@@ -19,14 +19,17 @@ export const BedProvider = ({ children }) => {
     loadDepartments();
   }, [user]);
 
+  const handleError = (err) => {
+    return;
+  };
+
   const loadDepartments = async () => {
     try {
       setLoading(true);
       const data = await fetchDepartments();
       setDepartments(data);
     } catch (err) {
-      console.error("Failed to fetch departments", err);
-      toast.error("Failed to load departments");
+      handleError(err);
     } finally {
       setLoading(false);
     }
@@ -45,7 +48,7 @@ export const BedProvider = ({ children }) => {
 
       loadDepartments();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Admit failed");
+      handleError(err)
     }
   };
 
@@ -62,7 +65,7 @@ export const BedProvider = ({ children }) => {
 
       loadDepartments();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Discharge failed");
+      handleError(err)
     }
   };
 

@@ -1,12 +1,19 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState } from "react";
 import {
   getStats,
   getAllUsers,
   getAllAssignments,
   getAllDepartments,
-  updateData,
+  addDepartment,
+  deleteDepartment,
+  addWard,
+  deleteWard,
+  addBed,
+  deleteBed,
+  deleteUser,
 } from "../services/adminService";
 import { toast } from "react-hot-toast";
+import { useAuth } from "./AuthContext";
 
 const AdminContext = createContext();
 
@@ -17,13 +24,15 @@ export const AdminProvider = ({ children }) => {
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const { user } = useAuth();
+
   const handleError = (err) => {
-    if (err.response && err.response.status === 401) {
-      return;
-    }
-    console.log("An error occurred:", err);
+    if (err.response && err.response.status === 401) return;
+    console.error("Admin error:", err);
+    toast.error(err?.response?.data?.message || "Something went wrong");
   };
 
+  // ---- Loaders ----
   const loadStats = async () => {
     try {
       const data = await getStats();
@@ -62,83 +71,72 @@ export const AdminProvider = ({ children }) => {
     }
   };
 
-  // Add a new ward
-  const addWard = async (deptId, wardName) => {
+  // ---- CRUD Operations ----
+  const createDepartment = async (name) => {
     try {
-      const updated = await updateData({
-        type: "department",
-        payload: {
-          deptId,
-          updateFields: {
-            $push: { wards: { name: wardName, beds: [] } },
-          },
-        },
-      });
+      await addDepartment(name);
+      toast.success("Department added!");
+      loadDepartments();
+    } catch (err) {
+      handleError(err);
+    }
+  };
+
+  const removeDepartment = async (deptId) => {
+    try {
+      await deleteDepartment(deptId);
+      toast.success("Department deleted!");
+      loadDepartments();
+    } catch (err) {
+      handleError(err);
+    }
+  };
+
+  const createWard = async (deptId, wardName) => {
+    try {
+      await addWard(deptId, wardName);
       toast.success("Ward added!");
       loadDepartments();
-      return updated;
     } catch (err) {
       handleError(err);
     }
   };
 
-  // Remove a ward
-  const removeWard = async (deptId, wardName) => {
+  const removeWardById = async (deptId, wardId) => {
     try {
-      const updated = await updateData({
-        type: "department",
-        payload: {
-          deptId,
-          updateFields: {
-            $pull: { wards: { name: wardName } },
-          },
-        },
-      });
-      toast.success("Ward removed!");
+      await deleteWard(deptId, wardId);
+      toast.success("Ward deleted!");
       loadDepartments();
-      return updated;
     } catch (err) {
       handleError(err);
     }
   };
 
-  // Add bed to ward
-  const addBed = async (deptId, wardName, bedId) => {
+  const createBed = async (deptId, wardId, bedId) => {
     try {
-      const updated = await updateData({
-        type: "department",
-        payload: {
-          deptId,
-          updateFields: {
-            $push: { "wards.$[w].beds": { id: bedId, status: "available" } },
-          },
-        },
-        arrayFilters: [{ "w.name": wardName }],
-      });
+      await addBed(deptId, wardId, { id: bedId, status: "available" });
       toast.success("Bed added!");
       loadDepartments();
-      return updated;
     } catch (err) {
       handleError(err);
     }
   };
 
-  // Remove bed
-  const removeBed = async (deptId, wardName, bedId) => {
+  const removeBedById = async (deptId, wardId, bedId) => {
     try {
-      const updated = await updateData({
-        type: "department",
-        payload: {
-          deptId,
-          updateFields: {
-            $pull: { "wards.$[w].beds": { id: bedId } },
-          },
-        },
-        arrayFilters: [{ "w.name": wardName }],
-      });
-      toast.success("Bed removed!");
+      await deleteBed(deptId, wardId, bedId);
+      toast.success("Bed deleted!");
       loadDepartments();
-      return updated;
+    } catch (err) {
+      handleError(err);
+    }
+  };
+
+  const removeUser = async (id) => {
+    try {
+      await deleteUser(id);
+      toast.success("User deleted!");
+      loadUsers();
     } catch (err) {
       handleError(err);
     }
@@ -156,10 +154,13 @@ export const AdminProvider = ({ children }) => {
         loadStats,
         loadUsers,
         loadAssignments,
-        addWard,
-        removeWard,
-        addBed,
-        removeBed,
+        createDepartment,
+        removeDepartment,
+        createWard,
+        removeWardById,
+        createBed,
+        removeBedById,
+        removeUser,
       }}
     >
       {children}

@@ -38,7 +38,7 @@ const MonthSubscriptionCard = ({ isSelected, onSelect }) => {
           </li>
           <li className="flex items-start space-x-2">
             <CircleCheckBig className="text-current" />
-            <span><strong>No Commitment:</strong> Cancel anytime.</span>
+            <span><strong>No Commitment:</strong> Only for one month.</span>
           </li>
           <li className="flex items-start space-x-2">
             <CircleCheckBig className="text-current" />
