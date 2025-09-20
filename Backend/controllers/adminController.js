@@ -49,7 +49,15 @@ export const deleteUser = async (req, res) => {
     const user = await User.findByIdAndDelete(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    res.json({ message: "User deleted successfully" });
+    // Delete related notifications (as sender or recipient)
+    await Notification.deleteMany({ 
+      $or: [{ user: user._id }, { from: user._id }] 
+    });
+
+    // Delete related assignments
+    await Assignment.deleteMany({ user: user._id, createdBy: user._id });
+
+    res.json({ message: "User and related data deleted successfully" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
