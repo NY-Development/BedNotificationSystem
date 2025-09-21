@@ -8,6 +8,7 @@ import {
   forgotPassword as forgotPasswordService,
   resetPassword as resetPasswordService,
 } from "../services/auth";
+import { getAssignmentExpiryForUser } from '../services/assignment';
 import { initiatePayment } from '../services/payment';
 
 const AuthContext = createContext();
@@ -17,27 +18,49 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(sessionStorage.getItem("token") || null);
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState();
-
   const [firstTime, setFirstTime] = useState();
 
+  // Assignment-related states now managed here
+  const [deptExpiry, setDeptExpiry] = useState(null);
+  const [wardExpiry, setWardExpiry] = useState(null);
+  const [expiry, setExpiry] = useState(null);
+
   useEffect(() => {
-    const loadUser = async () => {
+    const loadUserAndAssignments = async () => {
+      setLoading(true);
       if (token) {
         try {
           const profile = await getProfileService(token);
           setUser(profile);
           setUserEmail(profile.email);
           setFirstTime(profile.firstLoginDone);
+
+          // Centralized assignment expiry fetch
+          const data = await getAssignmentExpiryForUser(profile._id);
+          setExpiry(data);
+
+          if (data) {
+            const formattedDeptExpiry = data.deptExpiry ? new Date(data.deptExpiry).toISOString().split('T')[0] : null;
+            const formattedWardExpiry = data.wardExpiry ? new Date(data.wardExpiry).toLocaleDateString('en-CA') : null;
+
+            setDeptExpiry(formattedDeptExpiry);
+            setWardExpiry(formattedWardExpiry);
+          }
         } catch (error) {
-          console.error("Failed to fetch user profile:", error);
+          console.error("Failed to fetch user profile or assignments:", error);
           setToken(null);
           sessionStorage.removeItem("token");
+          setUser(null);
+          // Reset assignment states on error
+          setExpiry(null);
+          setDeptExpiry(null);
+          setWardExpiry(null);
         }
       }
       setLoading(false);
     };
 
-    loadUser();
+    loadUserAndAssignments();
   }, [token]);
 
   const login = async (email, password) => {
@@ -51,11 +74,15 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     sessionStorage.removeItem("token");
     setUser(null);
+    // Reset all states upon logout
+    setExpiry(null);
+    setDeptExpiry(null);
+    setWardExpiry(null);
   };
 
   const register = async (name, email, password, role, plan) => {
     const regData = await registerService(name, email, password, role, plan);
-    setUserEmail(email);//Later to register email.
+    setUserEmail(email);
     return regData;
   };
 
@@ -67,24 +94,21 @@ export const AuthProvider = ({ children }) => {
     await resendOtp(email);
   };
 
-  // New function for handling the forgot password flow
   const forgotPassword = async (email) => {
     const res = await forgotPasswordService(email);
-    setUserEmail(res.email)// Later to reset email.
+    setUserEmail(res.email);
     return res;
   };
 
-  // New function for handling the reset password flow
   const resetPassword = async (email, otp, newPassword) => {
     await resetPasswordService(email, otp, newPassword);
   };
 
-  //Subscription
   const initiateUserPayment = async (email) => {
-  const res = await initiatePayment(email);
+    const res = await initiatePayment(email);
     try {
       if (res.checkout_url) {
-        window.location.href = res.checkout_url; // redirect user to Chapa
+        window.location.href = res.checkout_url;
       }
     } catch (error) {
       console.error("Payment initiation error: ", error.message);
@@ -106,7 +130,11 @@ export const AuthProvider = ({ children }) => {
         resendVerificationOtp,
         forgotPassword,
         resetPassword,
-        initiateUserPayment, 
+        initiateUserPayment,
+        // Expose assignment states
+        expiry,
+        deptExpiry,
+        wardExpiry,
       }}
     >
       {children}

@@ -21,6 +21,7 @@ import Assignments from "./pages/Assignments";
 import Profile from "./pages/Profile";           
 import Payments from "./pages/Payments";
 import MyAssignments from "./pages/MyAssignments";
+import SelectSchool from "./pages/SelectSchool";
 
 function App() {
   return (
@@ -48,6 +49,7 @@ function App() {
                     <Route path="/forgot-password" element={<ForgotPassword />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/payment/success" element={<Payments />} />
+                    <Route path="/schools" element={<SelectSchool />} />
                     <Route path="*" element={<Home />} /> {/* fallback */}
                   </Routes>
                 </main>
