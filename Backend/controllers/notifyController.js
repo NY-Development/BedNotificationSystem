@@ -24,3 +24,26 @@ export const getUnreadNotificationCount = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+export const markAsRead = async (req, res) => {
+  try {
+    const { id } = req.params; // Get the notification ID from the URL
+    const notification = await Notification.findById(id);
+
+    if (!notification) {
+      return res.status(404).json({ message: "Notification not found" });
+    }
+
+    // Ensure the user is authorized to read this notification
+    if (notification.user.toString() !== req.user._id.toString()) {
+      return res.status(401).json({ message: "Not authorized to read this notification" });
+    }
+
+    notification.read = true;
+    await notification.save();
+
+    res.json({ message: "Notification marked as read", notification });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};

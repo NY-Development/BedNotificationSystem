@@ -7,16 +7,25 @@ import { getNotifications } from "../services/notification";
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
 
+  const fetchNotifications = async () => {
+    try {
+      const data = await getNotifications();
+      setNotifications(data);
+    } catch (err) {
+      console.error("Failed to fetch notifications:", err);
+    }
+  };
+
   useEffect(() => {
-    (async () => {
-      try {
-        const data = await getNotifications();
-        setNotifications(data);
-      } catch (err) {
-        console.error("Failed to fetch notifications:", err);
-      }
-    })();
+    fetchNotifications();
   }, []);
+
+  const handleMarkAsRead = (id) => {
+    // Filter out the notification that was just marked as read
+    setNotifications((prevNotifications) =>
+      prevNotifications.filter((n) => n._id !== id)
+    );
+  };
 
   return (
     <div className="p-8 max-w-4xl mx-auto min-h-screen bg-gray-50">
@@ -39,13 +48,8 @@ const Notifications = () => {
           {notifications.map((n) => (
             <NotificationCard
               key={n._id}
-              bed={n.bedId}
-              wardName={n.wardName}
-              departmentName={n.departmentName}
-              message={n.message}
-              type={n.type}
-              createdAt={n.createdAt}
-              from={n.from} 
+              notification={n}
+              onMarkAsRead={() => handleMarkAsRead(n._id)}
             />
           ))}
         </div>

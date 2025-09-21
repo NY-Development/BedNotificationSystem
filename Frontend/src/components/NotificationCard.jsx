@@ -1,14 +1,36 @@
-// components/NotificationCard.jsx
 import React, { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, CheckCircle } from "lucide-react";
+import { markNotificationAsRead } from "../services/notification";
 
-const NotificationCard = ({ message, type, bed, wardName, departmentName, createdAt, from }) => {
+const NotificationCard = ({ notification, onMarkAsRead }) => {
   const [showDetails, setShowDetails] = useState(false);
+  const { _id, message, type, bedId, wardName, departmentName, createdAt, from } = notification;
+
+  const handleMarkAsReadClick = async () => {
+    try {
+      await markNotificationAsRead(_id);
+      onMarkAsRead(_id); // Call the parent handler to remove the card from the list
+    } catch (err) {
+      console.error("Failed to mark notification as read:", err);
+    }
+  };
 
   return (
     <div className="bg-white shadow-md rounded-lg p-4 border border-gray-200 relative">
-      {/* Message */}
-      <p className="text-gray-800 font-semibold">{message}</p>
+      <div className="flex items-center justify-between mb-2">
+        {/* Message */}
+        <p className="text-gray-800 font-semibold">{message}</p>
+        
+        {/* Mark as Read button */}
+        <button
+          onClick={handleMarkAsReadClick}
+          className="cp text-xs text-green-600 font-medium flex items-center p-1 rounded-full transition-colors hover:bg-green-100"
+          aria-label="Mark as read"
+        >
+          <CheckCircle size={16} className="mr-1" />
+          Read
+        </button>
+      </div>
 
       {/* From */}
       <p className="text-sm text-gray-600 mt-1">
@@ -53,7 +75,7 @@ const NotificationCard = ({ message, type, bed, wardName, departmentName, create
             </span>
           </p>
           <p>
-            <span className="font-semibold">Bed:</span> {bed}
+            <span className="font-semibold">Bed:</span> {bedId}
           </p>
           <p>
             <span className="font-semibold">Ward:</span> {wardName}

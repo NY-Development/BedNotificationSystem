@@ -35,7 +35,7 @@ const Dashboard = () => {
     fetchUnreadCount();
 
     // Refresh count every 5 minutes (or as needed)
-    const interval = setInterval(fetchUnreadCount, 5 * 60 * 1000); 
+    const interval = setInterval(fetchUnreadCount, 1 * 60 * 1000); 
     return () => clearInterval(interval);
   }, [user]);
   
