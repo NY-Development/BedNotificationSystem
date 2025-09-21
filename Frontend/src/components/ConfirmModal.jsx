@@ -1,7 +1,10 @@
 import React from "react";
 
-const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel }) => {
+const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel, isDestructive = true }) => {
   if (!isOpen) return null;
+
+  const confirmButtonColor = isDestructive ? "bg-red-600 hover:bg-red-700" : "bg-emerald-500 hover:bg-emerald-600";
+  const confirmButtonText = isDestructive ? "Delete" : "Confirm";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-xs">
@@ -20,9 +23,9 @@ const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel }) => {
               onConfirm();
               onCancel();
             }}
-            className="cp px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            className={`cp px-4 py-2 text-white rounded ${confirmButtonColor}`}
           >
-            Confirm
+            {confirmButtonText}
           </button>
         </div>
       </div>
