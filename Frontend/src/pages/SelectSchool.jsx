@@ -27,9 +27,12 @@ const SelectSchool = () => {
     return user ? (
         <div className='bg-gray-100 min-h-screen p-8 flex flex-col items-center'>
             <div className='container mx-auto max-w-5xl'>
-                <h1 className='text-center text-5xl font-extrabold text-gray-800 mb-10'>
-                    Select Your School
+                <h1 className="text-5xl font-extrabold text-gray-900 leading-tight">
+                  Hello, <span className="text-indigo-600">{user.name}</span>!
                 </h1>
+                <h2 className='text-center text-5xl font-extrabold text-gray-800 mb-10'>
+                    Select Your School
+                </h2>
                 <p className='text-center text-lg text-gray-600 mb-12'>
                     Please choose your school to see available departments and beds.
                 </p>
