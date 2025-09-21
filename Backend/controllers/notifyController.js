@@ -12,3 +12,15 @@ export const getNotificationsForUser = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+export const getUnreadNotificationCount = async (req, res) => {
+  try {
+    const unreadCount = await Notification.countDocuments({
+      user: req.user._id,
+      read: false,
+    });
+    res.json({ count: unreadCount });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};

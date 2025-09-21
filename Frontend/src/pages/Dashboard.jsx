@@ -4,12 +4,14 @@ import { Link } from "react-router-dom";
 import Modal from "../components/Modal";
 import Assignments from "./Assignments";
 import { Menu, Bed, Bell, Users, LayoutDashboard } from "lucide-react";
+import { getUnreadNotificationsCount } from "../services/notification";
 
 const Dashboard = () => {
   const { user, loading, expiry, deptExpiry, wardExpiry } = useAuth();
   const [open, setOpen] = useState(false);
   const [forceRequired, setForceRequired] = useState(false);
   const [updateAssign, setUpdateAssign] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0); 
 
   const hasExpiredAssignment = useMemo(() => {
     if (!expiry) return false;
@@ -18,6 +20,24 @@ const Dashboard = () => {
     const wardExpired = wardExpiry && today >= wardExpiry;
     return deptExpired || wardExpired;
   }, [expiry, deptExpiry, wardExpiry]);
+
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      if (user) {
+        try {
+          const { count } = await getUnreadNotificationsCount(); // New service function
+          setUnreadCount(count);
+        } catch (err) {
+          console.error("Failed to fetch unread notification count", err);
+        }
+      }
+    };
+    fetchUnreadCount();
+
+    // Refresh count every 5 minutes (or as needed)
+    const interval = setInterval(fetchUnreadCount, 5 * 60 * 1000); 
+    return () => clearInterval(interval);
+  }, [user]);
   
   useEffect(() => {
     if (!loading && user) {
@@ -94,8 +114,13 @@ const Dashboard = () => {
           {/* Notifications Card */}
           <Link
             to="/notifications"
-            className="dashboard-card group bg-white hover:bg-yellow-100 border-l-4 border-yellow-500 hover:border-yellow-600 transition-all duration-300"
+            className="dashboard-card group bg-white hover:bg-yellow-100 border-l-4 border-yellow-500 hover:border-yellow-600 transition-all duration-300 relative"
           >
+            {unreadCount > 0 && (
+              <span className="absolute top-2 right-2 inline-flex items-center justify-center h-6 w-6 text-xs font-bold text-white bg-red-500 rounded-full">
+                {unreadCount}
+              </span>
+            )}
             <div className="bg-yellow-100 group-hover:bg-yellow-200 p-4 rounded-full inline-block transition-colors duration-300">
               <Bell size={32} className="text-yellow-600" />
             </div>
