@@ -2,7 +2,7 @@ import React, { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import bedIcon from "../assets/medical-bed.png";
-import { X, Menu } from 'lucide-react'
+import { X, Menu, LogOut } from 'lucide-react'
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -53,7 +53,8 @@ const Navbar = () => {
               <Link to="/beds" className="hover:text-blue-400">
                 Beds
               </Link>
-              <button onClick={handleLogout} className="hover:text-red-400">
+              <button onClick={handleLogout} className="hover:text-red-400 cp flex">
+                <LogOut />
                 Logout
               </button>
             </>
@@ -121,8 +122,9 @@ const Navbar = () => {
               </Link>
               <button
                 onClick={handleLogout}
-                className="w-full text-left block px-4 py-2 hover:bg-red-700 text-red-400 transition duration-200"
+                className="cp w-full text-left flex px-4 py-2 hover:bg-red-700 text-red-400 transition duration-200"
               >
+                <LogOut />
                 Logout
               </button>
             </>

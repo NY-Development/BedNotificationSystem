@@ -20,11 +20,9 @@ const Notifications = () => {
     fetchNotifications();
   }, []);
 
-  const handleMarkAsRead = (id) => {
-    // Filter out the notification that was just marked as read
-    setNotifications((prevNotifications) =>
-      prevNotifications.filter((n) => n._id !== id)
-    );
+  const handleMarkAsRead = () => {
+    // Re-fetch the notifications to get the updated list from the backend
+    fetchNotifications();
   };
 
   return (
@@ -49,7 +47,7 @@ const Notifications = () => {
             <NotificationCard
               key={n._id}
               notification={n}
-              onMarkAsRead={() => handleMarkAsRead(n._id)}
+              onMarkAsRead={handleMarkAsRead}
             />
           ))}
         </div>

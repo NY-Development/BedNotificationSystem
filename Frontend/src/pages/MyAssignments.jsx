@@ -57,10 +57,13 @@ const MyAssignments = () => {
                           `Clinical Year I Student`
                         ) : (
                           userAssign.createdBy.role === 'c2' ? (
-                          `Clinical Year II Student`) : (
+                          `Clinical Year II Student`) : 
+                          ( userAssign.createdBy.role === 'admin' ? (
+                            `Admin`
+                          ) :(
                             `Intern`
                           )
-                        )}</p>
+                        ))}</p>
                       </div>
                       <div className='p-6 bg-gray-50 border-t border-gray-200'>
                         <p className='text-sm uppercase font-semibold text-gray-500'>Location</p>
