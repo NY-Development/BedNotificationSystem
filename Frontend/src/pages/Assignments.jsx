@@ -49,6 +49,7 @@ const Assignments = ({ closeModal, updateAssign = false }) => {
       } else {
         await createAssignment(form);
         toast.success("Assignment saved!");
+        window.location.reload();
       }
       loadDepartments();
       closeModal();

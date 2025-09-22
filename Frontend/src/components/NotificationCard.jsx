@@ -15,11 +15,17 @@ const NotificationCard = ({ notification, onMarkAsRead }) => {
     }
   };
 
+  // Logic to hide the card after 3 days of being read
+  const isOldAndRead = read && (new Date() - new Date(new Date(createdAt).getTime() + 3 * 24 * 60 * 60 * 1000) > 0);
+  if (isOldAndRead) {
+    return null; // Don't render the component if it's old and read
+  }
+
   const cardClasses = `bg-white shadow-md rounded-lg p-4 border border-gray-200 relative transition-opacity duration-500 ${read ? 'opacity-50' : ''}`;
 
   return (
     <div className={cardClasses}>
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex flex-col items-center justify-between mb-2">
         {/* Message */}
         <p className={`font-semibold ${read ? 'text-gray-500' : 'text-gray-800'}`}>{message}</p>
         

@@ -155,7 +155,7 @@ const Register = () => {
                   </select>
                 </div>
 
-                {/* Subscription Cards with responsive layout */}
+                {/* Subscription Cards with responsive layout
                 <div className="mt-6">
                   <h3 className="text-lg font-semibold mb-4 text-center text-indigo-600">
                     Choose your subscription plan
@@ -170,7 +170,8 @@ const Register = () => {
                       onSelect={() => setSubscriptionPlan("yearly")}
                     />
                   </div>
-                </div>
+                </div> */} 
+                {/* 👆COMMENTED FOR A TRIAL PERIOD.   */}
               </div>
               <div>
                 <button

@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema(
     firstLoginDone: { type: Boolean, default: false },
     subscription: {
       plan: { type: String, enum: ["monthly", "yearly"], default: "monthly" },
-      isActive: { type: Boolean, default: false },
+      isActive: { type: Boolean, default: true },
       startDate: { type: Date },
       endDate: { type: Date },
       amountPaid: { type: Number }, // amount paid in ETB

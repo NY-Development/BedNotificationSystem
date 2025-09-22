@@ -8,3 +8,15 @@
   @apply flex flex-col items-center text-center p-8 rounded-2xl shadow-lg transform transition-transform duration-300 hover:scale-105;
 }
 }
+
+@keyframes custom-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Create the reusable utility class */
+.spinner-border {
+  border-top-color: transparent;
+  animation: custom-spin 1s linear infinite;
+}

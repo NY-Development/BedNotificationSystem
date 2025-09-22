@@ -1,23 +1,31 @@
 // MyAssignments.js
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAssignment } from '../context/AssignmentContext';
 import { useAuth } from '../context/AuthContext';
 import GoBack from '../components/GoBack';
+import { Timer } from 'lucide-react';
 
 const MyAssignments = () => {
   const { getUserAssignment, userAssign } = useAssignment();
   const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      getUserAssignment();
-    }
+    const fetchAssignments = async () => {
+      setLoading(true);
+      try {
+        if (user) {
+          await getUserAssignment();
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAssignments();
   }, [user]);
 
-  // Check if userAssign and its beds property exist and are not empty
   const hasAssignments = userAssign && userAssign.beds && userAssign.beds.length > 0;
 
-  // Group beds by ward
   const groupedBeds = {};
   if (hasAssignments) {
     userAssign.beds.forEach(bed => {
@@ -34,7 +42,18 @@ const MyAssignments = () => {
       <div className='container mx-auto max-w-4xl'>
         <GoBack />
         <h1 className='text-center text-5xl font-extrabold text-gray-800 mb-10'>Your Bed Assignments 🛏️</h1>
-        {hasAssignments ? (
+        {loading ? (
+          <div className='flex flex-col items-center justify-center p-10 bg-white rounded-xl shadow-xl border border-gray-200'>
+            <Timer size={64} className="text-gray-400 mb-4 animate-pulse" />
+            <div
+              className="w-16 h-16 rounded-full border-4 border-gray-300 border-t-indigo-500 spinner-border mt-4"
+              role="status"
+            >
+              <span className="sr-only">Loading...</span>
+            </div>
+            <p className='text-2xl font-semibold text-gray-700 mt-4'>Getting your assignments...</p>
+          </div>
+        ) : hasAssignments ? (
           <div>
             {Object.keys(groupedBeds).map(ward => (
               <div key={ward} className='mb-12'>

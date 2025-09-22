@@ -135,7 +135,7 @@ export const AdminProvider = ({ children }) => {
   const removeUser = async (id) => {
     try {
       await deleteUser(id);
-      toast.success("User deleted!");
+      toast.success("User successfully deleted!");
       loadUsers();
     } catch (err) {
       handleError(err);

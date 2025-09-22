@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { Menu, X, Hospital, Bed, User, Building2 } from "lucide-react";
+import { Menu, X, Hospital, Bed, User, Building2, Timer } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useBed } from "../context/BedContext";
 import toast from "react-hot-toast";
-import GoBack from '../components/GoBack'; // <-- Added GoBack component
+import GoBack from '../components/GoBack';
 
 const Beds = () => {
   const { user } = useAuth();
@@ -12,7 +12,18 @@ const Beds = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   if (loading) {
-    return <div className="text-center mt-10 text-xl font-medium text-gray-700 animate-pulse">Loading departments...</div>;
+    return (
+      <div className='flex flex-col items-center justify-center p-10 bg-white rounded-xl shadow-xl border border-gray-200'>
+        <Timer size={64} className="text-gray-400 mb-4 animate-pulse" />
+        <div
+          className="w-16 h-16 rounded-full border-4 border-gray-300 border-t-indigo-500 spinner-border mt-4"
+          role="status"
+        >
+          <span className="sr-only">Loading...</span>
+        </div>
+        <p className='text-2xl font-semibold text-gray-700 mt-4'>Getting departments & wards...</p>
+      </div>
+);
   }
 
   const currentDepartment =

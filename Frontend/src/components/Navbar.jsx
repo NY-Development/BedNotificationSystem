@@ -37,7 +37,9 @@ const Navbar = () => {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center space-x-4 font-medium">
-          {user && user?.subscription?.isActive ? (
+          {/* {user && user?.subscription?.isActive ? ( */}
+          {/* COMMENTED CAUSE TRIAL PERIOD. */}
+          {user ? (
             <>
               <span className="text-gray-300">
                 Hello, {user.name} ({user.role})
@@ -81,7 +83,9 @@ const Navbar = () => {
       {/* Mobile Menu Dropdown */}
       {isMenuOpen && (
         <div className="md:hidden mt-4 space-y-2 font-medium">
-          {user && user.subscription.isActive ? (
+          {/* {user && user.subscription.isActive ? ( */}
+          {/* COMMENTED CAUSE OF TRIAL PERIOD. */}
+          {user ? (
             <>
               {profMenu ? (
                 <div className="flex flex-col space-y-2">
