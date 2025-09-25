@@ -271,7 +271,10 @@ export const addBedsToAssignment = async (req, res) => {
     if (!assignment) return res.status(404).json({ message: "Assignment not found" });
 
     // Only owner or admin can modify
-    if (assignment.user.toString() !== req.user._id.toString() && req.user.role !== "admin") {
+    if (
+      assignment.user.toString() !== req.user._id.toString() &&
+      req.user.role !== "admin"
+    ) {
       return res.status(403).json({ message: "Not authorized to modify this assignment" });
     }
 
@@ -286,13 +289,22 @@ export const addBedsToAssignment = async (req, res) => {
     const alreadyAssigned = [];
     for (const bedId of bedIds) {
       const bed = ward.beds.find((b) => b.id === bedId);
-      if (!bed) return res.status(404).json({ message: `Bed ${bedId} not found in ward ${ward.name}` });
+      if (!bed) {
+        return res
+          .status(404)
+          .json({ message: `Bed ${bedId} not found in ward ${ward.name}` });
+      }
 
-      if (bed.assignedUser && bed.assignedUser.toString() !== assignment.user.toString()) {
+      // Only block if another user already owns it
+      if (
+        bed.assignedUser &&
+        bed.assignedUser.toString() !== assignment.user.toString()
+      ) {
         alreadyAssigned.push(bedId);
       } else {
-        bed.status = "occupied";
+        // assign it to this user
         bed.assignedUser = assignment.user;
+        bed.status = "occupied"; // keep status updated for consistency
         if (!assignment.beds.includes(bedId)) {
           assignment.beds.push(bedId);
         }
@@ -303,8 +315,10 @@ export const addBedsToAssignment = async (req, res) => {
     await assignment.save();
 
     if (alreadyAssigned.length) {
-      return res.status(400).json({ 
-        message: `Some beds already assigned to another user: ${alreadyAssigned.join(", ")}`
+      return res.status(400).json({
+        message: `Some beds are already assigned to another user: ${alreadyAssigned.join(
+          ", "
+        )}`,
       });
     }
 

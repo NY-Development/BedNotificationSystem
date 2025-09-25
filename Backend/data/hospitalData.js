@@ -33,13 +33,12 @@ const departmentsTemplate = [
 
 const generateBeds = async (users) => {
   return Array.from({ length: 50 }, (_, i) => {
-    const assignedUser = Math.random() < 0.5 
-      ? users[Math.floor(Math.random() * users.length)]._id 
-      : null;
+    // Randomly assign status, but assignedUser is always null
+    const status = Math.random() < 0.5 ? "occupied" : "available";
     return {
       id: i + 1,
-      status: assignedUser ? "occupied" : "available",
-      assignedUser,
+      status,
+      assignedUser: null, // always null
     };
   });
 };
