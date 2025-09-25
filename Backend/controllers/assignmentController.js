@@ -254,12 +254,15 @@ export const updateAssignment = async (req, res) => {
 
 
 
-
 /**
  * Add beds to an existing assignment
  */
 export const addBedsToAssignment = async (req, res) => {
   try {
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ message: "Unauthorized: User not logged in" });
+    }
+
     const { id } = req.params; // assignment ID
     const { beds: bedIds } = req.body; // new beds array
 
@@ -278,36 +281,25 @@ export const addBedsToAssignment = async (req, res) => {
       return res.status(403).json({ message: "Not authorized to modify this assignment" });
     }
 
-    // Find department + ward
     const department = await Department.findById(assignment.department);
     if (!department) return res.status(404).json({ message: "Department not found" });
 
     const ward = department.wards.find((w) => w.name === assignment.ward);
     if (!ward) return res.status(404).json({ message: "Ward not found" });
 
-    // Validate & assign new beds
     const alreadyAssigned = [];
     for (const bedId of bedIds) {
       const bed = ward.beds.find((b) => b.id === bedId);
       if (!bed) {
-        return res
-          .status(404)
-          .json({ message: `Bed ${bedId} not found in ward ${ward.name}` });
+        return res.status(404).json({ message: `Bed ${bedId} not found in ward ${ward.name}` });
       }
 
-      // Only block if another user already owns it
-      if (
-        bed.assignedUser &&
-        bed.assignedUser.toString() !== assignment.user.toString()
-      ) {
+      if (bed.assignedUser && bed.assignedUser.toString() !== assignment.user.toString()) {
         alreadyAssigned.push(bedId);
       } else {
-        // assign it to this user
         bed.assignedUser = assignment.user;
-        bed.status = "occupied"; // keep status updated for consistency
-        if (!assignment.beds.includes(bedId)) {
-          assignment.beds.push(bedId);
-        }
+        bed.status = "occupied";
+        if (!assignment.beds.includes(bedId)) assignment.beds.push(bedId);
       }
     }
 
@@ -316,9 +308,7 @@ export const addBedsToAssignment = async (req, res) => {
 
     if (alreadyAssigned.length) {
       return res.status(400).json({
-        message: `Some beds are already assigned to another user: ${alreadyAssigned.join(
-          ", "
-        )}`,
+        message: `Some beds are already assigned to another user: ${alreadyAssigned.join(", ")}`,
       });
     }
 
@@ -329,14 +319,17 @@ export const addBedsToAssignment = async (req, res) => {
   }
 };
 
-
 /**
  * Remove beds from an existing assignment
  */
 export const removeBedsFromAssignment = async (req, res) => {
   try {
-    const { id } = req.params; // assignment ID
-    const { beds: bedIds } = req.body; // beds to remove
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ message: "Unauthorized: User not logged in" });
+    }
+
+    const { id } = req.params;
+    const { beds: bedIds } = req.body;
 
     if (!Array.isArray(bedIds) || bedIds.length === 0) {
       return res.status(400).json({ message: "No beds provided" });
@@ -345,7 +338,6 @@ export const removeBedsFromAssignment = async (req, res) => {
     const assignment = await Assignment.findById(id);
     if (!assignment) return res.status(404).json({ message: "Assignment not found" });
 
-    // Only owner or admin
     if (assignment.user.toString() !== req.user._id.toString() && req.user.role !== "admin") {
       return res.status(403).json({ message: "Not authorized to modify this assignment" });
     }
@@ -361,7 +353,6 @@ export const removeBedsFromAssignment = async (req, res) => {
       if (bed && bed.assignedUser && bed.assignedUser.toString() === assignment.user.toString()) {
         bed.status = "available";
         bed.assignedUser = null;
-        // Remove from assignment.beds
         assignment.beds = assignment.beds.filter((b) => b !== bedId);
       }
     }
@@ -375,4 +366,3 @@ export const removeBedsFromAssignment = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-
