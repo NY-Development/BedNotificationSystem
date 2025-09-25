@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import Department from "../models/Department.js";
 import Assignment from "../models/Assignment.js";
+import Notification from "../models/Notification.js";
 
 
 // Get all users (excluding admins)
