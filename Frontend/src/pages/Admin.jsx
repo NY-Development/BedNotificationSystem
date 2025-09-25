@@ -335,8 +335,8 @@ const Admin = () => {
                                 key={idx}
                                 className="font-medium text-gray-700"
                               >
-                                {assign.department.name} – {assign.ward}:{" "}
-                                {assign.beds.length} beds
+                                {assign?.department?.name} – {assign?.ward}:{" "}
+                                {assign?.beds?.length} beds
                               </li>
                             ))}
                           </ul>

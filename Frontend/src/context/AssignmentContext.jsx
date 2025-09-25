@@ -38,6 +38,7 @@ export const AssignmentProvider = ({ children }) => {
       const data = await getMyAssignment();
       if(data){
       setUserAssign(data[0])
+      console.log(data)
       console.log(data[0]);
       }
     } catch(err) {
