@@ -158,8 +158,7 @@ export const getMyAssignments = async (req, res) => {
   }
 };
 
-
-// Update assignment (change ward/bed selection, expiry, note, etc.)
+// Update an assignment (admin or owner)
 export const updateAssignment = async (req, res) => {
   try {
     const { id } = req.params; // assignment ID
@@ -168,9 +167,17 @@ export const updateAssignment = async (req, res) => {
     const assignment = await Assignment.findById(id);
     if (!assignment) return res.status(404).json({ message: "Assignment not found" });
 
-    // Only the same user who owns the assignment or an admin can update
-    if (assignment.user.toString() !== req.user._id.toString() && req.user.role !== "admin") {
-      return res.status(403).json({ message: "Not authorized to update this assignment" });
+    
+    // - If admin → target is assignment.user
+    // - If normal user → only allow updating their own
+    let targetUserId;
+    if (req.user.role === "admin") {
+      targetUserId = assignment.user; // admin can manage any user’s assignments
+    } else {
+      if (assignment.user.toString() !== req.user._id.toString()) {
+        return res.status(403).json({ message: "Not authorized to update this assignment" });
+      }
+      targetUserId = req.user._id; // user can only manage their own
     }
 
     const department = await Department.findById(deptId);
@@ -179,23 +186,32 @@ export const updateAssignment = async (req, res) => {
     const ward = department.wards.find((w) => w.name === wardName);
     if (!ward) return res.status(404).json({ message: "Ward not found" });
 
-    // First free up old beds
-    const oldDept = await Department.findById(assignment.department);
-    if (oldDept) {
-      const oldWard = oldDept.wards.find((w) => w.name === assignment.ward);
-      if (oldWard) {
-        for (const bedId of assignment.beds) {
-          const bed = oldWard.beds.find((b) => b.id === bedId);
-          if (bed) {
-            bed.status = "available";
-            bed.assignedUser = null;
+    // 🔹 1. Free up ALL old beds across previous assignments of target user
+    const userAssignments = await Assignment.find({ user: targetUserId });
+    for (const a of userAssignments) {
+      const dept = await Department.findById(a.department);
+      if (dept) {
+        const oldWard = dept.wards.find((w) => w.name === a.ward);
+        if (oldWard) {
+          for (const bedId of a.beds) {
+            const bed = oldWard.beds.find((b) => b.id === bedId);
+            if (bed) {
+              bed.status = "available";
+              bed.assignedUser = null;
+            }
           }
+          await dept.save();
         }
-        await oldDept.save();
       }
     }
 
-    // Validate new beds availability
+    // 🔹 2. Delete all previous assignments for this user (except the one being updated)
+    await Assignment.deleteMany({
+      user: targetUserId,
+      _id: { $ne: assignment._id },
+    });
+
+    // 🔹 3. Validate new beds availability
     const unavailableBeds = [];
     for (const bedId of bedIds) {
       const bed = ward.beds.find((b) => b.id === bedId);
@@ -203,18 +219,20 @@ export const updateAssignment = async (req, res) => {
       if (bed.status === "occupied") unavailableBeds.push(bedId);
     }
     if (unavailableBeds.length) {
-      return res.status(400).json({ message: `Beds already occupied: ${unavailableBeds.join(", ")}` });
+      return res.status(400).json({
+        message: `Beds already occupied: ${unavailableBeds.join(", ")}`,
+      });
     }
 
-    // Mark new beds as occupied
+    // 🔹 4. Assign new beds
     for (const bedId of bedIds) {
       const bed = ward.beds.find((b) => b.id === bedId);
       bed.status = "occupied";
-      bed.assignedUser = req.user._id;
+      bed.assignedUser = targetUserId;
     }
     await department.save();
 
-    // Update assignment
+    // 🔹 5. Update current assignment
     assignment.department = department._id;
     assignment.ward = wardName;
     assignment.beds = bedIds;
@@ -224,9 +242,123 @@ export const updateAssignment = async (req, res) => {
 
     await assignment.save();
 
-    return res.json({ message: "Assignment updated successfully", assignment });
+    return res.json({
+      message: "Assignment updated successfully (previous assignments overridden)",
+      assignment,
+    });
   } catch (err) {
     console.error("updateAssignment error:", err);
     return res.status(500).json({ message: err.message || "Server error" });
   }
 };
+
+
+
+
+/**
+ * Add beds to an existing assignment
+ */
+export const addBedsToAssignment = async (req, res) => {
+  try {
+    const { id } = req.params; // assignment ID
+    const { beds: bedIds } = req.body; // new beds array
+
+    if (!Array.isArray(bedIds) || bedIds.length === 0) {
+      return res.status(400).json({ message: "No beds provided" });
+    }
+
+    const assignment = await Assignment.findById(id);
+    if (!assignment) return res.status(404).json({ message: "Assignment not found" });
+
+    // Only owner or admin can modify
+    if (assignment.user.toString() !== req.user._id.toString() && req.user.role !== "admin") {
+      return res.status(403).json({ message: "Not authorized to modify this assignment" });
+    }
+
+    // Find department + ward
+    const department = await Department.findById(assignment.department);
+    if (!department) return res.status(404).json({ message: "Department not found" });
+
+    const ward = department.wards.find((w) => w.name === assignment.ward);
+    if (!ward) return res.status(404).json({ message: "Ward not found" });
+
+    // Validate & assign new beds
+    const alreadyAssigned = [];
+    for (const bedId of bedIds) {
+      const bed = ward.beds.find((b) => b.id === bedId);
+      if (!bed) return res.status(404).json({ message: `Bed ${bedId} not found in ward ${ward.name}` });
+
+      if (bed.assignedUser && bed.assignedUser.toString() !== assignment.user.toString()) {
+        alreadyAssigned.push(bedId);
+      } else {
+        bed.status = "occupied";
+        bed.assignedUser = assignment.user;
+        if (!assignment.beds.includes(bedId)) {
+          assignment.beds.push(bedId);
+        }
+      }
+    }
+
+    await department.save();
+    await assignment.save();
+
+    if (alreadyAssigned.length) {
+      return res.status(400).json({ 
+        message: `Some beds already assigned to another user: ${alreadyAssigned.join(", ")}`
+      });
+    }
+
+    res.json({ message: "Beds added successfully", assignment });
+  } catch (err) {
+    console.error("addBedsToAssignment error:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+/**
+ * Remove beds from an existing assignment
+ */
+export const removeBedsFromAssignment = async (req, res) => {
+  try {
+    const { id } = req.params; // assignment ID
+    const { beds: bedIds } = req.body; // beds to remove
+
+    if (!Array.isArray(bedIds) || bedIds.length === 0) {
+      return res.status(400).json({ message: "No beds provided" });
+    }
+
+    const assignment = await Assignment.findById(id);
+    if (!assignment) return res.status(404).json({ message: "Assignment not found" });
+
+    // Only owner or admin
+    if (assignment.user.toString() !== req.user._id.toString() && req.user.role !== "admin") {
+      return res.status(403).json({ message: "Not authorized to modify this assignment" });
+    }
+
+    const department = await Department.findById(assignment.department);
+    if (!department) return res.status(404).json({ message: "Department not found" });
+
+    const ward = department.wards.find((w) => w.name === assignment.ward);
+    if (!ward) return res.status(404).json({ message: "Ward not found" });
+
+    for (const bedId of bedIds) {
+      const bed = ward.beds.find((b) => b.id === bedId);
+      if (bed && bed.assignedUser && bed.assignedUser.toString() === assignment.user.toString()) {
+        bed.status = "available";
+        bed.assignedUser = null;
+        // Remove from assignment.beds
+        assignment.beds = assignment.beds.filter((b) => b !== bedId);
+      }
+    }
+
+    await department.save();
+    await assignment.save();
+
+    res.json({ message: "Beds removed successfully", assignment });
+  } catch (err) {
+    console.error("removeBedsFromAssignment error:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
