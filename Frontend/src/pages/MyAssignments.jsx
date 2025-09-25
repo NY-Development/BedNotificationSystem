@@ -1,4 +1,3 @@
-// MyAssignments.js
 import React, { useEffect, useState } from 'react';
 import { useAssignment } from '../context/AssignmentContext';
 import { useAuth } from '../context/AuthContext';
