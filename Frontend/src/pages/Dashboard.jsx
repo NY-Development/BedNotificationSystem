@@ -159,7 +159,7 @@ const Dashboard = () => {
       <button
         onClick={() => {
           setOpen(true);
-          setUpdateAssign(!updateAssign);
+          setUpdateAssign(!!user.firstLoginDone);
         }}
         className="cursor-pointer fixed bottom-6 right-6 z-50 p-4 bg-indigo-600 text-white rounded-full shadow-lg transition-all duration-300 hover:bg-indigo-700 hover:scale-110 lg:hidden"
         aria-label="Open Assignments Menu"

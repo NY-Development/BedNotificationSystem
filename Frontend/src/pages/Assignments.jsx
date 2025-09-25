@@ -8,6 +8,15 @@ import { useAuth } from "../context/AuthContext";
 const Assignments = ({ closeModal, updateAssign = false }) => {
   const { loadDepartments } = useBed();
   const { user } = useAuth();
+  const [msg, setMsg] = useState('');
+
+  useEffect(() => {
+    if (updateAssign) {
+      setMsg('Warning ⚠️: Updating here overrides all previous assignments!');
+    } else {
+      setMsg('');
+    }
+  }, [updateAssign]);
 
   const [departments, setDepartments] = useState([]);
   const [form, setForm] = useState({
@@ -75,6 +84,7 @@ const Assignments = ({ closeModal, updateAssign = false }) => {
     <div className="max-h-[500px] overflow-auto p-4">
       <form onSubmit={handleSubmit} className="space-y-4">
         <h2 className="text-xl font-bold mb-2">
+          <p className={`${msg ? 'text-yellow-600 mb-2' : ''}`}>{msg}</p>
           {updateAssign ? "Update your assignments" : "Insert your assigned beds"}
         </h2>
 
