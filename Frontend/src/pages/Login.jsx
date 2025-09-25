@@ -18,7 +18,7 @@ const Login = () => {
     try {
       setError("");
       await login(email, password);
-      navigate("/schools");
+      navigate("/dashboard");
     } catch (err) {
       setError(err.message || "Login failed");
       console.error(err);
