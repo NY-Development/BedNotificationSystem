@@ -12,7 +12,7 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("c1");
-  const [message, setMessage] = useState("Trial Period.");
+  const [message, setMessage] = useState("Trial Period");
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { register } = useAuth();
