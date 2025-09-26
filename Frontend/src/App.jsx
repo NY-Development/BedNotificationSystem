@@ -22,6 +22,7 @@ import Profile from "./pages/Profile";
 import Payments from "./pages/Payments";
 import MyAssignments from "./pages/MyAssignments";
 import SelectSchool from "./pages/SelectSchool";
+import SupportWidget from "./components/SupportWidget";
 
 function App() {
   return (
@@ -54,6 +55,7 @@ function App() {
                   </Routes>
                 </main>
                 <Footer />
+                <SupportWidget />
               </div>
             </AdminProvider>
           </AssignmentProvider>

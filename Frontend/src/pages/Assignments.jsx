@@ -50,7 +50,7 @@ const Assignments = ({ closeModal, updateAssign = false }) => {
   // Load departments
   useEffect(() => {
     getDepartments().then(setDepartments).catch(console.error);
-  }, []);
+  }, [user]);
 
   const handleDeptChange = (e) => {
     setForm({ ...form, deptId: e.target.value, wardName: "", beds: [] });
@@ -78,7 +78,7 @@ const Assignments = ({ closeModal, updateAssign = false }) => {
         }
         await updateAssignment(userAssign._id, form); 
         toast.success("Assignment updated successfully!");
-        window.location.reload();
+        window.location.reload();
       } else {
         await createAssignment(form);
         toast.success("Assignment saved!");
@@ -96,6 +96,15 @@ const Assignments = ({ closeModal, updateAssign = false }) => {
 
   const selectedDept = departments.find((d) => d._id === form.deptId);
   const selectedWard = selectedDept?.wards.find((w) => w.name === form.wardName);
+
+  // 🔑 NEW FILTERING LOGIC: Determine which beds to display based on 'updateAssign' prop
+  const bedsToDisplay = selectedWard 
+    ? updateAssign
+      ? selectedWard.beds // If updating, show all beds in the ward
+      : selectedWard.beds.filter(bed => 
+          !bed.assignedUser || form.beds.includes(bed.id) // Filter: show UNASSIGNED beds OR beds currently selected in the form
+        ) 
+    : [];
 
   const isFormValid =
     form.deptId &&
@@ -181,8 +190,12 @@ const Assignments = ({ closeModal, updateAssign = false }) => {
         {selectedWard && (
           <div>
             <label className="block font-semibold">Select Beds:</label>
+            {/* Show message if no free beds available during initial create */}
+            {bedsToDisplay.length === 0 && !updateAssign && (
+              <p className="text-sm text-red-500 mt-1">No free beds available in this ward.</p>
+            )}
             <div className="grid grid-cols-2 gap-2">
-              {selectedWard.beds.map((bed) => (
+              {bedsToDisplay.map((bed) => (
                 <label key={bed.id} className="flex items-center space-x-2">
                   <input
                     type="checkbox"

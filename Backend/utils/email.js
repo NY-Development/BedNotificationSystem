@@ -24,7 +24,7 @@ export const sendEmail = async (to, subject, text) => {
         <div style="max-width:600px; margin:20px auto; background:#ffffff; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
           <!-- Header -->
           <div style="background-color:#4f46e5; padding:20px; text-align:center;">
-            <h1 style="margin:0; font-size:24px; color:#ffffff;">Your App</h1>
+            <h1 style="margin:0; font-size:24px; color:#ffffff;">Bed Notification System | BNS</h1>
           </div>
 
           <!-- Body -->
@@ -46,7 +46,7 @@ export const sendEmail = async (to, subject, text) => {
     `;
 
     const info = await transporter.sendMail({
-      from: `"Your App" <${process.env.SENDER_EMAIL}>`,
+      from: `"Bed Notification System | BNS" <${process.env.SENDER_EMAIL}>`,
       to,
       subject,
       text, // plain fallback

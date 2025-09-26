@@ -6,6 +6,7 @@ import MonthSubscriptionCard from "../components/MonthSubscriptionCard";
 import YearSubscriptionCard from "../components/YearSubscriptionCard";
 import homeImage from "../assets/homeImage.jpg";
 import bedIcon from '../assets/medical-bed.png'; // Import the bed icon
+import PrivacyModal from "../components/PrivacyModal";
 
 const Register = () => {
   const [name, setName] = useState("");
@@ -14,6 +15,8 @@ const Register = () => {
   const [role, setRole] = useState("c1");
   const [message, setMessage] = useState("Trial Period");
   const [error, setError] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
   const { register } = useAuth();
 
@@ -153,6 +156,29 @@ const Register = () => {
                     <option value="intern">Intern</option>
                     {/* Here later on update it with if the email is Selamawitilahun07@gmail.com the only role available will be Admin. */}
                   </select>
+
+                {/* ✅ Privacy & Terms Checkbox */}
+                <div className="flex items-start mt-4">
+                  <input
+                    id="terms"
+                    type="checkbox"
+                    checked={acceptedTerms}
+                    onChange={() => setAcceptedTerms(!acceptedTerms)}
+                    className="cp mt-1 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                    required
+                  />
+                  <label htmlFor="terms" className="ml-2 text-sm text-gray-600">
+                    I have read and agree to the{" "}
+                    <button
+                      type="button"
+                      onClick={() => setShowModal(true)}
+                      className="cp text-indigo-600 hover:underline"
+                    >
+                      Privacy Policy & Terms
+                    </button>
+                  </label>
+                </div>
+
                 </div>
 
                 {/* Subscription Cards with responsive layout
@@ -185,6 +211,8 @@ const Register = () => {
           </div>
         </div>
       </div>
+      {/* ✅ Modal */}
+      <PrivacyModal isOpen={showModal} onClose={() => setShowModal(false)} />
     </div>
   );
 };

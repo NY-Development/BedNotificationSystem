@@ -63,7 +63,7 @@ const Admin = () => {
       <div className="flex flex-wrap space-x-2 sm:space-x-4 mb-8 border-b border-gray-200">
         <button
           onClick={() => setTab("departments")}
-          className={`flex items-center space-x-2 px-4 py-3 rounded-t-lg font-semibold transition-colors duration-200 ${
+          className={`cp flex items-center space-x-2 px-4 py-3 rounded-t-lg font-semibold transition-colors duration-200 ${
             tab === "departments"
               ? "bg-indigo-600 text-white shadow-md"
               : "text-gray-600 hover:bg-gray-200"
@@ -74,7 +74,7 @@ const Admin = () => {
         </button>
         <button
           onClick={() => setTab("users")}
-          className={`flex items-center space-x-2 px-4 py-3 rounded-t-lg font-semibold transition-colors duration-200 ${
+          className={`cp flex items-center space-x-2 px-4 py-3 rounded-t-lg font-semibold transition-colors duration-200 ${
             tab === "users"
               ? "bg-indigo-600 text-white shadow-md"
               : "text-gray-600 hover:bg-gray-200"
@@ -94,7 +94,7 @@ const Admin = () => {
               <Users className="text-blue-500" size={24} />
               <div>
                 <p className="text-sm text-gray-500">Total Users</p>
-                <p className="text-xl font-bold">{stats.totalUsers}</p>
+                <p className="text-xl font-bold">{stats.totalUsers && stats.totalUsers === 1 ? user.name : stats.totalUsers}</p>
               </div>
             </div>
             <div className="bg-gray-100 p-4 rounded-lg flex items-center space-x-3">
