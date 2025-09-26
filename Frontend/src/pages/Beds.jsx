@@ -11,7 +11,8 @@ const Beds = () => {
   const { departments, loading, admit, discharge } = useBed();
   const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState(''); // Add state for the search term
+  const [searchTerm, setSearchTerm] = useState(''); // Add state for the search term\
+  const [isExpand, setIsExpand] = useState(false);
   
   if (loading) {
     return (
@@ -143,10 +144,12 @@ const Beds = () => {
                       <span className="bg-green-100 text-green-700 p-2 rounded-lg">Available: {availableBeds}</span>
                     </div>
                     <details className="mt-4">
-                      <summary className="cursor-pointer bg-indigo-600 text-white py-3 px-4 rounded-lg shadow-inner font-bold flex justify-between items-center transition-colors hover:bg-indigo-700">
+                      <summary 
+                      onClick={() => setIsExpand(!isExpand)}
+                      className="cursor-pointer bg-indigo-600 text-white py-3 px-4 rounded-lg shadow-inner font-bold flex justify-between items-center transition-colors hover:bg-indigo-700">
                         <span>Bed Details</span>
                         <span className="text-xs text-indigo-200">
-                          Click to expand
+                          {`${isExpand ? 'Click to condense' : 'Click to expand'}`}
                         </span>
                       </summary>
                       <div className="mt-4 space-y-4">

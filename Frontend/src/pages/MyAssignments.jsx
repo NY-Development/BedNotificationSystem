@@ -157,7 +157,7 @@ const MyAssignments = () => {
                 {isAdding ? 'Adding...' : <>Add Bed <Plus className='w-4 h-4 ml-1' /></>}
               </button>
             </div>
-            {bedsToOffer.length === 0 && <p className='text-sm text-gray-500 mt-2'>All available beds in **{userAssign.ward}** are currently assigned or occupied.</p>}
+            {bedsToOffer.length === 0 && <p className='text-sm text-gray-500 mt-2'>Fetching beds in **{userAssign.ward}**. . .</p>}
             <p className='text-sm text-red-500 mt-2 font-medium'>
               *Note: Only unassigned beds from your current ward ({userAssign.ward}) are available for quick updates.
             </p>
@@ -215,9 +215,9 @@ const MyAssignments = () => {
                         </div>
                         {/* --- REMOVE BED BUTTON --- */}
                         <button
-                          onClick={() => handleUpdateAssignment('remove', uab)} 
+                          onClick={() => handleUpdateAssignment('remove', uab.id)} 
                           // 🔑 FIX 2 (UI Bug): Disable only this button if its ID matches the removingBedId
-                          disabled={removingBedId === uab || groupedBeds[ward].length === 1 || isAdding}
+                          disabled={removingBedId === uab.id || groupedBeds[ward].length === 1 || isAdding}
                           className={`cp py-2 px-4 rounded-lg text-sm font-semibold transition-colors flex items-center ${
                             removingBedId === uab || groupedBeds[ward].length === 1 || isAdding
                               ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
@@ -225,7 +225,7 @@ const MyAssignments = () => {
                           }`}
                         >
                           {/* 🔑 FIX 2 (UI Bug): Show removing state only for this bed */}
-                          {removingBedId === uab ? 'Removing...' : <>Remove <Minus className='w-4 h-4 ml-1' /></>}
+                          {removingBedId === uab.id ? 'Removing...' : <>Remove <Minus className='w-4 h-4 ml-1' /></>}
                         </button>
                         {/* --------------------------- */}
                       </div>

@@ -26,10 +26,14 @@ export const addBedsToAssignment = async (assignmentId, bedIds) => {
 };
 
 // NEW: Dedicated PATCH endpoint for removing beds
+// NEW: Dedicated PATCH endpoint for removing beds
 export const removeBedsFromAssignment = async (assignmentId, bedIds) => {
-  // bedIds should be an array of bed IDs (e.g., ['b1', 'b2'])
-  const res = await API.patch(`/assignments/${assignmentId}/remove-beds`, { beds: bedIds });
-  return res.data;
+  // bedIds should be an array of bed IDs (e.g., ['b1', 'b2'])
+  // 👇 CRITICAL FIX: Ensure every bed ID in the array is a string
+  const normalizedBedIds = bedIds.map(String); 
+  
+  const res = await API.patch(`/assignments/${assignmentId}/remove-beds`, { beds: normalizedBedIds });
+  return res.data;
 };
 
 export const getMyAssignment = async() => {
