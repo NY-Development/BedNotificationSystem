@@ -18,8 +18,8 @@ app.use(express.json());
 
 const allowedOrigins = [
   "http://localhost:5173",          // local dev
-  "https://bns-beta.vercel.app",   // your deployed frontend
-  "https://bns-ao5j.vercel.app"
+  "https://bnst-beta.vercel.app",   // your deployed frontend
+  "https://bnst-ao5j.vercel.app"
 ];
 
 app.use(
