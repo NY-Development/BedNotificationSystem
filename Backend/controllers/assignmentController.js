@@ -120,7 +120,7 @@ export const getMyAssignments = async (req, res) => {
     // populate department details
     const assignments = await Assignment.find({ user: userId })
       .populate("department", "name wards")
-      .populate("createdBy", "name email role");
+      .populate("createdBy", "name email role image");
 
     if (!assignments.length) {
       return res.status(404).json({ message: "No assignments found" });
