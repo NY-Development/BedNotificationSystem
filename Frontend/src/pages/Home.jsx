@@ -36,7 +36,7 @@ const Home = () => {
               </a>
               <a
                 href="/register"
-                className="inline-flex items-center px-8 py-3 border-2 border-indigo-400 text-base font-medium rounded-md text-indigo-300 bg-transparent hover:bg-indigo-700/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300 ease-in-out"
+                className="inline-flex items-center px-8 py-3 border-2 border-indigo-400 text-base font-medium rounded-md text-white bg-transparent hover:bg-indigo-700/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300 ease-in-out"
               >
                 Learn More
               </a>
