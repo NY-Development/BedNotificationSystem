@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema(
       enum: ["admin", "c1", "c2", "intern"],
       default: "c1",
     },
+
     firstLoginDone: { type: Boolean, default: false },
     subscription: {
       plan: { type: String, enum: ["monthly", "yearly"], default: "monthly" },
@@ -19,6 +20,10 @@ const userSchema = new mongoose.Schema(
       amountPaid: { type: Number }, // amount paid in ETB
       tx_ref: { type: String },     // transaction reference from Chapa
       paidAt: { type: Date },       // payment timestamp
+    },
+    image: {
+        type: String,
+        default: "", // will store the ImageKit URL
     },
     verifyOtp: {
         type: String,

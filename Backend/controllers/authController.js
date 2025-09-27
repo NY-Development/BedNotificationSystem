@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { sendEmail } from "../utils/email.js";
 import { generateOtp } from "../utils/generateOtp.js"; 
+import imagekit from "../config/imageKit.js"; 
 
 const generateToken = (id, role) => {
   return jwt.sign({ id, role }, process.env.JWT_SECRET, { expiresIn: "30d" });
@@ -205,6 +206,40 @@ export const loginUser = async (req, res) => {
   }
 };
 
+// Upload profile image
+export const uploadProfileImage = async (req, res) => {
+  try {
+    const { file } = req; // multer will put file buffer here
+    const userId = req.user._id; // user comes from protect middleware
+
+    if (!file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    // Upload to ImageKit
+    const uploadResponse = await imagekit.upload({
+      file: file.buffer, // file buffer from multer
+      fileName: `${userId}-${Date.now()}`, // unique filename
+      folder: "/users", // optional folder in ImageKit
+    });
+
+    // Save image URL in user document
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { image: uploadResponse.url },
+      { new: true }
+    );
+
+    res.json({
+      message: "Profile image uploaded successfully",
+      imageUrl: user.image,
+    });
+  } catch (err) {
+    console.error("Image upload error:", err);
+    res.status(500).json({ message: "Failed to upload image" });
+  }
+};
+
 // Profile (protected)
 export const getProfile = async (req, res) => {
   try {
@@ -217,6 +252,7 @@ export const getProfile = async (req, res) => {
       subscription: user.subscription,
       id: user._id,
       isAccountVerified: user.isAccountVerified,
+      image:user.image,
       
     });
    
