@@ -3,7 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 import Toast from 'react-native-toast-message';
 
 const API = axios.create({
-  baseURL: 'https://bns-ao5j.vercel.app/api',
+  baseURL: 'https://bnst-ao5j.vercel.app/api',
   timeout: 10000,
 });
 

@@ -24,7 +24,8 @@ function AppContent() {
 
   return (
     <NavigationContainer>
-      {user && user.subscription?.isActive ? (
+      {/* {user && user.subscription?.isActive ? ( */}
+      {user ? (
         <MainNavigator />
       ) : (
         <AuthNavigator />

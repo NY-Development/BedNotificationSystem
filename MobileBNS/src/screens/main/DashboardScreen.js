@@ -202,9 +202,9 @@ const styles = StyleSheet.create({
     color: '#6B7280',
   },
   fab: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
+    position: 'relative',
+    top: 20,
+    left: 700,
     width: 56,
     height: 56,
     borderRadius: 28,

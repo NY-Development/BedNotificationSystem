@@ -1,8 +1,22 @@
 import API from './axios';
 
+// export const register = async (name, email, password, role, plan) => {
+//   try {
+//     const response = await API.post('/auth/register', {
+//       name,
+//       email,
+//       password,
+//       role,
+//       plan,
+//     });
+//     return response.data;
+//   } catch (error) {
+//     throw error.response?.data?.message || 'Registration failed';
+//   }
+// };
 export const register = async (name, email, password, role, plan) => {
   try {
-    const response = await API.post('/auth/register', {
+    const response = await API.post(`/auth/register`, {
       name,
       email,
       password,
@@ -11,7 +25,7 @@ export const register = async (name, email, password, role, plan) => {
     });
     return response.data;
   } catch (error) {
-    throw error.response?.data?.message || 'Registration failed';
+    throw error.response.data.message;
   }
 };
 

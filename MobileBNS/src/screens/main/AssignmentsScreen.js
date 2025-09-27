@@ -12,7 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import { createAssignment, updateAssignment } from '../../services/assignment';
-import { getDepartments } from '../../services/department';
+import { fetchDepartments } from '../../services/bed';
 import { useBed } from '../../context/BedContext';
 import { useAuth } from '../../context/AuthContext';
 import Toast from 'react-native-toast-message';
@@ -34,7 +34,7 @@ export default function AssignmentsScreen({ closeModal, updateAssign = false, is
   const [showWardModal, setShowWardModal] = useState(false);
 
   useEffect(() => {
-    getDepartments().then(setDepartments).catch(console.error);
+    fetchDepartments().then(setDepartments).catch(console.error);
   }, []);
 
   const selectedDept = departments.find((d) => d._id === form.deptId);

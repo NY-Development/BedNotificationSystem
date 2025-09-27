@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
@@ -57,7 +58,11 @@ export default function LoginScreen({ navigation }) {
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.header}>
-          <Ionicons name="medical" size={80} color="#4F46E5" />
+          <Image 
+            source={require('../../../assets/splash.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
           <Text style={styles.title}>Hospital BNS</Text>
           <Text style={styles.subtitle}>Sign in to your account</Text>
         </View>
@@ -131,6 +136,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
+  },
+  logo: {
+    width: 100,
+    height: 100,
   },
   scrollContainer: {
     flexGrow: 1,
