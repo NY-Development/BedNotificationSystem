@@ -98,13 +98,15 @@ const Assignments = ({ closeModal, updateAssign = false }) => {
   const selectedWard = selectedDept?.wards.find((w) => w.name === form.wardName);
 
   // 🔑 NEW FILTERING LOGIC: Determine which beds to display based on 'updateAssign' prop
-  const bedsToDisplay = selectedWard 
-    ? updateAssign
-      ? selectedWard.beds // If updating, show all beds in the ward
-      : selectedWard.beds.filter(bed => 
-          !bed.assignedUser || form.beds.includes(bed.id) // Filter: show UNASSIGNED beds OR beds currently selected in the form
-        ) 
-    : [];
+const bedsToDisplay = selectedWard
+  ? updateAssign
+    ? selectedWard.beds.filter(bed => 
+        !bed.assignedUser || bed.assignedUser.name === user.name // Filter out assigned beds not belonging to the current user
+      )
+    : selectedWard.beds.filter(bed => 
+        !bed.assignedUser || form.beds.includes(bed.id) // Filter: show UNASSIGNED beds OR beds currently selected in the form
+      )
+  : [];
 
   const isFormValid =
     form.deptId &&
