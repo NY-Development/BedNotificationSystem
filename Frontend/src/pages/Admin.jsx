@@ -336,7 +336,7 @@ const Admin = () => {
                                 className="font-medium text-gray-700"
                               >
                                 {assign?.department?.name} – {assign?.ward}:{" "}
-                                {assign?.beds?.length} beds
+                                {assign?.beds?.length} {`${assign?.beds?.length === 1 ? 'bed' : 'beds'}`}
                               </li>
                             ))}
                           </ul>

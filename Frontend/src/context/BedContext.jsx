@@ -47,6 +47,7 @@ export const BedProvider = ({ children }) => {
       }
 
       loadDepartments();
+      window.location.reload();
     } catch (err) {
       handleError(err)
     }
@@ -62,8 +63,8 @@ export const BedProvider = ({ children }) => {
       } else {
         toast.success(res.message || "Discharge handled");
       }
-
       loadDepartments();
+      window.location.reload();
     } catch (err) {
       handleError(err)
     }

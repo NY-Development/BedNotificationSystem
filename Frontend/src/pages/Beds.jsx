@@ -34,7 +34,7 @@ const Beds = () => {
     const filteredWards = dept.wards.map(ward => {
       const filteredBeds = ward.beds.filter(bed => {
         // Only show beds that are assigned and match the search term
-        return bed.assignedUser && bed.assignedUser.name.toLowerCase().includes(searchTerm.toLowerCase());
+        return ward.name.toLowerCase().includes(searchTerm.toLowerCase());
       });
       return { ...ward, beds: filteredBeds };
     }).filter(ward => ward.beds.length > 0); // Keep only wards that have matching beds
@@ -157,7 +157,7 @@ const Beds = () => {
                           <div
                             key={bed.id}
                             className={`p-4 rounded-lg border-2 shadow-inner transition-colors duration-200 ${
-                              bed.status === "occupied"
+                              bed.assignedUser?.name
                                 ? "bg-red-50 border-red-200 text-red-800"
                                 : "bg-green-50 border-green-200 text-green-800"
                             }`}
@@ -168,57 +168,51 @@ const Beds = () => {
                             </p>
                             <p className="text-sm mt-2 flex items-center space-x-1">
                               <User className="w-4 h-4" />
-                              <span>Assigned to: {bed.assignedUser?.name || "Not assigned"}</span>
+                              <span>Assigned: {bed.assignedUser?.name ? "Yes" : 'No'}</span>
                             </p>
                             <p className="text-sm mt-1">
                               Status: <span className="font-semibold">{bed.status}</span>
                             </p>
-                            <div className="mt-3 flex flex-col sm:flex-row gap-2">
-                              <button
-                                onClick={() => {
-                                  if (bed.assignedUser?._id === user._id) {
-                                    toast.error("You cannot admit yourself.");
-                                  } else {
-                                    admit(currentDepartment._id, ward.name, bed.id);
-                                  }
-                                }}
-                                disabled={bed.status === "occupied"}
-                                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium ${
-                                  bed.assignedUser === user?._id ? (
-                                    'cursor-not-allowed'
-                                  ) : (
-                                    bed.status === "occupied"
-                                    ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                                    : "bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
-                                  )
-                                }`}
-                              >
-                                {bed.status === "occupied"
-                                  ? "Patient Admitted"
-                                  : "Admit Patient"}
-                              </button>
-                              <button
-                                onClick={() => {
-                                  if (bed.assignedUser?._id === user._id) {
-                                    toast.error("You cannot discharge yourself.");
-                                  } else {
-                                    discharge(currentDepartment._id, ward.name, bed.id);
-                                  }
-                                }}
-                                disabled={bed.status === "available"}
-                                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium ${
-                                  bed.assignedUser === user?._id ? (
-                                    'cursor-not-allowed'
-                                  ) : (bed.status === "available" ? "bg-gray-300 text-gray-600 cursor-not-allowed" : 
-                                    "bg-green-600 text-white hover:bg-green-700 cursor-pointer"
-                                  )
-                                }`}
-                              >
-                                {bed.status === "available"
-                                  ? "Patient Discharged"
-                                  : "Discharge Patient"}
-                              </button>
-                            </div>
+                            {(bed?.assignedUser?.name === user.name) ? (
+                                <div className="text-center">
+                                  <p>These Beds are assigned to yourself.</p>
+                                </div>
+                            ) : (
+                                <div className="mt-3 flex flex-col sm:flex-row gap-2">
+                                {/* Admit Button */}
+                                <button
+                                  onClick={() => {
+                                    if (bed?.assignedUser?._id === user._id) {
+                                      toast.error("You cannot admit yourself.");
+                                    } else {
+                                      admit(currentDepartment._id, ward.name, bed.id);
+                                    }
+                                  }}
+                                  disabled={bed.status === "occupied"}
+                                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium ${
+                                    (bed.status === 'occupied'  ? ' bg-gray-300 text-gray-600 cursor-not-allowed' : ' bg-blue-600 text-white hover:bg-blue-700 cursor-pointer')
+                                  }`}
+                                >
+                                  {bed.status === "occupied" ? "Patient Admitted" : "Admit Patient"}
+                                </button>
+                                {/* Discharge Button */}
+                                <button
+                                  onClick={() => {
+                                    if (bed?.assignedUser?._id === user._id) {
+                                      toast.error("You cannot discharge yourself.");
+                                    } else {
+                                      discharge(currentDepartment._id, ward.name, bed.id);
+                                    }
+                                  }}
+                                  disabled={bed.status === "available"}
+                                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium ${
+                                    (bed.status === 'available' ? ' bg-gray-300 text-gray-600 cursor-not-allowed' : ' bg-blue-600 text-white hover:bg-blue-700 cursor-pointer')
+                                  }`}
+                                >
+                                  {bed.status === "available" ? "Patient Discharged" : "Discharge Patient"}
+                                </button>
+                                </div>
+                            )}
                           </div>
                         ))}
                       </div>

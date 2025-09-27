@@ -12,7 +12,7 @@ const SearchBar = ({ searchTerm, onSearchChange, onSearchClick }) => {
     <div className="flex items-center space-x-2 p-2 bg-white rounded-lg shadow-sm border border-gray-200">
       <input
         type="text"
-        placeholder="Search by assigned user name..."
+        placeholder="Search by ward name..."
         value={searchTerm}
         onChange={(e) => onSearchChange(e.target.value)}
         onKeyDown={handleKeyDown}
@@ -20,7 +20,7 @@ const SearchBar = ({ searchTerm, onSearchChange, onSearchClick }) => {
       />
       <button
         onClick={onSearchClick}
-        className="p-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+        className="cp p-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
       >
         <Search size={20} />
       </button>

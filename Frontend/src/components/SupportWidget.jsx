@@ -65,6 +65,20 @@ const SupportWidget = () => {
             onChange={(e) => setIssue(e.target.value)}
             required
           ></textarea>
+
+          {/* Telegram Username Section */}
+          <div className="text-gray-600 mb-2">
+            {`For quicker support, you can DM us on Telegram: `} 
+            <a 
+              href="https://t.me/Bns_support1" 
+              className="font-semibold text-blue-500 underline italic" 
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
+              {`Support`}
+            </a>
+          </div>
+
           <div className="flex justify-end gap-2">
             <button
               onClick={() => setOpen(false)}
