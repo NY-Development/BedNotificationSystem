@@ -44,10 +44,10 @@ const Navbar = () => {
         <div className="hidden md:flex items-center space-x-4 font-medium">
           {user ? (
             <>
-              <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center cursor-pointer overflow-hidden">
-              <button className="cp text-gray-300" onClick={openProfileModal}>
-                <img src={user?.image} alt="Profile" className="w-full h-full object-cover" /> Hello, {user.name} ({user.role})
-              </button>
+              <div className="w-10 h-10 rounded-full hidden bg-gray-200 items-center justify-center cursor-pointer">
+                <button className="cp text-gray-300" onClick={openProfileModal}>
+                  <img src={user?.image} alt="Profile" className="inline w-6 h-6 object-cover" /> <p>Hello, {user.name} ({user.role})</p>
+                </button>
               </div>
               {user.role === "admin" && (
                 <Link to="/admin" className="hover:text-blue-400">Users</Link>
@@ -80,7 +80,7 @@ const Navbar = () => {
           {user ? (
             <>
               <button className={`cp block px-4 py-2 text-sm text-gray-300`} onClick={openProfileModal}>
-                <img src={user?.image} alt="Profile" className="inline h-6 w-6 rounded-full" /> Hello, {user.name} ({user.role})
+                <img src={user?.image} alt="Profile" className="inline h-8 w-8 rounded-full" /> Hello, {user.name} ({user.role})
               </button>
               <Link to="/dashboard" onClick={toggleMenu} className="block px-4 py-2 hover:bg-gray-700 transition duration-200">Dashboard</Link>
               <Link to="/beds" onClick={toggleMenu} className="block px-4 py-2 hover:bg-gray-700 transition duration-200">Beds</Link>

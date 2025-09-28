@@ -156,7 +156,7 @@ const Admin = () => {
                   {selectedDept.wards.map((ward) => (
                     <li
                       key={ward._id}
-                      className={`p-4 rounded-lg flex justify-between items-center transition-all duration-200 ${
+                      className={`p-4 rounded-lg flex md:flex-row flex-col space-y-2 justify-between items-center transition-all duration-200 ${
                         selectedWard?._id === ward._id
                           ? "bg-indigo-100 border-2 border-indigo-400"
                           : "bg-gray-50 border border-gray-200 hover:bg-gray-100"
@@ -189,7 +189,7 @@ const Admin = () => {
                   ))}
                 </ul>
 
-                <div className="mt-6 flex space-x-2">
+                <div className="mt-6 flex md:flex-row flex-col  md:space-x-2 space-y-2">
                   <input
                     type="text"
                     value={newWardName}
@@ -204,7 +204,7 @@ const Admin = () => {
                         setNewWardName("");
                       }
                     }}
-                    className="cp px-1 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700"
+                    className="mt-2 md:m-0 cp p-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700"
                   >
                     Add Ward
                   </button>
@@ -217,7 +217,7 @@ const Admin = () => {
                     Beds in {selectedWard.name}
                   </h3>
                   <ul className="space-y-3">
-                    <div className="flex space-x-2">
+                    <div className="flex md:flex-row flex-col space-x-2 space-y-2">
                       <input
                         type="text"
                         value={newBedId}
@@ -232,7 +232,7 @@ const Admin = () => {
                             setNewBedId("");
                           }
                         }}
-                        className="cp px-1 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700"
+                        className="cp p-2 md:px-1 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 mt-2 md:m-0"
                       >
                         Add Bed
                       </button>
@@ -240,7 +240,7 @@ const Admin = () => {
                     {selectedWard.beds.map((bed) => (
                       <li
                         key={bed._id}
-                        className="flex justify-between items-center p-4 bg-gray-50 rounded-lg border border-gray-200"
+                        className="flex md:flex-row flex-col justify-between items-center p-4 bg-gray-50 rounded-lg border border-gray-200 space-y-2"
                       >
                         <div className="font-semibold text-gray-700 flex items-center space-x-2">
                           <Bed size={20} />
