@@ -44,9 +44,11 @@ const Navbar = () => {
         <div className="hidden md:flex items-center space-x-4 font-medium">
           {user ? (
             <>
+              <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center cursor-pointer overflow-hidden">
               <button className="cp text-gray-300" onClick={openProfileModal}>
-                <img src={user?.image} alt="Profile" className="inline h-6 w-6 rounded-full" /> Hello, {user.name} ({user.role})
+                <img src={user?.image} alt="Profile" className="w-full h-full object-cover" /> Hello, {user.name} ({user.role})
               </button>
+              </div>
               {user.role === "admin" && (
                 <Link to="/admin" className="hover:text-blue-400">Users</Link>
               )}

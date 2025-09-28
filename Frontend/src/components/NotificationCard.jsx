@@ -47,11 +47,22 @@ const NotificationCard = ({ notification, onMarkAsRead }) => {
         )}
       </div>
 
-      {/* From */}
-      <p className={`text-sm ${read ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
-        From:{" "}
-        <span className={`font-medium ${read ? 'text-indigo-400' : 'text-indigo-600'}`}>{from?.name || "Unknown"}</span>
-      </p>
+      {/* From with image */}
+      <div className="flex flex-col items-center mt-1">
+        {from?.image && (
+          <img
+            src={from.image}
+            alt="Sender"
+            className="w-8 h-8 rounded-full mr-2" // Adjust size and margin as needed
+          />
+        )}
+        <p className={`text-sm ${read ? 'text-gray-400' : 'text-gray-600'}`}>
+          From:{" "}
+          <span className={`font-medium ${read ? 'text-indigo-400' : 'text-indigo-600'}`}>
+            {from?.name || "Unknown"}
+          </span>
+        </p>
+      </div>
 
       {/* Timestamp */}
       <p className={`text-xs ${read ? 'text-gray-300' : 'text-gray-400'} mt-1`}>
