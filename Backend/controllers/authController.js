@@ -206,39 +206,45 @@ export const loginUser = async (req, res) => {
   }
 };
 
-// Upload profile image
 export const uploadProfileImage = async (req, res) => {
   try {
-    const { file } = req; // multer will put file buffer here
-    const userId = req.user._id; // user comes from protect middleware
+    const { file } = req;
+    const userId = req.user._id;
+    const { name, email } = req.body; // optional fields
 
-    if (!file) {
-      return res.status(400).json({ message: "No file uploaded" });
+    if (!file && !name && !email) {
+      return res.status(400).json({ message: "No data provided" });
     }
 
-    // Upload to ImageKit
-    const uploadResponse = await imagekit.upload({
-      file: file.buffer, // file buffer from multer
-      fileName: `${userId}-${Date.now()}`, // unique filename
-      folder: "/users", // optional folder in ImageKit
-    });
+    let updateData = {};
 
-    // Save image URL in user document
-    const user = await User.findByIdAndUpdate(
-      userId,
-      { image: uploadResponse.url },
-      { new: true }
-    );
+    // Upload image if file exists
+    if (file) {
+      const uploadResponse = await imagekit.upload({
+        file: file.buffer,
+        fileName: `${userId}-${Date.now()}`,
+        folder: "/users",
+      });
+      updateData.image = uploadResponse.url;
+    }
+
+    // Add name/email if provided
+    if (name) updateData.name = name;
+    if (email) updateData.email = email;
+
+    // Update user
+    const user = await User.findByIdAndUpdate(userId, updateData, { new: true });
 
     res.json({
-      message: "Profile image uploaded successfully",
-      imageUrl: user.image,
+      message: "Profile updated successfully",
+      user,
     });
   } catch (err) {
-    console.error("Image upload error:", err);
-    res.status(500).json({ message: "Failed to upload image" });
+    console.error("Profile update error:", err);
+    res.status(500).json({ message: "Failed to update profile" });
   }
 };
+
 
 // Profile (protected)
 export const getProfile = async (req, res) => {
