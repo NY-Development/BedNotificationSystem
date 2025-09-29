@@ -118,7 +118,7 @@ export const getMyAssignments = async (req, res) => {
     const userId = req.user._id; // from auth middleware
 
     // populate department details
-    const assignments = await Assignment.find({ user: userId })
+    const assignments = await Assignment.find({ user: userId, isActive: true })
       .populate("department", "name wards")
       .populate("createdBy", "name email role image");
 
