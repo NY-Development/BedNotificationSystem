@@ -90,14 +90,16 @@ const Admin = () => {
         <div className="mb-8 bg-white shadow-lg p-6 rounded-xl border border-gray-200">
           <h2 className="text-2xl font-bold mb-4 text-gray-800">📊 System Stats</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-gray-100 p-4 rounded-lg flex items-center space-x-3">
+            <div onClick={() => setTab('users')}
+            className="cp bg-gray-100 p-4 rounded-lg flex items-center space-x-3">
               <Users className="text-blue-500" size={24} />
               <div>
                 <p className="text-sm text-gray-500">Total Users</p>
                 <p className="text-xl font-bold">{stats.totalUsers && stats.totalUsers === 1 ? user.name : stats.totalUsers}</p>
               </div>
             </div>
-            <div className="bg-gray-100 p-4 rounded-lg flex items-center space-x-3">
+            <div onClick={() => setTab('departments')} 
+            className="cp bg-gray-100 p-4 rounded-lg flex items-center space-x-3">
               <Hospital className="text-purple-500" size={24} />
               <div>
                 <p className="text-sm text-gray-500">Total Departments</p>
