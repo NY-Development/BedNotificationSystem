@@ -32,13 +32,13 @@ const Home = () => {
                 href="/login"
                 className="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300 ease-in-out"
               >
-                Get Started
+                Log in
               </a>
               <a
                 href="/register"
                 className="inline-flex items-center px-8 py-3 border-2 border-indigo-400 text-base font-medium rounded-md text-white bg-transparent hover:bg-indigo-700/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300 ease-in-out"
               >
-                Learn More
+                Sign Up
               </a>
             </div>
           </div>

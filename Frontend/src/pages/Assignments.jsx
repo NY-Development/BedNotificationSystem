@@ -72,7 +72,6 @@ const Assignments = ({ closeModal, updateAssign = false }) => {
     setLoading(true);
     try {
       if (updateAssign) {
-        // ⭐️ CORRECTION: Use assignment ID (userAssign._id) for the PUT request
         if (!userAssign || !userAssign._id) {
           throw new Error("Assignment ID not found for update.");
         }
