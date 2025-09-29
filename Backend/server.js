@@ -2,6 +2,8 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./config/db.js";
+import { startExpiryJob } from "./cronJobs/expireAssignments.js";
+
 
 import authRoutes from "./routes/authRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
@@ -16,6 +18,9 @@ connectDB();
 
 const app = express();
 app.use(express.json());
+
+//  Start the cron job
+startExpiryJob();
 
 const allowedOrigins = [
   "http://localhost:5173",          // local dev
