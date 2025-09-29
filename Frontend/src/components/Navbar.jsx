@@ -44,9 +44,9 @@ const Navbar = () => {
         <div className="hidden md:flex items-center space-x-4 font-medium">
           {user ? (
             <>
-              <div className="w-10 h-10 rounded-full hidden bg-gray-200 items-center justify-center cursor-pointer">
-                <button className="cp text-gray-300" onClick={openProfileModal}>
-                  <img src={user?.image} alt="Profile" className="inline w-6 h-6 object-cover" /> <p>Hello, {user.name} ({user.role})</p>
+              <div className="items-center justify-center cursor-pointer">
+                <button className="cp flex space-x-2 items-center text-gray-300" onClick={openProfileModal}>
+                  <img src={user?.image} alt="Profile" className="inline w-10 h-10 object-cover rounded-full" /> <p>{user.name}</p>
                 </button>
               </div>
               {user.role === "admin" && (
@@ -79,9 +79,11 @@ const Navbar = () => {
         <div className="md:hidden mt-4 space-y-2 font-medium">
           {user ? (
             <>
-              <button className={`cp block px-4 py-2 text-sm text-gray-300`} onClick={openProfileModal}>
-                <img src={user?.image} alt="Profile" className="inline h-8 w-8 rounded-full" /> Hello, {user.name} ({user.role})
-              </button>
+              <div className="items-center justify-center cursor-pointer">
+                <button className="cp flex space-x-2 items-center text-gray-300" onClick={openProfileModal}>
+                  <img src={user?.image} alt="Profile" className="inline w-10 h-10 object-cover rounded-full" /> <p>{user.name}</p>
+                </button>
+              </div>
               <Link to="/dashboard" onClick={toggleMenu} className="block px-4 py-2 hover:bg-gray-700 transition duration-200">Dashboard</Link>
               <Link to="/beds" onClick={toggleMenu} className="block px-4 py-2 hover:bg-gray-700 transition duration-200">Beds</Link>
               <button onClick={handleLogout} className="cp w-full text-left flex px-4 py-2 hover:bg-red-700 text-red-400 transition duration-200">
