@@ -8,7 +8,8 @@ const assignmentSchema = new mongoose.Schema({
   deptExpiry: { type: Date, required: true },
   wardExpiry: { type: Date, required: true },
   note: { type: String }, // optional note
-  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" } // who created the assignment (may be same as user)
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // who created the assignment (may be same as user)
+  isActive: { type: Boolean, default: true }, 
 }, { timestamps: true });
 
 export default mongoose.model("Assignment", assignmentSchema);
