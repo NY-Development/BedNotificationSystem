@@ -28,7 +28,7 @@ export const registerUser = async (req, res) => {
         name: name || "Admin", // default name if not provided
         email,
         password: hashedPassword,
-        role: "admin", // force admin role
+        role: "supervisor", // force supervisor role
         subscription: {
           plan: plan || "yearly", // give default or passed plan
           isActive: true, // directly active
