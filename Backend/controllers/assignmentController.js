@@ -364,8 +364,14 @@ export const removeBedsFromAssignment = async (req, res) => {
     }
 
     await department.save();
-    await assignment.save();
 
+    // If no beds left in assignment → delete the assignment itself
+    if (assignment.beds.length === 0) {
+      await assignment.deleteOne();
+      return res.json({ message: "All beds removed, assignment deleted" });
+    }
+
+    await assignment.save();
     res.json({ message: "Beds removed successfully", assignment });
   } catch (err) {
     console.error("removeBedsFromAssignment error:", err);
