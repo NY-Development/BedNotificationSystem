@@ -23,6 +23,7 @@ import Payments from "./pages/Payments";
 import MyAssignments from "./pages/MyAssignments";
 import SelectSchool from "./pages/SelectSchool";
 import SupportWidget from "./components/SupportWidget";
+import MainAdmin from "./pages/MainAdmin";
 
 function App() {
   return (
@@ -46,11 +47,12 @@ function App() {
                     <Route path="/assignments" element={<Assignments />} /> 
                     <Route path="/myassignments" element={<MyAssignments />} />
                     <Route path="/profile" element={<Profile />} />
-                    <Route path="/admin" element={<Admin />} />
+                    <Route path="/supervisor" element={<Admin />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/payment/success" element={<Payments />} />
                     <Route path="/schools" element={<SelectSchool />} />
+                    <Route path="/admin" element={<MainAdmin />} />
                     <Route path="*" element={<Home />} /> {/* fallback */}
                   </Routes>
                 </main>

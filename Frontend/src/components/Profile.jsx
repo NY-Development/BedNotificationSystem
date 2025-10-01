@@ -5,6 +5,8 @@ import toast from 'react-hot-toast';
 const Profile = ({ onClose, user }) => {
   const [image, setImage] = useState(user?.image || '');
   const [file, setFile] = useState(null); // State to hold the file object
+  const [name, setName] = useState(user?.name || ''); // State for name
+  const [email, setEmail] = useState(user?.email || ''); // State for email
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -27,6 +29,8 @@ const Profile = ({ onClose, user }) => {
 
     const formData = new FormData();
     formData.append('image', file); // Append the file to the form data
+    formData.append('name', name); // Append the name to the form data
+    formData.append('email', email); // Append the email to the form data
 
     try {
       const uploadResponse = await uploadProfileImage(formData);
@@ -43,7 +47,7 @@ const Profile = ({ onClose, user }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center backdrop-blur-xs z-50">
-      <div className="bg-white p-4 rounded shadow-lg">
+      <div className="bg-white w-120 p-4 rounded shadow-lg">
         <h2 className="text-xl font-bold mb-4 text-black text-center">Update Profile</h2>
         {error && <p className="text-red-500 text-center">{error}</p>} {/* Show error message */}
         <form onSubmit={handleSubmit} className="flex flex-col items-center">
@@ -68,6 +72,22 @@ const Profile = ({ onClose, user }) => {
               <span className="text-gray-500">Upload Photo</span>
             )}
           </label>
+          <input 
+            type="text" 
+            value={name} 
+            onChange={(e) => setName(e.target.value)} 
+            placeholder="Your Name" 
+            className="border border-black text-black mb-2 p-2 rounded w-full"
+            required
+          />
+          <input 
+            type="email" 
+            value={email} 
+            onChange={(e) => setEmail(e.target.value)} 
+            placeholder="Your Email" 
+            className="border border-black text-black mb-4 p-2 rounded w-full"
+            required
+          />
           <button 
             type="submit" 
             className={`cp bg-blue-500 text-white px-4 py-2 rounded mb-4 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`} 

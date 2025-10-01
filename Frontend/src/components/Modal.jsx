@@ -1,9 +1,13 @@
 import React from "react";
+import { useAuth } from "../context/AuthContext";
 
 const Modal = ({ isOpen, updateAssign, onClose, children, forceRequired = false }) => {
   if (!isOpen) return null;
 
+  const {user} = useAuth();
+
   return (
+    user?.role !== 'intern' &&
     <div className="fixed inset-0 flex items-center justify-center backdrop-blur-xs z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-lg relative shadow-lg">
         {/* ❌ close button (only show if not forceRequired) */}

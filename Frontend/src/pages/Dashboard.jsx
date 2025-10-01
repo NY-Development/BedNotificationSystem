@@ -11,11 +11,17 @@ const Dashboard = () => {
   const [open, setOpen] = useState(false);
   const [forceRequired, setForceRequired] = useState(false);
   const [updateAssign, setUpdateAssign] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0); 
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [today, setToday] = useState(); 
+
+
+  if(user?.role === 'admin'){
+    window.location.href = '/admin';
+  }
 
   const hasExpiredAssignment = useMemo(() => {
     if (!expiry) return false;
-    const today = new Date().toLocaleDateString('en-CA');
+    setToday(new Date().toLocaleDateString('en-CA'));
     const deptExpired = deptExpiry && today >= deptExpiry;
     const wardExpired = wardExpiry && today >= wardExpiry;
     return deptExpired || wardExpired;
@@ -112,6 +118,8 @@ const Dashboard = () => {
           </Link>
 
           {/* Notifications Card */}
+          {user?.role !== 'intern' ? (
+            <>
           <Link
             to="/notifications"
             className="dashboard-card group bg-white hover:bg-yellow-100 border-l-4 border-yellow-500 hover:border-yellow-600 transition-all duration-300 relative"
@@ -128,7 +136,6 @@ const Dashboard = () => {
             <p className="text-sm text-gray-500 group-hover:text-yellow-700">Check for new admissions.</p>
           </Link>
 
-          {/* My Assignments Card */}
           <Link
             to="/myassignments"
             className="dashboard-card group bg-white hover:bg-blue-100 border-l-4 border-blue-500 hover:border-blue-600 transition-all duration-300"
@@ -138,10 +145,14 @@ const Dashboard = () => {
             </div>
             <h3 className="text-xl font-bold text-gray-800 group-hover:text-blue-800 mt-4">My Assignments</h3>
             <p className="text-sm text-gray-500 group-hover:text-blue-700">View beds assigned to you.</p>
-          </Link>
+          </Link> 
+          </>
+          ) : (
+            <></>
+          )}
 
           {/* Admin Access Card */}
-          {user.role === "admin" && (
+          {user.role === "supervisor" && (
             <Link
               to="/admin"
               className="dashboard-card group bg-white hover:bg-purple-100 border-l-4 border-purple-500 hover:border-purple-600 transition-all duration-300"
@@ -174,9 +185,15 @@ const Dashboard = () => {
         forceRequired={forceRequired}
         updateAssign={updateAssign}
       >
-        <Assignments 
+        <Assignments
           updateAssign={updateAssign}
-          closeModal={() => setOpen(false)} />
+          closeModal={() => setOpen(false)}
+          forceType={
+            deptExpiry && today >= deptExpiry ? "department" :
+            wardExpiry && today >= wardExpiry ? "ward" :
+            null
+          }
+        />
       </Modal>
     </div>
   );

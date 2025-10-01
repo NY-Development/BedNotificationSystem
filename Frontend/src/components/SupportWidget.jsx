@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { HelpCircle } from "lucide-react";
+import { HelpCircle, MessageCircleMore } from "lucide-react";
 import toast from "react-hot-toast";
 import API from "../services/axios";
 import { useAuth } from "../context/AuthContext";
@@ -71,11 +71,11 @@ const SupportWidget = () => {
             {`For quicker support, you can DM us on Telegram: `} 
             <a 
               href="https://t.me/Bns_support1" 
-              className="font-semibold text-blue-500 underline italic" 
+              className="text-blue-500 underline font-bold italic " 
               target="_blank" 
               rel="noopener noreferrer"
             >
-              {`Support`}
+              {`Support`} <MessageCircleMore className="inline text-center ml-1 h-auto"/>
             </a>
           </div>
 

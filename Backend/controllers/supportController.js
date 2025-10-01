@@ -22,3 +22,23 @@ export const sendSupportEmail = async (req, res) => {
     return res.status(500).json({ message: "Failed to send support request" });
   }
 };
+
+// New endpoint to send a refined message to a specific email
+export const sendRefinedMessage = async (req, res) => {
+  try {
+    const { recipient, subject, message } = req.body;
+
+    if (!recipient || !subject || !message) {
+      return res
+        .status(400)
+        .json({ message: "Recipient, subject, and message are required." });
+    }
+
+    await sendEmail(recipient, subject, message);
+
+    return res.json({ message: "Refined message sent successfully!" });
+  } catch (error) {
+    console.error("Error sending refined message:", error);
+    return res.status(500).json({ message: "Failed to send refined message." });
+  }
+};
