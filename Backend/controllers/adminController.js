@@ -307,3 +307,44 @@ export const getAllSubscriptions = async (req, res) => {
     res.status(500).json({ message: "Error fetching subscriptions", error: err.message });
   }
 };
+
+//  Approve (activate) subscription
+export const activateSubscription = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // ensure screenshot exists before activation
+    if (!user.subscription.paymentScreenshot) {
+      return res.status(400).json({ message: "No payment screenshot uploaded for this user" });
+    }
+
+    // set start date = now
+    const startDate = new Date();
+    let endDate;
+
+    if (user.subscription.plan === "yearly") {
+      endDate = new Date(startDate);
+      endDate.setFullYear(endDate.getFullYear() + 1); // add 1 year
+    } else {
+      endDate = new Date(startDate);
+      endDate.setMonth(endDate.getMonth() + 1); // add 1 month
+    }
+
+    user.subscription.isActive = true;
+    user.subscription.startDate = startDate;
+    user.subscription.endDate = endDate;
+    user.subscription.paidAt = new Date();
+
+    await user.save();
+
+    res.status(200).json({
+      message: `Subscription (${user.subscription.plan}) activated successfully`,
+      subscription: user.subscription,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Error activating subscription", error: err.message });
+  }
+};
