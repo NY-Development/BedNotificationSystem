@@ -34,3 +34,11 @@ export const adminOnly = (req, res, next) => {
     res.status(403).json({ message: "Admin access only" });
   }
 };
+
+export const supervisorOnly = (req, res, next) => {
+  if (req.user && req.user.role === "supervisor") {
+    next();
+  } else {
+    res.status(403).json({ message: "Supervisor access only" });
+  }
+};
