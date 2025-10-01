@@ -49,6 +49,18 @@ export const deleteUser = async (req, res) => {
   }
 };
 
+export const getAllNotifications = async (req, res) => {
+  try {
+    const notifications = await Notification.find()
+      .populate("user", "name email role")
+      .populate("from", "name email role")
+      .sort({ createdAt: -1 });
+    res.status(200).json(notifications);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching notifications", error: err.message });
+  }
+};
+
 // get all assignments with user and department details
 export const getAllAssignments = async (req, res) => {
   try {

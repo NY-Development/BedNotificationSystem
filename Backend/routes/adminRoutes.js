@@ -14,6 +14,7 @@ import {
   addDepartment,
   addWard,
   addBed,
+  getAllNotifications,
 } from "../controllers/adminController.js";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
 
@@ -26,6 +27,7 @@ router.get("/users", getAllUsers);
 router.get("/users/:id", getUserById);
 router.delete("/users/:id", deleteUser);
 
+router.get("/notifications",getAllNotifications );
 router.get("/assignments", getAllAssignments);
 router.get("/departments", getAllDepartments);
 
