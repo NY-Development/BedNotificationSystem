@@ -14,12 +14,15 @@ const userSchema = new mongoose.Schema(
     firstLoginDone: { type: Boolean, default: false },
     subscription: {
       plan: { type: String, enum: ["monthly", "yearly"], default: "monthly" },
-      isActive: { type: Boolean, default: true },
+      isActive: { type: Boolean, default: false },
       startDate: { type: Date },
       endDate: { type: Date },
-      amountPaid: { type: Number }, // amount paid in ETB
-      tx_ref: { type: String },     // transaction reference from Chapa
+      amountPaid: { type: Number }, // amount paid in ETB     // transaction reference from Chapa
       paidAt: { type: Date },       // payment timestamp
+      paymentScreenshot: {
+        type: String,   // will hold URL (ImageKit / Cloudinary / S3)
+        default: "",
+      },
     },
     image: {
         type: String,

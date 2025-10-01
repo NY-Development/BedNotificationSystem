@@ -297,3 +297,13 @@ export const addBed = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+//  Get all users with subscription details
+export const getAllSubscriptions = async (req, res) => {
+  try {
+    const users = await User.find().select("name email role subscription image");
+    res.status(200).json(users);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching subscriptions", error: err.message });
+  }
+};
