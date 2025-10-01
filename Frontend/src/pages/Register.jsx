@@ -154,7 +154,6 @@ const Register = () => {
                     <option value="c1">C1</option>
                     <option value="c2">C2</option>
                     <option value="intern">Intern</option>
-                    <option value="admin">Admin</option>
                     {/* Here later on update it with if the email is Selamawitilahun07@gmail.com the only role available will be Admin. */}
                   </select>
 
