@@ -15,6 +15,9 @@ import {
   addWard,
   addBed,
   getAllNotifications,
+  getAllSubscriptions,
+  activateSubscription,
+  deactivateSubscription,
 } from "../controllers/adminController.js";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
 
@@ -33,6 +36,10 @@ router.get("/departments", getAllDepartments);
 
 router.get("/stats", getStats);
 router.post("/update", updateData);
+
+router.get("/subscriptions",  getAllSubscriptions);
+router.put("/:userId/activate", activateSubscription);
+router.put("/:userId/deactivate", deactivateSubscription);
 
 // Create endpoints
 router.post("/departments", addDepartment);
