@@ -1,5 +1,23 @@
-
 import Department from "../models/Department.js";
+
+
+// get all departments with wards and beds
+export const getAllDepartments = async (req, res) => {
+  try {
+    const departments = await Department.find()
+      .populate({
+        path: "wards.beds.assignedUser", 
+        select: "name email role image", // only return these user fields
+      });
+
+    res.status(200).json(departments);
+  } catch (err) {
+    res.status(500).json({
+      message: "Error fetching departments",
+      error: err.message,
+    });
+  }
+};
 
 // Delete a department
 export const deleteDepartment = async (req, res) => {

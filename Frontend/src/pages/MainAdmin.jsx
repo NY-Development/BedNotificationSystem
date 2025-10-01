@@ -33,12 +33,11 @@ import {
 import { useAuth } from "../context/AuthContext";
 
 // --- Constants ---
-const USER_ROLES = ["user", "manager", "super-admin"]; // Define all possible roles
-const PIE_COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
+const USER_ROLES = ["c1", "c2", "intern", "supervisor", "admin"]; // Define all possible roles
+const PIE_COLORS = ["01088FE", "#00C4FF", "#FFBB28", "#FF8042", "00FF00"];
 
 // --- Components for Modularity ---
 
-// Component for displaying key statistics
 const StatCard = ({ title, value, color }) => (
   <div className={`p-4 rounded-xl shadow-lg border-l-4 ${color}`}>
     <p className="text-sm font-medium text-gray-500">{title}</p>
@@ -46,7 +45,6 @@ const StatCard = ({ title, value, color }) => (
   </div>
 );
 
-// Form for adding a new Department
 const AddDepartmentForm = ({ onSuccess }) => {
   const [name, setName] = useState("");
   const [status, setStatus] = useState("");
@@ -75,14 +73,13 @@ const AddDepartmentForm = ({ onSuccess }) => {
         className="w-full p-2 border rounded"
         required
       />
-      <button type="submit" className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">
+      <button type="submit" className="w-full px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">
         Add Department
       </button>
       {status && <p className="text-sm text-gray-600">{status}</p>}
     </form>
   );
 };
-
 
 // Main Component
 const MainAdmin = () => {
@@ -95,8 +92,7 @@ const MainAdmin = () => {
   const [message, setMessage] = useState("");
   const [supportStatus, setSupportStatus] = useState("");
   const [loading, setLoading] = useState(true);
-
-  // --- Data Fetching ---
+  const {user} = useAuth();
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -116,13 +112,11 @@ const MainAdmin = () => {
     } finally {
       setLoading(false);
     }
-  }, [tab]);
+  }, [tab, user]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
-
-  // --- Handlers ---
 
   const handleDeleteUser = async (id) => {
     if (window.confirm("Are you sure you want to delete this user and all associated data?")) {
@@ -210,7 +204,6 @@ const MainAdmin = () => {
     }
   };
 
-
   const handleSendSupport = async (e) => {
     e.preventDefault();
     setSupportStatus("Sending...");
@@ -225,8 +218,6 @@ const MainAdmin = () => {
     }
   };
 
-  // --- Render Functions ---
-
   const renderDashboard = () => {
     if (!stats) return <p className="text-center text-gray-500">Loading statistics...</p>;
 
@@ -238,17 +229,14 @@ const MainAdmin = () => {
 
     return (
       <div className="space-y-8">
-        {/* Stat Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard title="Total Users" value={stats.totalUsers} color="border-blue-500 bg-blue-50" />
           <StatCard title="Total Departments" value={stats.totalDepartments} color="border-indigo-500 bg-purple-50" />
           <StatCard title="Total Beds" value={stats.beds.total} color="border-green-500 bg-green-50" />
           <StatCard title="Available Beds" value={stats.beds.available} color="border-yellow-500 bg-yellow-50" />
         </div>
 
-        {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 bg-white rounded-xl shadow-lg">
-          {/* User Role Distribution */}
           <div className="flex flex-col items-center">
             <h3 className="text-xl font-semibold mb-4">User Role Distribution</h3>
             <PieChart width={400} height={300}>
@@ -271,10 +259,9 @@ const MainAdmin = () => {
             </PieChart>
           </div>
 
-          {/* User Growth Chart */}
           <div className="bg-white p-6 rounded-xl shadow-lg">
             <h3 className="text-xl font-semibold mb-4">User Growth Over Time</h3>
-            <div className="w-full h-80"> {/* fixed height, flexible width */}
+            <div className="w-full h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
                   data={stats.userGrowth || []}
@@ -297,8 +284,6 @@ const MainAdmin = () => {
             </div>
           </div>
 
-
-          {/* Bed Occupancy */}
           <div className="flex flex-col items-center">
             <h3 className="text-xl font-semibold mb-4">Bed Occupancy Status</h3>
             <BarChart width={400} height={300} data={bedData}>
@@ -321,47 +306,32 @@ const MainAdmin = () => {
 
   const renderUsers = () => (
     <div className="bg-white p-6 rounded-xl shadow-lg">
-      <h2 className="text-xl font-semibold mb-4">
-        User Management & Subscriptions
-      </h2>
-
-      {/* Responsive table wrapper */}
+      <h2 className="text-xl font-semibold mb-4">User Management & Subscriptions</h2>
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200 text-sm sm:text-base">
           <thead className="bg-gray-50 sticky top-0 z-10">
             <tr>
-              <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Name
-              </th>
-              <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Email
-              </th>
-              <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Role
-              </th>
-              <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Sub Status
-              </th>
-              <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Plan
-              </th>
-              <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Screenshot
-              </th>
-              <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
+              <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+              <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+              <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+              <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sub Status</th>
+              <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
+              <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Screenshot</th>
+              <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {users.map((u) => (
               <tr key={u._id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-4 sm:px-6 py-4 whitespace-nowrap font-medium text-gray-800">
+                <td className="flex px-4 sm:px-6 py-4 whitespace-nowrap font-medium text-gray-800 justify-center items-center">
+                  <img 
+                  src={`${u.image}`} 
+                  alt="profile image"
+                  className="rounded-full h-10 w-10 mr-2"
+                  />
                   {u.name}
-                </td>
-                <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-gray-600">
-                  {u.email}
-                </td>
+                  </td>
+                <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-gray-600">{u.email}</td>
                 <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                   <select
                     value={u.role}
@@ -370,21 +340,15 @@ const MainAdmin = () => {
                   >
                     {USER_ROLES.map((role) => (
                       <option key={role} value={role}>
-                        {role}
+                        {role === u.role && role}
                       </option>
                     ))}
                   </select>
                 </td>
-                <td
-                  className={`px-4 sm:px-6 py-4 whitespace-nowrap font-semibold ${
-                    u.subscription?.isActive ? "text-green-600" : "text-red-600"
-                  }`}
-                >
+                <td className={`px-4 sm:px-6 py-4 whitespace-nowrap font-semibold ${u.subscription?.isActive ? "text-green-600" : "text-red-600"}`}>
                   {u.subscription?.isActive ? "Active" : "Inactive"}
                 </td>
-                <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-gray-700">
-                  {u.subscription?.plan || "N/A"}
-                </td>
+                <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-gray-700">{u.subscription?.plan || "N/A"}</td>
                 <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                   {u.subscription?.paymentScreenshot ? (
                     <a
@@ -410,9 +374,7 @@ const MainAdmin = () => {
                     </button>
                   ) : (
                     <button
-                      onClick={() =>
-                        handleSubscriptionAction(u._id, "deactivate")
-                      }
+                      onClick={() => handleSubscriptionAction(u._id, "deactivate")}
                       className="text-white bg-red-600 hover:bg-red-700 px-3 py-1 rounded-full text-xs"
                     >
                       Deactivate
@@ -432,7 +394,6 @@ const MainAdmin = () => {
       </div>
     </div>
   );
-
 
   const renderDepartments = () => (
     <div className="bg-white p-6 rounded-xl shadow-lg space-y-6">
@@ -455,7 +416,6 @@ const MainAdmin = () => {
               </div>
             </div>
 
-            {/* Wards Section */}
             <div className="space-y-3 pl-4 border-l-2 border-gray-200">
               {d.wards.map((ward) => (
                 <div key={ward._id} className="p-3 bg-white rounded-md shadow-inner">
@@ -472,7 +432,6 @@ const MainAdmin = () => {
                     </div>
                   </div>
 
-                  {/* Beds Section */}
                   <div className="flex flex-wrap gap-2 pt-2 border-t mt-2">
                     {ward.beds.map((bed) => (
                       <span
@@ -538,31 +497,31 @@ const MainAdmin = () => {
     const [isAdding, setIsAdding] = useState(false);
 
     const handleSubmit = (e) => {
-        e.preventDefault();
-        handleAddWard(deptId, name).then(() => {
-            setName('');
-            setIsAdding(false);
-            onAdd();
-        });
+      e.preventDefault();
+      handleAddWard(deptId, name).then(() => {
+        setName('');
+        setIsAdding(false);
+        onAdd();
+      });
     };
 
     return isAdding ? (
-        <form onSubmit={handleSubmit} className="inline-flex space-x-2">
-            <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Ward Name"
-                className="p-1 border rounded text-sm w-32"
-                required
-            />
-            <button type="submit" className="px-2 py-1 bg-green-500 text-white rounded text-xs">Add</button>
-            <button type="button" onClick={() => setIsAdding(false)} className="px-2 py-1 bg-gray-500 text-white rounded text-xs">Cancel</button>
-        </form>
+      <form onSubmit={handleSubmit} className="inline-flex space-x-2">
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Ward Name"
+          className="p-1 border rounded text-sm w-32"
+          required
+        />
+        <button type="submit" className="px-2 py-1 bg-green-500 text-white rounded text-xs">Add</button>
+        <button type="button" onClick={() => setIsAdding(false)} className="px-2 py-1 bg-gray-500 text-white rounded text-xs">Cancel</button>
+      </form>
     ) : (
-        <button onClick={() => setIsAdding(true)} className="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600">
-            + Ward
-        </button>
+      <button onClick={() => setIsAdding(true)} className="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600">
+        + Ward
+      </button>
     );
   };
 
@@ -571,72 +530,71 @@ const MainAdmin = () => {
     const [isAdding, setIsAdding] = useState(false);
 
     const handleSubmit = (e) => {
-        e.preventDefault();
-        handleAddBed(deptId, wardId, id).then(() => {
-            setId('');
-            setIsAdding(false);
-            onAdd();
-        });
+      e.preventDefault();
+      handleAddBed(deptId, wardId, id).then(() => {
+        setId('');
+        setIsAdding(false);
+        onAdd();
+      });
     };
 
     return isAdding ? (
-        <form onSubmit={handleSubmit} className="inline-flex space-x-2">
-            <input
-                type="text"
-                value={id}
-                onChange={(e) => setId(e.target.value)}
-                placeholder="Bed ID (e.g., 101)"
-                className="p-1 border rounded text-xs w-24"
-                required
-            />
-            <button type="submit" className="px-2 py-1 bg-blue-500 text-white rounded text-xs">Add</button>
-            <button type="button" onClick={() => setIsAdding(false)} className="px-2 py-1 bg-gray-500 text-white rounded text-xs">Cancel</button>
-        </form>
+      <form onSubmit={handleSubmit} className="inline-flex space-x-2">
+        <input
+          type="text"
+          value={id}
+          onChange={(e) => setId(e.target.value)}
+          placeholder="Bed ID (e.g., 101)"
+          className="p-1 border rounded text-xs w-24"
+          required
+        />
+        <button type="submit" className="px-2 py-1 bg-blue-500 text-white rounded text-xs">Add</button>
+        <button type="button" onClick={() => setIsAdding(false)} className="px-2 py-1 bg-gray-500 text-white rounded text-xs">Cancel</button>
+      </form>
     ) : (
-        <button onClick={() => setIsAdding(true)} className="text-blue-500 hover:text-blue-700 text-xs">
-            + Bed
-        </button>
+      <button onClick={() => setIsAdding(true)} className="text-blue-500 hover:text-blue-700 text-xs">
+        + Bed
+      </button>
     );
   };
-
-  const {user} = useAuth();
   return (
-    user?.role === 'admin' &&
-    <div className="p-8 bg-gray-100 min-h-screen">
-      <h1 className="text-4xl font-extrabold text-gray-800 mb-8 border-b pb-3">BNS Admin Dashboard</h1>
+    user?.role === 'admin' && (
+      <div className="p-4 md:p-8 bg-gray-100 min-h-screen">
+        <h1 className="text-3xl md:text-4xl font-extrabold text-gray-800 mb-8 border-b pb-3">BNS Admin Dashboard</h1>
 
-      {/* Tabs / Navigation */}
-      <div className="flex flex-1 gap-2 mb-8 border-b border-gray-300">
-        {[
-          { key: "dashboard", label: "Dashboard" },
-          { key: "users", label: "User Management" },
-          { key: "departments", label: "Structure Management" },
-          { key: "support", label: "Support Replies" },
-        ].map((item) => (
-          <button
-            key={item.key}
-            onClick={() => setTab(item.key)}
-            className={`px-6 py-3 font-medium transition-colors duration-150 ${
-              tab === item.key
-                ? "border-b-4 border-blue-600 text-blue-600 bg-white shadow-sm"
-                : "text-gray-600 hover:text-blue-500"
-            }`}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
-
-      {loading && <div className="text-center text-lg py-10">Loading data...</div>}
-      {!loading && (
-        <div className="container mx-auto">
-          {tab === "dashboard" && renderDashboard()}
-          {tab === "users" && renderUsers()}
-          {tab === "departments" && renderDepartments()}
-          {tab === "support" && renderSupport()}
+        {/* Tabs / Navigation */}
+        <div className="flex flex-col md:flex-row gap-2 mb-8 border-b border-gray-300">
+          {[
+            { key: "dashboard", label: "Dashboard" },
+            { key: "users", label: "User Management" },
+            { key: "departments", label: "Structure Management" },
+            { key: "support", label: "Support Replies" },
+          ].map((item) => (
+            <button
+              key={item.key}
+              onClick={() => setTab(item.key)}
+              className={`cursor-pointer flex-1 px-6 py-3 font-medium transition-colors duration-150 ${
+                tab === item.key
+                  ? "border-b-4 border-blue-600 text-blue-600 bg-white shadow-sm"
+                  : "text-gray-600 hover:text-blue-500"
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
         </div>
-      )}
-    </div>
+
+        {loading && <div className="text-center text-lg py-10">Loading data...</div>}
+        {!loading && (
+          <div className="container mx-auto">
+            {tab === "dashboard" && renderDashboard()}
+            {tab === "users" && renderUsers()}
+            {tab === "departments" && renderDepartments()}
+            {tab === "support" && renderSupport()}
+          </div>
+        )}
+      </div>
+    )
   );
 };
 

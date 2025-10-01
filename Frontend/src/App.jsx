@@ -16,6 +16,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { BedProvider } from "./context/BedContext"; 
 import { AssignmentProvider } from "./context/AssignmentContext";
 import { AdminProvider } from "./context/AdminContext"; 
+import { SupervisorProvider } from "./context/SupervisorContext";
 import ResetPassword from "./pages/ResetPassword";
 import Assignments from "./pages/Assignments"; 
 import Profile from "./pages/Profile";           
@@ -33,6 +34,7 @@ function App() {
         <BedProvider>
           <AssignmentProvider>
             <AdminProvider>
+              <SupervisorProvider>
               <div className="min-h-screen bg-gray-50">
                 <Navbar />
                 <main className="min-h-screen text-center">
@@ -59,6 +61,7 @@ function App() {
                 <Footer />
                 <SupportWidget />
               </div>
+              </SupervisorProvider>
             </AdminProvider>
           </AssignmentProvider>
         </BedProvider>

@@ -154,7 +154,7 @@ const Dashboard = () => {
           {/* Admin Access Card */}
           {user.role === "supervisor" && (
             <Link
-              to="/admin"
+              to="/supervisor"
               className="dashboard-card group bg-white hover:bg-purple-100 border-l-4 border-purple-500 hover:border-purple-600 transition-all duration-300"
             >
               <div className="bg-purple-100 group-hover:bg-purple-200 p-4 rounded-full inline-block transition-colors duration-300">

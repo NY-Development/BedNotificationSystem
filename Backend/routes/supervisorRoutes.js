@@ -6,7 +6,7 @@ import {
   addDepartment,
   addWard,
   addBed,
-  
+  getAllDepartments,
 } from "../controllers/supervisorController.js";
 import { protect, supervisorOnly } from "../middleware/authMiddleware.js";
 
@@ -17,7 +17,8 @@ router.use(protect, supervisorOnly);
 
 
 // Create endpoints
-router.post("/departments", addDepartment);
+router.get("/departments", getAllDepartments);
+router.post("/add-departments", addDepartment);
 router.post("/departments/:deptId/wards", addWard);
 router.post("/departments/:deptId/wards/:wardId/beds", addBed);
 
