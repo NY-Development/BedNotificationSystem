@@ -106,6 +106,7 @@ const Beds = () => {
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
           onSearchClick={handleSearch}
+          placeholder={`Search by Ward Name`}
         />
 
         {currentDepartment && (

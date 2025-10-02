@@ -1,7 +1,7 @@
 import React from 'react';
 import { Search } from 'lucide-react';
 
-const SearchBar = ({ searchTerm, onSearchChange, onSearchClick }) => {
+const SearchBar = ({ searchTerm, onSearchChange, onSearchClick, placeholder }) => {
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       onSearchClick();
@@ -12,7 +12,7 @@ const SearchBar = ({ searchTerm, onSearchChange, onSearchClick }) => {
     <div className="flex items-center space-x-2 p-2 bg-white rounded-lg shadow-sm border border-gray-200">
       <input
         type="text"
-        placeholder="Search by ward name..."
+        placeholder={placeholder}
         value={searchTerm}
         onChange={(e) => onSearchChange(e.target.value)}
         onKeyDown={handleKeyDown}

@@ -16,6 +16,8 @@ import {
   updateUserData,
   getMessages,
   updateMessageReadStatus,
+  getAllAssignments,
+  getAllNotifications,
 } from "../services/adminService";
 import {
   PieChart,
@@ -33,6 +35,7 @@ import {
   ResponsiveContainer
 } from "recharts";
 import { useAuth } from "../context/AuthContext";
+import SearchBar from "../components/SearchBar";
 
 // --- Constants ---
 const USER_ROLES = ["c1", "c2", "intern", "supervisor", "admin"]; // Define all possible roles
@@ -97,6 +100,18 @@ const MainAdmin = () => {
   const [loading, setLoading] = useState(true);
   const {user} = useAuth();
 
+  const [assignments, setAssignments] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+
+  //Search Filtering States
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [filteredDepartments, setFilteredDepartments] = useState([]);
+  const [filteredAssignments, setFilteredAssignments] = useState([]);
+  const [filteredNotifications, setFilteredNotifications] = useState([]);
+
+
+
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
@@ -112,6 +127,12 @@ const MainAdmin = () => {
       } else if (tab === "support") {
         const msg = await getMessages();
         setMessages(msg);
+      } else if (tab === "assignments") {
+        const assignRes = await getAllAssignments();
+        setAssignments(assignRes);
+      } else if (tab === "notifications") {
+        const notifRes = await getAllNotifications();
+        setNotifications(notifRes);
       }
     } catch (error) {
       console.error(`Error loading ${tab} data:`, error);
@@ -224,6 +245,58 @@ const MainAdmin = () => {
     }
   };
 
+  const handleSearch = () => {
+    const term = searchTerm.toLowerCase();
+
+    if (tab === "users") {
+      setFilteredUsers(
+        users.filter(
+          (u) =>
+            u.name.toLowerCase().includes(term) ||
+            u.email.toLowerCase().includes(term)
+        )
+      );
+    }
+
+    if (tab === "departments") {
+      setFilteredDepartments(
+        departments.map((d) => ({
+          ...d,
+          wards: d.wards.map((w) => ({
+            ...w,
+            beds: w.beds.filter(
+              (b) =>
+                b.assignedUser?.name?.toLowerCase().includes(term) ||
+                b.assignedUser?.email?.toLowerCase().includes(term)
+            ),
+          })),
+        }))
+      );
+    }
+
+    if (tab === "assignments") {
+      setFilteredAssignments(
+        assignments.filter(
+          (a) =>
+            a.user?.name.toLowerCase().includes(term) ||
+            a.user?.email.toLowerCase().includes(term)
+        )
+      );
+    }
+
+    if (tab === "notifications") {
+      setFilteredNotifications(
+        notifications.filter(
+          (n) =>
+            n.user?.name.toLowerCase().includes(term) ||
+            n.user?.email.toLowerCase().includes(term) ||
+            n.from?.name?.toLowerCase().includes(term) ||
+            n.from?.email?.toLowerCase().includes(term)
+        )
+      );
+    }
+  };
+
   const renderDashboard = () => {
     if (!stats) return <p className="text-center text-gray-500">Loading statistics...</p>;
 
@@ -327,7 +400,7 @@ const MainAdmin = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {users.map((u) => (
+            {(searchTerm ? filteredUsers : users).map((u) => (
               <tr key={u._id} className="hover:bg-gray-50 transition-colors">
                 <td className="flex px-4 sm:px-6 py-4 whitespace-nowrap font-medium text-gray-800 justify-center items-center">
                   <img 
@@ -407,7 +480,7 @@ const MainAdmin = () => {
       <AddDepartmentForm onSuccess={loadData} />
 
       <div className="space-y-4">
-        {departments.map((d) => (
+        {(searchTerm ? filteredDepartments : departments).map((d) => (
           <div key={d._id} className="border p-4 rounded-lg shadow-sm bg-gray-50">
             <div className="flex justify-between items-center mb-3">
               <h3 className="text-lg font-bold">{d.name}</h3>
@@ -458,6 +531,64 @@ const MainAdmin = () => {
           </div>
         ))}
       </div>
+    </div>
+  );
+
+  const renderAssignments = () => (
+    <div className="bg-white p-6 rounded-xl shadow-lg">
+      <h2 className="text-xl font-semibold mb-4">All Assignments</h2>
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200 text-sm sm:text-base">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase">User</th>
+              <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase">Email</th>
+              <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase">Role</th>
+              <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase">Department</th>
+              <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase">Ward</th>
+              <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase">Bed</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {(searchTerm ? filteredAssignments : assignments).map((a) => (
+              <tr key={a._id}>
+                <td className="px-6 py-4">{a.user?.name}</td>
+                <td className="px-6 py-4">{a.user?.email}</td>
+                <td className="px-6 py-4">{a.user?.role}</td>
+                <td className="px-6 py-4">{a.department?.name}</td>
+                <td className="px-6 py-4">{a.ward || "N/A"}</td>
+                <td className="px-6 py-4">{a.bed || "N/A"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const renderNotifications = () => (
+    <div className="bg-white p-6 rounded-xl shadow-lg">
+      <h2 className="text-xl font-semibold mb-4">System Notifications</h2>
+      <ul className="space-y-4">
+        {(searchTerm ? filteredNotifications : notifications).map((n) => (
+          <li key={n._id} className="p-4 border rounded-lg shadow-sm bg-gray-50">
+            <div className="flex justify-between">
+              <span className="font-semibold text-blue-600">
+                {n.user?.name} ({n.user?.role})
+              </span>
+              <span className="text-xs text-gray-500">
+                {new Date(n.createdAt).toLocaleString()}
+              </span>
+            </div>
+            <p className="mt-2">{n.message}</p>
+            {n.from && (
+              <p className="text-sm text-gray-500 mt-1">
+                From: {n.from.name} ({n.from.role})
+              </p>
+            )}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 
@@ -613,6 +744,8 @@ const MainAdmin = () => {
             { key: "dashboard", label: "Dashboard" },
             { key: "users", label: "User Management" },
             { key: "departments", label: "Structure Management" },
+            { key: "assignments", label: "Assignments" },
+            { key: "notifications", label: "Notifications" },
             { key: "support", label: "Support Replies" },
           ].map((item) => (
             <button
@@ -628,6 +761,17 @@ const MainAdmin = () => {
             </button>
           ))}
         </div>
+        {tab !== "dashboard" && (
+          <div className="mb-4">
+            <SearchBar
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              onSearchClick={handleSearch}
+              placeholder={`Enter user's name or email`}
+            />
+          </div>
+        )}
+
 
         {loading && <div className="text-center text-lg py-10">Loading data...</div>}
         {!loading && (
@@ -635,6 +779,8 @@ const MainAdmin = () => {
             {tab === "dashboard" && renderDashboard()}
             {tab === "users" && renderUsers()}
             {tab === "departments" && renderDepartments()}
+            {tab === "assignments" && renderAssignments()}
+            {tab === "notifications" && renderNotifications()}
             {tab === "support" && renderSupport()}
           </div>
         )}
