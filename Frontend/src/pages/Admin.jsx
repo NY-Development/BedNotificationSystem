@@ -95,7 +95,7 @@ const Admin = () => {
                 <h3 className="text-xl font-semibold text-gray-800">
                   {dept.name}
                 </h3>
-                <div className="flex space-x-2">
+                <div className="flex md:flex-row flex-col space-x-2">
                   <button
                     onClick={() => {
                       if (selectedDept?._id === dept._id) {

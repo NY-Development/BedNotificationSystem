@@ -6,7 +6,7 @@ import { useBed } from "../context/BedContext";
 import { useAuth } from "../context/AuthContext";
 import { useAssignment } from "../context/AssignmentContext"; 
 
-const Assignments = ({ closeModal, updateAssign = false, forceType }) => {
+const Assignments = ({ closeModal, updateAssign = false }) => {
   const { loadDepartments } = useBed();
   const { user } = useAuth();
   const { userAssign, getUserAssignment } = useAssignment();
@@ -22,8 +22,6 @@ const Assignments = ({ closeModal, updateAssign = false, forceType }) => {
   });
   const [loading, setLoading] = useState(false);
 
-  const isDeptLocked = forceType === "ward"; // ✅ lock dept if only ward expired
-
   // Fetch user assignments on mount
   useEffect(() => {
     const fetchAssignments = async () => {
@@ -38,17 +36,6 @@ const Assignments = ({ closeModal, updateAssign = false, forceType }) => {
     };
     fetchAssignments();
   }, [user]);
-
-  // Prefill department when ward expiry only
-  useEffect(() => {
-    if (isDeptLocked && userAssign?.deptId) {
-      setForm((prev) => ({
-        ...prev,
-        deptId: userAssign.deptId._id || userAssign.deptId,
-        deptExpiry: userAssign.deptExpiry?.split("T")[0] || "",
-      }));
-    }
-  }, [isDeptLocked, userAssign]);
 
   useEffect(() => {
     if (updateAssign) {
@@ -120,10 +107,8 @@ const Assignments = ({ closeModal, updateAssign = false, forceType }) => {
 
   // Form validation
   const isFormValid =
-    (forceType === "department"
-      ? form.deptId && form.deptExpiry
-      : true
-    ) &&
+    form.deptId &&
+    form.deptExpiry &&
     form.wardName &&
     form.wardExpiry &&
     form.beds.length > 0;
@@ -139,31 +124,24 @@ const Assignments = ({ closeModal, updateAssign = false, forceType }) => {
         {/* Department Selection */}
         <div>
           <label className="block font-semibold">Select Department:</label>
-          {isDeptLocked && userAssign?.deptId ? (
-            <p className="p-2 bg-gray-100 border rounded text-gray-700">
-              {userAssign.deptId.name || "Department Locked"}
-            </p>
-          ) : (
-            departments.map((dept) => (
-              <label key={dept._id} className="block">
-                <input
-                  type="radio"
-                  name="department"
-                  value={dept._id}
-                  checked={form.deptId === dept._id}
-                  onChange={handleDeptChange}
-                  required={!isDeptLocked}
-                  disabled={isDeptLocked}
-                  className="border-1 border-indigo-500"
-                />{" "}
-                {dept.name}
-              </label>
-            ))
-          )}
+          {departments.map((dept) => (
+            <label key={dept._id} className="block">
+              <input
+                type="radio"
+                name="department"
+                value={dept._id}
+                checked={form.deptId === dept._id}
+                onChange={handleDeptChange}
+                required
+                className="border-1 border-indigo-500"
+              />{" "}
+              {dept.name}
+            </label>
+          ))}
         </div>
 
-        {/* Department expiry (hidden if ward-only expiry) */}
-        {forceType === "department" && (
+        {/* Department expiry */}
+        {form.deptId && (
           <div>
             <label className="block font-semibold">Department Expiry:</label>
             <input
@@ -171,7 +149,7 @@ const Assignments = ({ closeModal, updateAssign = false, forceType }) => {
               className="border p-2 w-full rounded-md"
               value={form.deptExpiry}
               onChange={(e) => setForm({ ...form, deptExpiry: e.target.value })}
-              required={forceType === "department"}
+              required
             />
           </div>
         )}
