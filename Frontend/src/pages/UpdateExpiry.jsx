@@ -4,6 +4,7 @@ import { updateExpiryDates } from "../services/assignment";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-hot-toast";
 import { FaCalendarAlt, FaExclamationTriangle, FaCheckCircle, FaSpinner, FaClock } from 'react-icons/fa';
+import GoBack from "../components/GoBack";
 
 const UpdateExpiry = () => {
   const { user } = useAuth();
@@ -103,7 +104,7 @@ const UpdateExpiry = () => {
 
     return (
       <div className={`p-8 rounded-2xl shadow-2xl min-h-screen ${mainBgClass}`}>
-        
+        <GoBack />
         <div className="flex items-center space-x-3 mb-4">
           <span className="text-3xl">{mainEmoji}</span>
           <h2 className={`text-3xl font-bold ${mainTitleColor}`}>
