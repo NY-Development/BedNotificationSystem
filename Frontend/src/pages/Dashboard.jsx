@@ -188,11 +188,6 @@ const Dashboard = () => {
         <Assignments
           updateAssign={updateAssign}
           closeModal={() => setOpen(false)}
-          forceType={
-            deptExpiry && today >= deptExpiry ? "department" :
-            wardExpiry && today >= wardExpiry ? "ward" :
-            null
-          }
         />
       </Modal>
     </div>
