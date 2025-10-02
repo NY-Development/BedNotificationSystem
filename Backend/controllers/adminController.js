@@ -365,3 +365,49 @@ export const deactivateSubscription = async (req, res) => {
     res.status(500).json({ message: "Error deactivating subscription", error: err.message });
   }
 };
+
+//  Admin approves role change
+export const updateUserRole = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { newRole } = req.body;
+
+    if (!newRole || !["admin", "supervisor", "c1", "c2", "intern"].includes(newRole)) {
+      return res.status(400).json({ message: "Invalid role" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const oldRole = user.role;
+
+    // Update role
+    user.role = newRole;
+
+    // Clear related data if role changed
+    if (oldRole !== newRole) {
+      // Example: clear subscription, resetOtp, firstLoginDone etc.
+      user.subscription = {
+        plan: "monthly",
+        isActive: false,
+        startDate: null,
+        endDate: null,
+        amountPaid: 0,
+        paidAt: null,
+        paymentScreenshot: "",
+      };
+      user.firstLoginDone = false;
+      user.resetOtp = "";
+      user.resetOtpExpireAt = 0;
+    }
+
+    // Remove request
+    user.roleChangeRequest = undefined;
+
+    await user.save();
+
+    res.status(200).json({ message: `User role updated to ${newRole}`, user });
+  } catch (err) {
+    res.status(500).json({ message: "Error updating role", error: err.message });
+  }
+};

@@ -18,6 +18,7 @@ import {
   getAllSubscriptions,
   activateSubscription,
   deactivateSubscription,
+  updateUserRole,
 } from "../controllers/adminController.js";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
 
@@ -40,6 +41,7 @@ router.post("/update", updateData);
 router.get("/subscriptions",  getAllSubscriptions);
 router.put("/:userId/activate", activateSubscription);
 router.put("/:userId/deactivate", deactivateSubscription);
+router.put("/update-role/:userId",  updateUserRole);
 
 // Create endpoints
 router.post("/departments", addDepartment);
