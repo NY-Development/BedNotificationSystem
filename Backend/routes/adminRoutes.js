@@ -19,6 +19,7 @@ import {
   activateSubscription,
   deactivateSubscription,
   updateUserRole,
+  getRoleChangeRequests,
 } from "../controllers/adminController.js";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
 
@@ -34,6 +35,7 @@ router.delete("/users/:id", deleteUser);
 router.get("/notifications",getAllNotifications );
 router.get("/assignments", getAllAssignments);
 router.get("/departments", getAllDepartments);
+router.get("/role-change-requests", getRoleChangeRequests);
 
 router.get("/stats", getStats);
 router.post("/update", updateData);

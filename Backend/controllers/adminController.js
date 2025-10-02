@@ -411,3 +411,21 @@ export const updateUserRole = async (req, res) => {
     res.status(500).json({ message: "Error updating role", error: err.message });
   }
 };
+
+// Admin: Get all role change requests
+export const getRoleChangeRequests = async (req, res) => {
+  try {
+    const requests = await User.find(
+      { roleChangeRequest: { $exists: true, $ne: null } },
+      "name email role roleChangeRequest"
+    ).lean();
+
+    if (!requests || requests.length === 0) {
+      return res.status(200).json({ message: "No pending role change requests", requests: [] });
+    }
+
+    res.status(200).json({ requests });
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching role change requests", error: err.message });
+  }
+};
