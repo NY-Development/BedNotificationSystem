@@ -75,7 +75,7 @@ const SupportWidget = () => {
               target="_blank" 
               rel="noopener noreferrer"
             >
-              {`Support`} <MessageCircleMore className="inline text-center ml-1 h-auto"/>
+              {`NYDev`} <MessageCircleMore className="inline text-center ml-1 h-auto"/>
             </a>
           </div>
 
