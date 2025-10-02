@@ -25,6 +25,7 @@ import MyAssignments from "./pages/MyAssignments";
 import SelectSchool from "./pages/SelectSchool";
 import SupportWidget from "./components/SupportWidget";
 import MainAdmin from "./pages/MainAdmin";
+import UpdateExpiry from "./pages/UpdateExpiry";
 
 function App() {
   return (
@@ -55,6 +56,7 @@ function App() {
                     <Route path="/payment/success" element={<Payments />} />
                     <Route path="/schools" element={<SelectSchool />} />
                     <Route path="/admin" element={<MainAdmin />} />
+                    <Route path="/update-expiry" element={<UpdateExpiry />} />
                     <Route path="*" element={<Home />} /> {/* fallback */}
                   </Routes>
                 </main>

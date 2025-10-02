@@ -41,7 +41,7 @@ export const registerUser = async (req, res) => {
       return res.status(201).json({
         email: user.email,
         role: user.role,
-        message: "Admin account created successfully (no verification required).",
+        message: "Supervisor account created successfully (no verification required).",
       });
     }
 

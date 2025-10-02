@@ -49,6 +49,14 @@ const Navbar = () => {
                   <img src={user?.image} alt="Profile" className="inline w-10 h-10 object-cover rounded-full" /> <p>{user.name}</p>
                 </button>
               </div>
+              { user?.role !== 'intern' &&
+              <Link
+                to="/update-expiry"
+                className="block px-4 py-2 hover:bg-gray-700 transition duration-200"
+              >
+                Update Date
+              </Link>
+              }
               {user.role === "admin" && (
                 <Link to="/admin" className="hover:text-blue-400">Users</Link>
               )}
@@ -84,6 +92,14 @@ const Navbar = () => {
                   <img src={user?.image} alt="Profile" className="inline w-10 h-10 object-cover rounded-full" /> <p>{user.name}</p>
                 </button>
               </div>
+              { user?.role !== 'intern' &&
+              <Link
+                to="/update-expiry"
+                className="block px-4 py-2 hover:bg-gray-700 transition duration-200"
+              >
+                Update Date
+              </Link>
+              }
               <Link to="/dashboard" onClick={toggleMenu} className="block px-4 py-2 hover:bg-gray-700 transition duration-200">Dashboard</Link>
               <Link to="/beds" onClick={toggleMenu} className="block px-4 py-2 hover:bg-gray-700 transition duration-200">Beds</Link>
               <button onClick={handleLogout} className="cp w-full text-left flex px-4 py-2 hover:bg-red-700 text-red-400 transition duration-200">

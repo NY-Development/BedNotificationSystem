@@ -186,3 +186,14 @@ export const sendRefinedMessage = async ({ recipient, subject, message }) => {
     throw error;
   }
 };
+
+// -----getMessages-------
+export const getMessages = async () => {
+  try {
+    const response = await API.get('/support/messages');
+    return response.data;
+  } catch (error) {
+    console.error('Error retrieving messages:', error);
+    throw error;
+  }
+};

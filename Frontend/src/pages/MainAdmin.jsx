@@ -14,6 +14,7 @@ import {
   addBed,
   deleteBed,
   updateUserData,
+  getMessages,
 } from "../services/adminService";
 import {
   PieChart,
@@ -90,6 +91,7 @@ const MainAdmin = () => {
   const [recipient, setRecipient] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState([]);
   const [supportStatus, setSupportStatus] = useState("");
   const [loading, setLoading] = useState(true);
   const {user} = useAuth();
@@ -106,6 +108,9 @@ const MainAdmin = () => {
       } else if (tab === "departments") {
         const deptRes = await getAllDepartments();
         setDepartments(deptRes);
+      } else if (tab === "support") {
+        const msg = await getMessages();
+        setMessages(msg);
       }
     } catch (error) {
       console.error(`Error loading ${tab} data:`, error);
@@ -456,38 +461,52 @@ const MainAdmin = () => {
   );
 
   const renderSupport = () => (
-    <div className="bg-white p-6 rounded-xl shadow-lg max-w-2xl mx-auto">
-      <h2 className="text-xl font-semibold mb-4">Reply to Support Messages (Refined Message)</h2>
-      <form onSubmit={handleSendSupport} className="space-y-4">
-        <input
-          type="email"
-          value={recipient}
-          onChange={(e) => setRecipient(e.target.value)}
-          placeholder="Recipient Email"
-          className="w-full p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
-          required
-        />
-        <input
-          type="text"
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-          placeholder="Subject"
-          className="w-full p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
-          required
-        />
-        <textarea
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Your Message"
-          className="w-full p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
-          rows="6"
-          required
-        />
-        <button type="submit" className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition duration-150">
-          Send Reply
-        </button>
-      </form>
-      {supportStatus && <p className={`mt-4 text-center text-sm ${supportStatus.includes('successfully') ? 'text-green-600' : 'text-red-600'}`}>{supportStatus}</p>}
+    <div className="bg-gray-100 min-h-screen p-6">
+      <div className="bg-white p-6 rounded-xl shadow-lg max-w-2xl mx-auto mb-6">
+        <h2 className="text-xl text-black font-semibold mb-4">Support Requests</h2>
+        <ul className="space-y-4">
+          {messages.map((msg) => (
+            <li key={msg._id} className="p-4 border rounded-lg">
+              <strong>{msg.subject}</strong>: {msg.message} <br />
+              <em>From: {msg.from}</em>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="bg-white p-6 rounded-xl shadow-lg max-w-2xl mx-auto">
+        <h2 className="text-xl font-semibold mb-4">Reply to Support Messages (Refined Message)</h2>
+        <form onSubmit={handleSendSupport} className="space-y-4">
+          <input
+            type="email"
+            value={recipient}
+            onChange={(e) => setRecipient(e.target.value)}
+            placeholder="Recipient Email"
+            className="w-full p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
+            required
+          />
+          <input
+            type="text"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            placeholder="Subject"
+            className="w-full p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
+            required
+          />
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Your Message"
+            className="w-full p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
+            rows="6"
+            required
+          />
+          <button type="submit" className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition duration-150">
+            Send Reply
+          </button>
+        </form>
+        {supportStatus && <p className={`mt-4 text-center text-sm ${supportStatus.includes('successfully') ? 'text-green-600' : 'text-red-600'}`}>{supportStatus}</p>}
+      </div>
     </div>
   );
 
