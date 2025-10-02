@@ -18,8 +18,7 @@ import { AssignmentProvider } from "./context/AssignmentContext";
 import { AdminProvider } from "./context/AdminContext"; 
 import { SupervisorProvider } from "./context/SupervisorContext";
 import ResetPassword from "./pages/ResetPassword";
-import Assignments from "./pages/Assignments"; 
-import Profile from "./pages/Profile";           
+import Assignments from "./pages/Assignments";           
 import Payments from "./pages/Payments";
 import MyAssignments from "./pages/MyAssignments";
 import SelectSchool from "./pages/SelectSchool";
@@ -50,7 +49,6 @@ function App() {
                     <Route path="/notifications" element={<Notifications />} />
                     <Route path="/assignments" element={<Assignments />} /> 
                     <Route path="/myassignments" element={<MyAssignments />} />
-                    <Route path="/profile" element={<Profile />} />
                     <Route path="/supervisor" element={<Admin />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
                     <Route path="/reset-password" element={<ResetPassword />} />

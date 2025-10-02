@@ -91,3 +91,12 @@ export const resetPassword = async (email, otp, newPassword) => {
     throw error.response.data.message;
   }
 };
+
+export const requestRoleChange = async (requestedRole) => {
+  try {
+    const response = await API.post("/auth/request-role-change", { requestedRole });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.message || "Error sending role change request.";
+  }
+};
