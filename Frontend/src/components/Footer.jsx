@@ -24,7 +24,7 @@ const Footer = () => {
 
           {/* Social Media Links */}
           <div className="flex items-center space-x-6">
-            <span className="text-gray-500 hidden sm:inline">Connect with the NYDev:</span>
+            <span className="text-gray-500 sm:inline">Connect with the NYDev:</span>
             
             <a
               href="https://www.youtube.com/@NYDev-t6p"
