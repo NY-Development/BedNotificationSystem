@@ -28,11 +28,6 @@ export const getUserById = async (req, res) => {
   }
 };
 
-import User from "../models/User.js";
-import Notification from "../models/Notification.js";
-import Assignment from "../models/Assignment.js";
-import Department from "../models/Department.js";
-
 // Delete user and associated data (or cleanup if user doesn't exist)
 export const deleteUser = async (req, res) => {
   try {

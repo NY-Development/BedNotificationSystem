@@ -1,6 +1,6 @@
 import express from "express";
 import { initiatePayment, paymentCallback, uploadPaymentScreenshot, verifyPayment } from "../controllers/paymentController.js";
-import upload from "../configs/multer.js";
+import upload from "../middleware/upload.js";
 
 const router = express.Router();
 
