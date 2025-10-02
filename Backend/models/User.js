@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema(
       isActive: { type: Boolean, default: false },
       startDate: { type: Date },
       endDate: { type: Date },
-      amountPaid: { type: Number }, // amount paid in ETB     // transaction reference from Chapa
+      amountPaid: { type: Number }, // amount paid in ETB   
       paidAt: { type: Date },       // payment timestamp
       paymentScreenshot: {
         type: String,   // will hold URL (ImageKit / Cloudinary / S3)
