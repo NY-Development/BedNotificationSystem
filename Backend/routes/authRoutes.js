@@ -1,5 +1,5 @@
 import express from "express";
-import { registerUser, loginUser, getProfile, verifyUserOtp, resendOtp, forgotPassword, resetPassword, uploadProfileImage } from "../controllers/authController.js";
+import { registerUser, loginUser, getProfile, verifyUserOtp, resendOtp, forgotPassword, resetPassword, uploadProfileImage, requestRoleChange } from "../controllers/authController.js";
 import { protect, authorizeRoles } from "../middleware/authMiddleware.js";
 import upload from "../middleware/upload.js";
 
@@ -13,6 +13,8 @@ router.get("/profile", protect, getProfile);
 router.post("/resend-otp", resendOtp);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
+
+router.post("/request-role-change", protect, requestRoleChange);
 
 router.post("/upload-image", protect, upload.single("image"), uploadProfileImage);
 

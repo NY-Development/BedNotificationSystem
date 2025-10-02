@@ -266,3 +266,29 @@ export const getProfile = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+//  User requests role change
+export const requestRoleChange = async (req, res) => {
+  try {
+    const { requestedRole } = req.body;
+
+    if (!requestedRole || !["admin", "supervisor", "c1", "c2", "intern"].includes(requestedRole)) {
+      return res.status(400).json({ message: "Invalid role requested" });
+    }
+
+    const user = await User.findById(req.user._id); // assume req.user is set by auth middleware
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Save request in DB (could be another collection, but here we’ll store in user doc)
+    user.roleChangeRequest = {
+      role: requestedRole,
+      requestedAt: new Date(),
+    };
+
+    await user.save();
+
+    res.status(200).json({ message: "Role change request sent to admin", request: user.roleChangeRequest });
+  } catch (err) {
+    res.status(500).json({ message: "Error requesting role change", error: err.message });
+  }
+};
