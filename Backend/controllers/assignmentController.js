@@ -158,6 +158,41 @@ export const getMyAssignments = async (req, res) => {
   }
 };
 
+// New: update only expiry dates
+export const updateExpiryDates = async (req, res) => {
+  try {
+    const { id } = req.params; // assignment ID
+    const { deptExpiry, wardExpiry } = req.body;
+
+    const assignment = await Assignment.findById(id);
+    if (!assignment) {
+      return res.status(404).json({ message: "Assignment not found" });
+    }
+
+    // authorization: user must be owner or admin
+    if (
+      assignment.user.toString() !== req.user._id.toString() &&
+      req.user.role !== "admin"
+    ) {
+      return res.status(403).json({ message: "Not authorized to update expiry" });
+    }
+
+    if (deptExpiry) assignment.deptExpiry = new Date(deptExpiry);
+    if (wardExpiry) assignment.wardExpiry = new Date(wardExpiry);
+
+    await assignment.save();
+
+    return res.json({
+      message: "Expiry dates updated successfully",
+      assignment,
+    });
+  } catch (err) {
+    console.error("updateExpiryDates error:", err);
+    return res.status(500).json({ message: err.message || "Server error" });
+  }
+};
+
+
 // Update an assignment (admin or owner)
 export const updateAssignment = async (req, res) => {
   try {

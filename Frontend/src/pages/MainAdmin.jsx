@@ -15,6 +15,7 @@ import {
   deleteBed,
   updateUserData,
   getMessages,
+  updateMessageReadStatus,
 } from "../services/adminService";
 import {
   PieChart,
@@ -387,7 +388,7 @@ const MainAdmin = () => {
                   )}
                   <button
                     onClick={() => handleDeleteUser(u._id)}
-                    className="text-white bg-gray-600 hover:bg-gray-700 px-3 py-1 rounded-full text-xs"
+                    className="cp text-red-500 border-2 border-red-500 bg-white hover:bg-red-500 hover:text-white px-3 py-1 rounded-full text-xs"
                   >
                     Delete
                   </button>
@@ -461,73 +462,78 @@ const MainAdmin = () => {
   );
 
   const renderSupport = () => {
-  const handleMarkAsRead = (msgId) => {
-    // Update the message's read status (you would typically update this on the server)
-    const updatedMessages = messages.map((msg) =>
-      msg._id === msgId ? { ...msg, read: true } : msg
-    );
-    setMessages(updatedMessages); // Assuming you have a setMessages function to update the state
-  };
+    const handleMarkAsRead = async (msgId) => {
+      try {
+        await updateMessageReadStatus(msgId);
+        setMessages((prevMessages) =>
+          prevMessages.map((msg) =>
+            msg._id === msgId ? { ...msg, read: true } : msg
+          )
+        );
+      } catch (error) {
+        console.error('Failed to mark message as read:', error);
+      }
+    }
 
-  return (
-    <div className="bg-gray-100 min-h-screen p-6">
-      <div className="bg-white p-6 rounded-xl shadow-lg max-w-2xl mx-auto">
-        <h2 className="text-xl font-semibold mb-4">Reply to Support Messages (Refined Message)</h2>
-        <form onSubmit={handleSendSupport} className="space-y-4">
-          <input
-            type="email"
-            value={recipient}
-            onChange={(e) => setRecipient(e.target.value)}
-            placeholder="Recipient Email"
-            className="w-full p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
-            required
-          />
-          <input
-            type="text"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-            placeholder="Subject"
-            className="w-full p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
-            required
-          />
-          <textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Your Message"
-            className="w-full p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
-            rows="6"
-            required
-          />
-          <button type="submit" className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition duration-150">
-            Send Reply
-          </button>
-        </form>
-        {supportStatus && <p className={`mt-4 text-center text-sm ${supportStatus.includes('successfully') ? 'text-green-600' : 'text-red-600'}`}>{supportStatus}</p>}
-      </div>
+      return (
+        <div className="bg-gray-100 min-h-screen p-6">
+          <div className="bg-white p-6 rounded-xl shadow-lg max-w-2xl mx-auto">
+            <h2 className="text-xl font-semibold mb-4">Reply to Support Messages (Refined Message)</h2>
+            <form onSubmit={handleSendSupport} className="space-y-4">
+              <input
+                type="email"
+                value={recipient}
+                onChange={(e) => setRecipient(e.target.value)}
+                placeholder="Recipient Email"
+                className="w-full p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                required
+              />
+              <input
+                type="text"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                placeholder="Subject"
+                className="w-full p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                required
+              />
+              <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Your Message"
+                className="w-full p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                rows="6"
+                required
+              />
+              <button type="submit" className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition duration-150">
+                Send Reply
+              </button>
+            </form>
+            {supportStatus && <p className={`mt-4 text-center text-sm ${supportStatus.includes('successfully') ? 'text-green-600' : 'text-red-600'}`}>{supportStatus}</p>}
+          </div>
 
-      <div className="bg-white p-6 rounded-xl shadow-lg max-w-2xl mx-auto mt-6">
-        <h2 className="text-xl text-black font-semibold mb-4">Support Requests</h2>
-        <ul className="space-y-4">
-          {messages.map((msg) => (
-            <li key={msg._id} className={`p-4 border rounded-lg ${msg.read ? 'bg-gray-200' : ''} ${msg.read ? 'cursor-not-allowed' : ''}`}>
-              <div className='font-extrabold text-blue-500'>{msg.from === "yamlaknegash96@gmail.com" ? "Sent" : "Incoming"}</div>
-              <strong>{msg.subject}</strong>: {msg.message} <br />
-              <em>From: {msg.from}</em> <br />
-              <em>To: {msg.to}</em> <br />
-              {!msg.read && (
-                <button 
-                  onClick={() => handleMarkAsRead(msg._id)} 
-                  className="cp mt-2 text-blue-600 hover:underline"
-                >
-                  Mark as Read
-                </button>
-              )}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
+          <div className="bg-white p-6 rounded-xl shadow-lg max-w-2xl mx-auto mt-6">
+            <h2 className="text-xl text-black font-semibold mb-4">Support Requests</h2>
+            <ul className="space-y-4">
+              {messages.map((msg) => (
+                <li key={msg._id} className={`p-4 border rounded-lg ${msg.read ? 'bg-gray-200' : ''} ${msg.read ? 'cursor-not-allowed' : ''}`}>
+                  <div className='font-extrabold text-blue-500'>{msg.from === "yamlaknegash96@gmail.com" ? "Sent" : "Incoming"}</div>
+                  <strong>{msg.subject}</strong>: {msg.message} <br />
+                  <em>From: {msg.from}</em> <br />
+                  <em>To: {msg.to}</em> <br />
+                  {!msg.read && (
+                    <button 
+                      onClick={() => handleMarkAsRead(msg._id)} 
+                      className="cp mt-2 text-blue-600 hover:underline"
+                    >
+                      Mark as Read
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      );
 };
 
   // --- Inline Forms for Subcomponents ---

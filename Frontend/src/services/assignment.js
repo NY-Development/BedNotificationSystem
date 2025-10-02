@@ -18,6 +18,11 @@ export const updateAssignment = async (id, data) => {
   return res.data;
 };
 
+export const updateExpiryDates = async (id, payload) => {
+  const { data } = await API.patch(`/assignments/${id}/expiry`, payload);
+  return data;
+};
+
 // NEW: Dedicated PATCH endpoint for adding beds
 export const addBedsToAssignment = async (assignmentId, bedIds) => {
   // bedIds should be an array of bed IDs (e.g., ['b1', 'b2'])

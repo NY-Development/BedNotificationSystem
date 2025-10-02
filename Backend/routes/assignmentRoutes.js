@@ -5,7 +5,8 @@ import {
 getAssignmentExpiryForUser,
 getMyAssignments,
 removeBedsFromAssignment,
-updateAssignment
+updateAssignment,
+updateExpiryDates,
 } from "../controllers/assignmentController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
@@ -17,6 +18,7 @@ router.get("/user/:userId/expiry", protect, getAssignmentExpiryForUser);
 router.get("/my", protect, getMyAssignments);
 router.put("/:id", protect, updateAssignment);
 
+router.patch("/:id/expiry", protect, updateExpiryDates);
 
 // new bed management routes
 router.patch("/:id/add-beds", protect, addBedsToAssignment);

@@ -70,7 +70,7 @@ const SupportWidget = () => {
           <div className="text-gray-600 mb-2">
             {`For quicker support, you can DM us on Telegram: `} 
             <a 
-              href="https://t.me/Bns_support1" 
+              href="https://t.me/NYDev_Chat" 
               className="text-blue-500 underline font-bold italic " 
               target="_blank" 
               rel="noopener noreferrer"

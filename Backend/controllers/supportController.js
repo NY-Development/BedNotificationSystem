@@ -78,3 +78,27 @@ export const getMessages = async (req, res) => {
     return res.status(500).json({ message: "Failed to retrieve messages." });
   }
 };
+
+export const updateMessageReadStatus = async (req, res) => {
+  const { id } = req.params; // Get the message ID from the request parameters
+
+  try {
+    // Find the message by ID and update the read status
+    const updatedMessage = await Message.findByIdAndUpdate(
+      id,
+      { read: true }, // Set the read status to true
+      { new: true } // Return the updated document
+    );
+
+    // Check if the message was found and updated
+    if (!updatedMessage) {
+      return res.status(404).json({ message: 'Message not found' });
+    }
+
+    // Return the updated message
+    res.status(200).json(updatedMessage);
+  } catch (error) {
+    console.error('Error updating message read status:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};

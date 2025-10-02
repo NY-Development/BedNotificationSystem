@@ -197,3 +197,13 @@ export const getMessages = async () => {
     throw error;
   }
 };
+
+export const updateMessageReadStatus = async (msgId) => {
+  try {
+    const response = await API.patch(`/support/messages/${msgId}/read`, { read: true });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating message read status:', error);
+    throw error;
+  }
+};

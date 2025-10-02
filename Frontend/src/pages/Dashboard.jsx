@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useAuth } from "../context/AuthContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Modal from "../components/Modal";
 import Assignments from "./Assignments";
-import { Menu, Bed, Bell, Users, LayoutDashboard } from "lucide-react";
+import { Menu, Bed, Bell, Users, LayoutDashboard, CalendarClock } from "lucide-react";
 import { getUnreadNotificationsCount } from "../services/notification";
 
 const Dashboard = () => {
@@ -12,26 +12,38 @@ const Dashboard = () => {
   const [forceRequired, setForceRequired] = useState(false);
   const [updateAssign, setUpdateAssign] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [today, setToday] = useState(); 
+  const [today, setToday] = useState();
+  const navigate = useNavigate();
 
-
-  if(user?.role === 'admin'){
-    window.location.href = '/admin';
+  // redirect admins
+  if (user?.role === "admin") {
+    window.location.href = "/admin";
   }
 
+  // check if expiry reached
   const hasExpiredAssignment = useMemo(() => {
     if (!expiry) return false;
-    setToday(new Date().toLocaleDateString('en-CA'));
+    setToday(new Date().toLocaleDateString("en-CA"));
     const deptExpired = deptExpiry && today >= deptExpiry;
     const wardExpired = wardExpiry && today >= wardExpiry;
     return deptExpired || wardExpired;
-  }, [expiry, deptExpiry, wardExpiry]);
+  }, [expiry, deptExpiry, wardExpiry, today]);
 
+  // redirect to update-expiry if expired (and not intern)
+  useEffect(() => {
+    if (!loading && user) {
+      if (hasExpiredAssignment && user.role !== "intern") {
+        navigate("/update-expiry", { replace: true });
+      }
+    }
+  }, [loading, user, hasExpiredAssignment, navigate]);
+
+  // notifications
   useEffect(() => {
     const fetchUnreadCount = async () => {
       if (user) {
         try {
-          const { count } = await getUnreadNotificationsCount(); // New service function
+          const { count } = await getUnreadNotificationsCount();
           setUnreadCount(count);
         } catch (err) {
           console.error("Failed to fetch unread notification count", err);
@@ -40,32 +52,7 @@ const Dashboard = () => {
     };
     fetchUnreadCount();
 
-    // Refresh count every 5 minutes (or as needed)
-    const interval = setInterval(fetchUnreadCount, 1 * 60 * 1000); 
-    return () => clearInterval(interval);
-  }, [user]);
-  
-  useEffect(() => {
-    if (!loading && user) {
-      const isFirstLogin = !user.firstLoginDone;
-      if (isFirstLogin || hasExpiredAssignment) {
-        setOpen(true);
-        setForceRequired(true);
-      } else {
-        setForceRequired(false);
-      }
-    }
-  }, [loading, user, hasExpiredAssignment]);
-
-  useEffect(() => {
-    // This interval is still useful to re-check expiry without page refresh
-    const interval = setInterval(() => {
-      if (user) {
-        // You would need to add a re-fetch function to AuthContext for this
-        // For now, this is commented out to reflect the changed architecture
-        // fetchExpiry(); 
-      }
-    }, 60 * 1000);
+    const interval = setInterval(fetchUnreadCount, 1 * 60 * 1000);
     return () => clearInterval(interval);
   }, [user]);
 
@@ -99,7 +86,8 @@ const Dashboard = () => {
             Hello, <span className="text-indigo-600">{user.name}</span>!
           </h1>
           <p className="text-xl text-gray-600 mt-2">
-            Your role: <span className="font-semibold text-gray-800">{user.role}</span>
+            Your role:{" "}
+            <span className="font-semibold text-gray-800">{user.role}</span>
           </p>
         </div>
 
@@ -113,42 +101,68 @@ const Dashboard = () => {
             <div className="bg-green-100 group-hover:bg-green-200 p-4 rounded-full inline-block transition-colors duration-300">
               <Bed size={32} className="text-green-600" />
             </div>
-            <h3 className="text-xl font-bold text-gray-800 group-hover:text-green-800 mt-4">Manage Beds</h3>
-            <p className="text-sm text-gray-500 group-hover:text-green-700">Browse and assign beds.</p>
+            <h3 className="text-xl font-bold text-gray-800 group-hover:text-green-800 mt-4">
+              Manage Beds
+            </h3>
+            <p className="text-sm text-gray-500 group-hover:text-green-700">
+              Browse and assign beds.
+            </p>
           </Link>
 
           {/* Notifications Card */}
-          {user?.role !== 'intern' ? (
+          {user?.role !== "intern" && (
             <>
-          <Link
-            to="/notifications"
-            className="dashboard-card group bg-white hover:bg-yellow-100 border-l-4 border-yellow-500 hover:border-yellow-600 transition-all duration-300 relative"
-          >
-            {unreadCount > 0 && (
-              <span className="absolute top-2 right-2 inline-flex items-center justify-center h-6 w-6 text-xs font-bold text-white bg-red-500 rounded-full">
-                {unreadCount}
-              </span>
-            )}
-            <div className="bg-yellow-100 group-hover:bg-yellow-200 p-4 rounded-full inline-block transition-colors duration-300">
-              <Bell size={32} className="text-yellow-600" />
-            </div>
-            <h3 className="text-xl font-bold text-gray-800 group-hover:text-yellow-800 mt-4">View Notifications</h3>
-            <p className="text-sm text-gray-500 group-hover:text-yellow-700">Check for new admissions.</p>
-          </Link>
+              <Link
+                to="/notifications"
+                className="dashboard-card group bg-white hover:bg-yellow-100 border-l-4 border-yellow-500 hover:border-yellow-600 transition-all duration-300 relative"
+              >
+                {unreadCount > 0 && (
+                  <span className="absolute top-2 right-2 inline-flex items-center justify-center h-6 w-6 text-xs font-bold text-white bg-red-500 rounded-full">
+                    {unreadCount}
+                  </span>
+                )}
+                <div className="bg-yellow-100 group-hover:bg-yellow-200 p-4 rounded-full inline-block transition-colors duration-300">
+                  <Bell size={32} className="text-yellow-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-800 group-hover:text-yellow-800 mt-4">
+                  View Notifications
+                </h3>
+                <p className="text-sm text-gray-500 group-hover:text-yellow-700">
+                  Check for new admissions.
+                </p>
+              </Link>
 
-          <Link
-            to="/myassignments"
-            className="dashboard-card group bg-white hover:bg-blue-100 border-l-4 border-blue-500 hover:border-blue-600 transition-all duration-300"
-          >
-            <div className="bg-blue-100 group-hover:bg-blue-200 p-4 rounded-full inline-block transition-colors duration-300">
-              <LayoutDashboard size={32} className="text-blue-600" />
-            </div>
-            <h3 className="text-xl font-bold text-gray-800 group-hover:text-blue-800 mt-4">My Assignments</h3>
-            <p className="text-sm text-gray-500 group-hover:text-blue-700">View beds assigned to you.</p>
-          </Link> 
-          </>
-          ) : (
-            <></>
+              <Link
+                to="/myassignments"
+                className="dashboard-card group bg-white hover:bg-blue-100 border-l-4 border-blue-500 hover:border-blue-600 transition-all duration-300"
+              >
+                <div className="bg-blue-100 group-hover:bg-blue-200 p-4 rounded-full inline-block transition-colors duration-300">
+                  <LayoutDashboard size={32} className="text-blue-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-800 group-hover:text-blue-800 mt-4">
+                  My Assignments
+                </h3>
+                <p className="text-sm text-gray-500 group-hover:text-blue-700">
+                  View beds assigned to you.
+                </p>
+              </Link>
+
+              {/* New Update Expiry Tab */}
+              <Link
+                to="/update-expiry"
+                className="dashboard-card group bg-white hover:bg-red-100 border-l-4 border-red-500 hover:border-red-600 transition-all duration-300"
+              >
+                <div className="bg-red-100 group-hover:bg-red-200 p-4 rounded-full inline-block transition-colors duration-300">
+                  <CalendarClock size={32} className="text-red-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-800 group-hover:text-red-800 mt-4">
+                  Update Expiry
+                </h3>
+                <p className="text-sm text-gray-500 group-hover:text-red-700">
+                  Extend department or ward expiry.
+                </p>
+              </Link>
+            </>
           )}
 
           {/* Admin Access Card */}
@@ -160,13 +174,18 @@ const Dashboard = () => {
               <div className="bg-purple-100 group-hover:bg-purple-200 p-4 rounded-full inline-block transition-colors duration-300">
                 <Users size={32} className="text-purple-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-800 group-hover:text-purple-800 mt-4">Admin Panel</h3>
-              <p className="text-sm text-gray-500 group-hover:text-purple-700">Manage all system users.</p>
+              <h3 className="text-xl font-bold text-gray-800 group-hover:text-purple-800 mt-4">
+                Admin Panel
+              </h3>
+              <p className="text-sm text-gray-500 group-hover:text-purple-700">
+                Manage all system users.
+              </p>
             </Link>
           )}
         </div>
       </div>
 
+      {/* Floating Button for Assignments */}
       <button
         onClick={() => {
           setOpen(true);

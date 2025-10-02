@@ -49,7 +49,7 @@ const Beds = () => {
     // This function can be used to trigger a search if a button is used.
     // In this implementation, filtering happens on every keystroke, so this might not be strictly necessary,
     // but it's good practice for a button click handler.
-    console.log("Searching for:", searchTerm);
+    // console.log("Searching for:", searchTerm);
   };
   
   return (
