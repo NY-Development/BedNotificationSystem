@@ -28,26 +28,47 @@ export const getUserById = async (req, res) => {
   }
 };
 
+import User from "../models/User.js";
+import Notification from "../models/Notification.js";
+import Assignment from "../models/Assignment.js";
+import Department from "../models/Department.js";
 
-// Delete user and associated data
+// Delete user and associated data (or cleanup if user doesn't exist)
 export const deleteUser = async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
+    const userId = req.params.id;
+    const user = await User.findByIdAndDelete(userId);
 
-    // Delete related notifications (as sender or recipient)
-    await Notification.deleteMany({ 
-      $or: [{ user: user._id }, { from: user._id }] 
-    });
+    if (!user) {
+      // User not found, but still cleanup references
+      await Notification.deleteMany({ $or: [{ user: userId }, { from: userId }] });
+      await Assignment.deleteMany({ $or: [{ user: userId }, { createdBy: userId }] });
+      await Department.updateMany(
+        { "wards.beds.assignedUser": userId },
+        { $set: { "wards.$[].beds.$[bed].assignedUser": null, "wards.$[].beds.$[bed].status": "available" } },
+        { arrayFilters: [{ "bed.assignedUser": userId }] }
+      );
 
-    // Delete related assignments
-    await Assignment.deleteMany({ user: user._id, createdBy: user._id });
+      return res.status(200).json({ 
+        message: "User not found in DB, but related data cleaned successfully" 
+      });
+    }
 
-    res.json({ message: "User and related data deleted successfully" });
+    // If user exists → normal delete flow
+    await Notification.deleteMany({ $or: [{ user: user._id }, { from: user._id }] });
+    await Assignment.deleteMany({ $or: [{ user: user._id }, { createdBy: user._id }] });
+    await Department.updateMany(
+      { "wards.beds.assignedUser": user._id },
+      { $set: { "wards.$[].beds.$[bed].assignedUser": null, "wards.$[].beds.$[bed].status": "available" } },
+      { arrayFilters: [{ "bed.assignedUser": user._id }] }
+    );
+
+    res.json({ message: "User and related data deleted successfully, beds freed" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 export const getAllNotifications = async (req, res) => {
   try {
