@@ -6,6 +6,11 @@ const messageSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  to: {
+    type: String,
+    required: true,
+    trim: true,
+  },
   subject: {
     type: String,
     required: true,
@@ -18,6 +23,10 @@ const messageSchema = new mongoose.Schema({
   timestamp: {
     type: Date,
     default: Date.now,
+  },
+  read: {
+    type: Boolean,
+    default: false, // Default to false for new messages
   },
 });
 

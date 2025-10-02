@@ -17,6 +17,7 @@ export const sendSupportEmail = async (req, res) => {
       from: email,
       subject: "New Support Request",
       message: issue,
+      to: process.env.SENDER_EMAIL,
     });
 
     // Save the message to the database
@@ -48,9 +49,10 @@ export const sendRefinedMessage = async (req, res) => {
 
     // Create a new refined message instance
     const refinedMessage = new Message({
-      from: recipient,
+      from: process.env.SENDER_EMAIL,
       subject: subject,
       message: message,
+      to: recipient,
     });
 
     // Save the refined message to the database

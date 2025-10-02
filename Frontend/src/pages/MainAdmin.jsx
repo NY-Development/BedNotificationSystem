@@ -460,20 +460,17 @@ const MainAdmin = () => {
     </div>
   );
 
-  const renderSupport = () => (
-    <div className="bg-gray-100 min-h-screen p-6">
-      <div className="bg-white p-6 rounded-xl shadow-lg max-w-2xl mx-auto mb-6">
-        <h2 className="text-xl text-black font-semibold mb-4">Support Requests</h2>
-        <ul className="space-y-4">
-          {messages.map((msg) => (
-            <li key={msg._id} className="p-4 border rounded-lg">
-              <strong>{msg.subject}</strong>: {msg.message} <br />
-              <em>From: {msg.from}</em>
-            </li>
-          ))}
-        </ul>
-      </div>
+  const renderSupport = () => {
+  const handleMarkAsRead = (msgId) => {
+    // Update the message's read status (you would typically update this on the server)
+    const updatedMessages = messages.map((msg) =>
+      msg._id === msgId ? { ...msg, read: true } : msg
+    );
+    setMessages(updatedMessages); // Assuming you have a setMessages function to update the state
+  };
 
+  return (
+    <div className="bg-gray-100 min-h-screen p-6">
       <div className="bg-white p-6 rounded-xl shadow-lg max-w-2xl mx-auto">
         <h2 className="text-xl font-semibold mb-4">Reply to Support Messages (Refined Message)</h2>
         <form onSubmit={handleSendSupport} className="space-y-4">
@@ -507,8 +504,31 @@ const MainAdmin = () => {
         </form>
         {supportStatus && <p className={`mt-4 text-center text-sm ${supportStatus.includes('successfully') ? 'text-green-600' : 'text-red-600'}`}>{supportStatus}</p>}
       </div>
+
+      <div className="bg-white p-6 rounded-xl shadow-lg max-w-2xl mx-auto mt-6">
+        <h2 className="text-xl text-black font-semibold mb-4">Support Requests</h2>
+        <ul className="space-y-4">
+          {messages.map((msg) => (
+            <li key={msg._id} className={`p-4 border rounded-lg ${msg.read ? 'bg-gray-200' : ''} ${msg.read ? 'cursor-not-allowed' : ''}`}>
+              <div className='font-extrabold text-blue-500'>{msg.from === "yamlaknegash96@gmail.com" ? "Sent" : "Incoming"}</div>
+              <strong>{msg.subject}</strong>: {msg.message} <br />
+              <em>From: {msg.from}</em> <br />
+              <em>To: {msg.to}</em> <br />
+              {!msg.read && (
+                <button 
+                  onClick={() => handleMarkAsRead(msg._id)} 
+                  className="cp mt-2 text-blue-600 hover:underline"
+                >
+                  Mark as Read
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
+};
 
   // --- Inline Forms for Subcomponents ---
   const WardForm = ({ deptId, onAdd }) => {
