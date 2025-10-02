@@ -47,7 +47,11 @@ const userSchema = new mongoose.Schema(
     resetOtpExpireAt:{
         type: Number,
         default: 0
-    }
+    },
+    roleChangeRequest: {
+        role: { type: String, enum: ["admin", "supervisor", "c1", "c2", "intern"] },
+        requestedAt: { type: Date },
+    },
   },
   { timestamps: true }
 );
