@@ -91,11 +91,11 @@ const Admin = () => {
                   : "bg-gray-50 border-gray-200"
               }`}
             >
-              <div className="flex justify-between items-center">
+              <div className="flex md:flex-row flex-col space-y-2 justify-between items-center">
                 <h3 className="text-xl font-semibold text-gray-800">
                   {dept.name}
                 </h3>
-                <div className="flex md:flex-row flex-col space-x-2">
+                <div className="flex flex-row space-x-2">
                   <button
                     onClick={() => {
                       if (selectedDept?._id === dept._id) {

@@ -1,0 +1,10 @@
+# POST http://localhost:5000/api/auth/login
+# Content-Type: application/json
+
+# {
+#     "email": "yamlaknegash96@gmail.com",
+#     "password": "12348765",
+# }
+DELETE http://localhost:5000/api/admin/users/68de3fce0840c57ea070d0a7
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGQzYTU2MjdkNGIyN2I2MWI2YTdiNCIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc1OTQwMjk0NSwiZXhwIjoxNzYxOTk0OTQ1fQ.-jjix6iHnDsMKdeILPrUB8rDN7-Da76SY_R67bI0-10
+Content-Type: application/json
