@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import Modal from "../components/Modal";
 import Assignments from "./Assignments";
-import { Menu, Bed, Bell, Users, LayoutDashboard, CalendarClock } from "lucide-react";
+import { Menu, Bed, Bell, Users, LayoutDashboard, MessageCircleReply } from "lucide-react";
 import { getUnreadNotificationsCount } from "../services/notification";
 
 const Dashboard = () => {
@@ -150,15 +150,15 @@ const Dashboard = () => {
               {/* Support Responses Tab */}
               <Link
                 to="/support-responses"
-                className="dashboard-card group bg-white hover:bg-red-100 border-l-4 border-red-500 hover:border-red-600 transition-all duration-300"
+                className="dashboard-card group bg-white hover:bg-black border-l-4 border-black hover:border-gray-400 transition-all duration-300"
               >
-                <div className="bg-red-100 group-hover:bg-red-200 p-4 rounded-full inline-block transition-colors duration-300">
-                  <Bell size={32} className="text-red-600" />
+                <div className="bg-gray-100 group-hover:bg-gray-200 p-4 rounded-full inline-block transition-colors duration-300">
+                  <MessageCircleReply size={32} className="text-black" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-800 group-hover:text-red-800 mt-4">
+                <h3 className="text-xl font-bold text-gray-800 group-hover:text-white mt-4">
                   Support Responses
                 </h3>
-                <p className="text-sm text-gray-500 group-hover:text-red-700">
+                <p className="text-sm text-gray-500 group-hover:text-white">
                   View replies from admin to your requests.
                 </p>
               </Link>
