@@ -136,129 +136,181 @@ const MainAdmin = () => {
     loadData();
   }, [loadData]);
 
-//Add department form
-const AddDepartmentForm = ({ onSuccess }) => {
-  const [name, setName] = useState("");
-  const [loading, setLoading] = useState(false);
+  //Add department form
+  const AddDepartmentForm = ({ onSuccess }) => {
+    const [name, setName] = useState("");
+    const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!name.trim()) return;
-    setLoading(true);
-    try {
-      await addDepartment({ name });
-      toast.success("Department added successfully");
-      setName("");
-      onSuccess?.();
-    } catch (err) {
-      toast.error("Failed to add department");
-    } finally {
-      setLoading(false);
-    }
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      if (!name.trim()) return;
+      setLoading(true);
+      try {
+        await addDepartment({ name });
+        toast.success("Department added successfully");
+        setName("");
+        onSuccess?.();
+      } catch (err) {
+        toast.error("Failed to add department");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    return (
+      <form onSubmit={handleSubmit} className="flex gap-2 mb-6">
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="New Department Name"
+          className="flex-1 p-3 border rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+          required
+        />
+        <button
+          type="submit"
+          disabled={loading}
+          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+        >
+          {loading ? "Adding..." : "Add Department"}
+        </button>
+      </form>
+    );
   };
 
-  return (
-    <form onSubmit={handleSubmit} className="flex gap-2 mb-6">
-      <input
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="New Department Name"
-        className="flex-1 p-3 border rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-        required
-      />
-      <button
-        type="submit"
-        disabled={loading}
-        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-      >
-        {loading ? "Adding..." : "Add Department"}
-      </button>
-    </form>
-  );
-};
+  //Add WArd form
+  const WardForm = ({ deptId, onAdd, handleAddWard }) => {
+    const [wardName, setWardName] = useState("");
+    const [loading, setLoading] = useState(false);
 
-//Add WArd form
-const WardForm = ({ deptId, onAdd, handleAddWard }) => {
-  const [wardName, setWardName] = useState("");
-  const [loading, setLoading] = useState(false);
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      if (!wardName.trim()) return;
+      setLoading(true);
+      try {
+        await handleAddWard(deptId, wardName);
+        setWardName("");
+        onAdd?.();
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!wardName.trim()) return;
-    setLoading(true);
-    try {
-      await handleAddWard(deptId, wardName);
-      setWardName("");
-      onAdd?.();
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    return (
+      <form onSubmit={handleSubmit} className="flex gap-2">
+        <input
+          type="text"
+          value={wardName}
+          onChange={(e) => setWardName(e.target.value)}
+          placeholder="New Ward"
+          className="p-2 border rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500"
+          required
+        />
+        <button
+          type="submit"
+          disabled={loading}
+          className="px-3 py-1 bg-green-600 text-white rounded-full text-sm hover:bg-green-700 transition-colors"
+        >
+          {loading ? "Adding..." : "Add Ward"}
+        </button>
+      </form>
+    );
   };
 
-  return (
-    <form onSubmit={handleSubmit} className="flex gap-2">
-      <input
-        type="text"
-        value={wardName}
-        onChange={(e) => setWardName(e.target.value)}
-        placeholder="New Ward"
-        className="p-2 border rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500"
-        required
-      />
-      <button
-        type="submit"
-        disabled={loading}
-        className="px-3 py-1 bg-green-600 text-white rounded-full text-sm hover:bg-green-700 transition-colors"
-      >
-        {loading ? "Adding..." : "Add Ward"}
-      </button>
-    </form>
-  );
-};
+  //Add bed form 
+  const BedForm = ({ deptId, wardId, onAdd, handleAddBed }) => {
+    const [bedId, setBedId] = useState("");
+    const [loading, setLoading] = useState(false);
 
-//Add bed form 
-const BedForm = ({ deptId, wardId, onAdd, handleAddBed }) => {
-  const [bedId, setBedId] = useState("");
-  const [loading, setLoading] = useState(false);
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      if (!bedId.trim()) return;
+      setLoading(true);
+      try {
+        await handleAddBed(deptId, wardId, bedId);
+        setBedId("");
+        onAdd?.();
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!bedId.trim()) return;
-    setLoading(true);
-    try {
-      await handleAddBed(deptId, wardId, bedId);
-      setBedId("");
-      onAdd?.();
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    return (
+      <form onSubmit={handleSubmit} className="flex gap-1">
+        <input
+          type="text"
+          value={bedId}
+          onChange={(e) => setBedId(e.target.value)}
+          placeholder="Bed ID"
+          className="p-1 border rounded-lg text-xs focus:ring-green-500 focus:border-green-500"
+          required
+        />
+        <button
+          type="submit"
+          disabled={loading}
+          className="px-2 py-1 bg-green-500 text-white rounded-full text-xs hover:bg-green-600 transition-colors"
+        >
+          {loading ? "Adding..." : "+"}
+        </button>
+      </form>
+    );
   };
 
-  return (
-    <form onSubmit={handleSubmit} className="flex gap-1">
-      <input
-        type="text"
-        value={bedId}
-        onChange={(e) => setBedId(e.target.value)}
-        placeholder="Bed ID"
-        className="p-1 border rounded-lg text-xs focus:ring-green-500 focus:border-green-500"
-        required
-      />
-      <button
-        type="submit"
-        disabled={loading}
-        className="px-2 py-1 bg-green-500 text-white rounded-full text-xs hover:bg-green-600 transition-colors"
-      >
-        {loading ? "Adding..." : "+"}
-      </button>
-    </form>
-  );
-};
+  const handleSearch = () => {
+    const term = searchTerm.toLowerCase();
+
+    if (tab === "users") {
+      setFilteredUsers(
+        users.filter(
+          (u) =>
+            u.name.toLowerCase().includes(term) ||
+            u.email.toLowerCase().includes(term)
+        )
+      );
+    }
+
+    if (tab === "departments") {
+      setFilteredDepartments(
+        departments.map((d) => ({
+          ...d,
+          wards: d.wards.map((w) => ({
+            ...w,
+            beds: w.beds.filter(
+              (b) =>
+                b.assignedUser?.name?.toLowerCase().includes(term) ||
+                b.assignedUser?.email?.toLowerCase().includes(term)
+            ),
+          })),
+        }))
+      );
+    }
+
+    if (tab === "assignments") {
+      setFilteredAssignments(
+        assignments.filter(
+          (a) =>
+            a.user?.name.toLowerCase().includes(term) ||
+            a.user?.email.toLowerCase().includes(term)
+        )
+      );
+    }
+
+    if (tab === "notifications") {
+      setFilteredNotifications(
+        notifications.filter(
+          (n) =>
+            n.user?.name.toLowerCase().includes(term) ||
+            n.user?.email.toLowerCase().includes(term) ||
+            n.from?.name?.toLowerCase().includes(term) ||
+            n.from?.email?.toLowerCase().includes(term)
+        )
+      );
+    }
+  };
 
   // ---- Role Request Actions ----
   const handleApprove = async (userId, role) => {
@@ -946,7 +998,7 @@ const handleSendSupport = async (e) => {
             <SearchBar
               searchTerm={searchTerm}
               onSearchChange={setSearchTerm}
-              onSearchClick={() => {}}
+              onSearchClick={handleSearch}
               placeholder={`Search ${tab} by user name or email...`}
             />
           </div>
