@@ -435,18 +435,18 @@ const handleSendSupport = async (e) => {
                       req.roleChangeRequest.requestedAt
                     ).toLocaleString()}
                   </td>
-                  <td className="px-4 py-2 border space-x-2">
+                  <td className="flex flex-col md:flex-row space-y-2 px-4 py-2 border md:space-x-2">
                     <button
                       onClick={() =>
                         handleApprove(req._id, req.roleChangeRequest.role)
                       }
-                      className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                      className="cp bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
                     >
                       Approve
                     </button>
                     <button
                       onClick={() => handleDeny(req._id)}
-                      className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                      className="cp bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
                     >
                       Deny
                     </button>

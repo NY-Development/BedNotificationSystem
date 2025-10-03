@@ -30,7 +30,7 @@ const Profile = ({ onClose, user }) => {
         }
         try {
             setSendingRole(true);
-            const res = await requestRoleChange({ requestedRole: roleRequest }); 
+            const res = await requestRoleChange(roleRequest); 
             toast.success(res.message || "Role change request sent!");
             setRoleRequest('');
         } catch (err) {
@@ -186,7 +186,7 @@ const Profile = ({ onClose, user }) => {
                                     {/* <option value="admin">Admin (Full Control)</option>
                                     <option value="supervisor">Supervisor (Management)</option> */}
                                     <option value="c1">C1 (Clinical Year 1 Student)</option>
-                                    <option value="c2">C2 (Clinical Year 1 Student)</option>
+                                    <option value="c2">C2 (Clinical Year 2 Student)</option>
                                     <option value="intern">Intern</option>
                                 </select>
                                 <button
