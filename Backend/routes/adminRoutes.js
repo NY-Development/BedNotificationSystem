@@ -21,6 +21,7 @@ import {
   updateUserRole,
   getRoleChangeRequests,
   denyRoleChange,
+  deleteAssignment,
 } from "../controllers/adminController.js";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
 
@@ -57,5 +58,6 @@ router.post("/departments/:deptId/wards/:wardId/beds", addBed);
 router.delete("/departments/:deptId", deleteDepartment);
 router.delete("/departments/:deptId/wards/:wardId", deleteWard);
 router.delete("/departments/:deptId/wards/:wardId/beds/:bedId", deleteBed);
+router.delete("/assignments/:id",deleteAssignment);
 
 export default router;
