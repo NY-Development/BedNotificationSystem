@@ -20,6 +20,8 @@ import {
   deactivateSubscription,
   updateUserRole,
   getRoleChangeRequests,
+  denyRoleChange,
+  deleteAssignment,
 } from "../controllers/adminController.js";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
 
@@ -44,6 +46,8 @@ router.get("/subscriptions",  getAllSubscriptions);
 router.put("/:userId/activate", activateSubscription);
 router.put("/:userId/deactivate", deactivateSubscription);
 router.put("/update-role/:userId",  updateUserRole);
+router.put("/deny-role-change/:userId", denyRoleChange);
+
 
 // Create endpoints
 router.post("/departments", addDepartment);
@@ -54,5 +58,6 @@ router.post("/departments/:deptId/wards/:wardId/beds", addBed);
 router.delete("/departments/:deptId", deleteDepartment);
 router.delete("/departments/:deptId/wards/:wardId", deleteWard);
 router.delete("/departments/:deptId/wards/:wardId/beds/:bedId", deleteBed);
+router.delete("/assignments/:id",deleteAssignment);
 
 export default router;

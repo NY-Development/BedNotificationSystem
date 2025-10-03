@@ -427,6 +427,30 @@ export const updateUserRole = async (req, res) => {
   }
 };
 
+// Admin denies role change request
+export const denyRoleChange = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (!user.roleChangeRequest || !user.roleChangeRequest.role) {
+      return res.status(400).json({ message: "No pending role change request for this user" });
+    }
+
+    // Clear the request without changing role
+    user.roleChangeRequest = undefined;
+
+    await user.save();
+
+    res.status(200).json({ message: "Role change request denied successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Error denying role change", error: err.message });
+  }
+};
+
+
 // Admin: Get all role change requests
 export const getRoleChangeRequests = async (req, res) => {
   try {
@@ -442,5 +466,57 @@ export const getRoleChangeRequests = async (req, res) => {
     res.status(200).json({ requests });
   } catch (err) {
     res.status(500).json({ message: "Error fetching role change requests", error: err.message });
+  }
+};
+
+// ================== Delete Assignment ==================
+export const deleteAssignment = async (req, res) => {
+  try {
+    const { id } = req.params; // assignmentId from route
+
+    const assignment = await Assignment.findById(id);
+    if (!assignment) {
+      return res.status(404).json({ message: "Assignment not found" });
+    }
+
+    // Get department and ward
+    const department = await Department.findById(assignment.department);
+    if (!department) {
+      return res.status(404).json({ message: "Department not found" });
+    }
+
+    const ward = department.wards.find(w => w.name === assignment.ward);
+    if (!ward) {
+      return res.status(404).json({ message: "Ward not found in department" });
+    }
+
+    // Unassign all related beds (remove assignedUser from them)
+    for (const bedId of assignment.beds) {
+      const bed = ward.beds.find(b => String(b.id) === String(bedId));
+      if (bed && String(bed.assignedUser) === String(assignment.user)) {
+        bed.assignedUser = null; // free the bed
+      }
+    }
+
+    // Save updated department
+    await department.save();
+
+    // Delete the assignment
+    await assignment.deleteOne();
+
+    // Optional: If you want to mark user firstLoginDone = false when no assignments left
+    const userAssignments = await Assignment.find({ user: assignment.user });
+    if (userAssignments.length === 0) {
+      const userDoc = await User.findById(assignment.user);
+      if (userDoc) {
+        userDoc.firstLoginDone = false;
+        await userDoc.save();
+      }
+    }
+
+    return res.json({ message: "Assignment and related data deleted successfully" });
+  } catch (err) {
+    console.error("deleteAssignment error:", err);
+    return res.status(500).json({ message: err.message || "Server error" });
   }
 };
