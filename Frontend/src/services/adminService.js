@@ -127,3 +127,22 @@ export const updateMessageReadStatus = async (msgId) => {
     throw error;
   }
 };
+
+// ----- Role Change Requests -----
+export const getRoleChangeRequests = async () => {
+  try {
+    const res = await API.get("/admin/role-change-requests");
+    return res.data;
+  } catch (err) {
+    throw err.response?.data?.message || "Error fetching role change requests";
+  }
+};
+
+export const updateUserRole = async (userId, newRole) => {
+  try {
+    const res = await API.put(`/admin/update-role/${userId}`, { newRole });
+    return res.data;
+  } catch (err) {
+    throw err.response?.data?.message || "Error updating user role";
+  }
+};
