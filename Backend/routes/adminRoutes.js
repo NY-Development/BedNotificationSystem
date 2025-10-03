@@ -20,6 +20,7 @@ import {
   deactivateSubscription,
   updateUserRole,
   getRoleChangeRequests,
+  denyRoleChange,
 } from "../controllers/adminController.js";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
 
@@ -44,6 +45,8 @@ router.get("/subscriptions",  getAllSubscriptions);
 router.put("/:userId/activate", activateSubscription);
 router.put("/:userId/deactivate", deactivateSubscription);
 router.put("/update-role/:userId",  updateUserRole);
+router.put("/deny-role-change/:userId", denyRoleChange);
+
 
 // Create endpoints
 router.post("/departments", addDepartment);

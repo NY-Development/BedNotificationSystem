@@ -427,6 +427,30 @@ export const updateUserRole = async (req, res) => {
   }
 };
 
+// Admin denies role change request
+export const denyRoleChange = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (!user.roleChangeRequest || !user.roleChangeRequest.role) {
+      return res.status(400).json({ message: "No pending role change request for this user" });
+    }
+
+    // Clear the request without changing role
+    user.roleChangeRequest = undefined;
+
+    await user.save();
+
+    res.status(200).json({ message: "Role change request denied successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Error denying role change", error: err.message });
+  }
+};
+
+
 // Admin: Get all role change requests
 export const getRoleChangeRequests = async (req, res) => {
   try {
