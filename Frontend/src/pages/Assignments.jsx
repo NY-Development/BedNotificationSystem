@@ -22,6 +22,11 @@ const Assignments = ({ closeModal, updateAssign = false }) => {
   });
   const [loading, setLoading] = useState(false);
 
+  // Calculate tomorrow's date
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const minDate = tomorrow.toISOString().split("T")[0]; // Format YYYY-MM-DD
+
   // Fetch user assignments on mount
   useEffect(() => {
     const fetchAssignments = async () => {
@@ -150,6 +155,7 @@ const Assignments = ({ closeModal, updateAssign = false }) => {
               value={form.deptExpiry}
               onChange={(e) => setForm({ ...form, deptExpiry: e.target.value })}
               required
+              min={minDate} // Set minimum date to tomorrow
             />
           </div>
         )}
@@ -184,6 +190,7 @@ const Assignments = ({ closeModal, updateAssign = false }) => {
               value={form.wardExpiry}
               onChange={(e) => setForm({ ...form, wardExpiry: e.target.value })}
               required
+              min={minDate} // Set minimum date to tomorrow
             />
           </div>
         )}

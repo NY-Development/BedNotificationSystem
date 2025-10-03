@@ -3,187 +3,128 @@ import { useAssignment } from "../context/AssignmentContext";
 import { updateExpiryDates } from "../services/assignment";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-hot-toast";
-import { FaCalendarAlt, FaExclamationTriangle, FaCheckCircle, FaSpinner, FaClock } from 'react-icons/fa';
+import {
+  FaExclamationTriangle,
+  FaCheckCircle,
+  FaSpinner,
+} from "react-icons/fa";
 import GoBack from "../components/GoBack";
+import { useBed } from "../context/BedContext";
+import { getDepartments } from "../services/department";
 
 const UpdateExpiry = () => {
   const { user } = useAuth();
   const { userAssign, fetchExpiry, getUserAssignment } = useAssignment();
-  const [form, setForm] = useState({ deptExpiry: "", wardExpiry: "" });
+  const [form, setForm] = useState({
+    deptId: "",
+    wardName: "",
+    deptExpiry: "",
+    wardExpiry: "",
+    beds: [], // Added to manage selected beds
+  });
   const [loading, setLoading] = useState(false);
   const [expiry, setExpiry] = useState(null);
   const [assignment, setAssignment] = useState(null);
+  const [departments, setDepartments] = useState([]);
 
-  // Normalize today's date to ISO string for date input min attribute
-  const todayISO = new Date().toISOString().split("T")[0];
+  // Load all departments for dropdown
+  useEffect(() => {
+    getDepartments().then(setDepartments).catch(console.error);
+  }, [user]);
 
+  // Load current assignment + expiry
   useEffect(() => {
     const loadData = async () => {
-      // Fetch data and initialize state
       const expiryData = await fetchExpiry();
       setExpiry(expiryData);
 
       const assignData = await getUserAssignment();
       setAssignment(assignData);
+
+      setForm((prev) => ({
+        ...prev,
+        deptId: departments.find((d) => d.name === assignData?.department)?._id || "",
+        wardName: assignData?.ward || "",
+      }));
     };
     loadData();
-  }, [user]);
+  }, [user, departments]);
 
-  // --- EXPIRY LOGIC & HELPERS ---
+  // Beds filtering logic
+  const selectedDept = departments.find((d) => d._id === form.deptId);
+  const selectedWard = selectedDept?.wards.find((w) => w.name === form.wardName);
+  const bedsToDisplay = selectedWard ? selectedWard.beds.filter(bed => !bed.assignedUser) : [];
 
-  const currentDate = new Date();
-  currentDate.setHours(0, 0, 0, 0);
+  // Dates for validation
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const minDate = tomorrow.toISOString().split("T")[0];
 
-  const getStatusAndDays = (dateString) => {
-    if (!dateString) return { status: 'N/A', days: null };
-    const expirationDate = new Date(dateString);
-    expirationDate.setHours(0, 0, 0, 0);
-
-    const timeDifference = expirationDate.getTime() - currentDate.getTime();
-    const daysDifference = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
-
-    if (daysDifference < 0) return { status: 'Expired', days: daysDifference };
-    if (daysDifference <= 3) return { status: 'ExpiringSoon', days: daysDifference };
-    return { status: 'Valid', days: daysDifference };
+  // Helpers for expiry status
+  const getStatus = (dateString) => {
+    if (!dateString) return "N/A";
+    const d = new Date(dateString);
+    d.setHours(0, 0, 0, 0);
+    if (d <= today) return "Expired";
+    const days = Math.ceil((d - today) / (1000 * 60 * 60 * 24));
+    return days <= 3 ? "ExpiringSoon" : "Valid";
   };
 
-  const deptStatusData = getStatusAndDays(expiry?.deptExpiry);
-  const wardStatusData = getStatusAndDays(expiry?.wardExpiry);
+  const deptStatus = getStatus(expiry?.deptExpiry);
+  const wardStatus = getStatus(expiry?.wardExpiry);
 
-  const isDeptExpired = deptStatusData.status === 'Expired';
-  const isWardExpired = wardStatusData.status === 'Expired';
+  const isDeptExpired = deptStatus === "Expired";
+  const isWardExpired = wardStatus === "Expired";
 
-  const isDeptExpiringSoon = deptStatusData.status === 'ExpiringSoon';
-  const isWardExpiringSoon = wardStatusData.status === 'ExpiringSoon';
-
-  const isAnyExpired = isDeptExpired || isWardExpired;
-  const isAnyExpiringSoon = isDeptExpiringSoon || isWardExpiringSoon;
-
-  // Interns or if nothing is expired, show the info view
-  if (user?.role === "intern" || !isAnyExpired) {
-    // --- VALID VIEW WITH OPTIONAL WARNING ---
-    
-    // Dynamic classes based on warning status
-    const isWarning = isAnyExpiringSoon && !isAnyExpired;
-    
-    const mainBgClass = isWarning
-      ? "bg-gradient-to-br from-yellow-50 to-orange-100 border border-orange-300"
-      : "bg-gradient-to-br from-white to-gray-50 border border-green-200";
-
-    const mainTitleColor = isWarning ? "text-orange-700" : "text-green-600";
-    const mainEmoji = isWarning ? "💡" : "✨";
-    const mainTitle = isWarning ? "Heads Up: Dates Approaching!" : "Status: Everything is Valid!";
-
-    const expiryCardClasses = (isSoon) => isSoon 
-      ? "p-3 bg-orange-100 rounded-lg ring-2 ring-orange-400" 
-      : "p-3 bg-gray-100 rounded-lg";
-    const expiryIcon = (isSoon) => isSoon 
-      ? <FaExclamationTriangle className="text-orange-500" /> 
-      : <FaCalendarAlt className="text-gray-500" />;
-
-    const renderExpiryInfo = (statusData, expiryDate) => {
-      const { status, days } = statusData;
-      
-      if (status === 'Expired') {
-          return <span className="text-red-600 font-bold text-lg">EXPIRED! ({new Date(expiryDate).toLocaleDateString()})</span>;
-      }
-      if (status === 'ExpiringSoon') {
-        return (
-          <span className="text-orange-700 font-bold text-lg">
-            {new Date(expiryDate).toLocaleDateString()}
-            <span className="ml-2 text-sm text-red-600 font-semibold flex items-center">
-              <FaClock className="mr-1" />
-              {days} day{days !== 1 ? 's' : ''} left!
-            </span>
-          </span>
-        );
-      }
-      return <span className="text-gray-900 font-medium">{expiryDate ? new Date(expiryDate).toLocaleDateString() : 'N/A'}</span>;
-    };
-
-
+  // If nothing expired or intern → show info only
+  if ((!isDeptExpired && !isWardExpired) || user?.role === "intern") {
     return (
-      <div className={`p-8 rounded-2xl shadow-2xl min-h-screen ${mainBgClass}`}>
+      <div className="p-8 bg-white rounded-xl shadow-lg max-w-lg mx-auto mt-8">
         <GoBack />
-        <div className="flex items-center space-x-3 mb-4">
-          <span className="text-3xl">{mainEmoji}</span>
-          <h2 className={`text-3xl font-bold ${mainTitleColor}`}>
-            {mainTitle}
-          </h2>
-        </div>
-
-        <p className="text-xl text-gray-700">
-          {isWarning && user?.role !== "intern" ? (
-            <span className="font-medium text-orange-800">
-              Your dates are approaching expiry. Please update them soon  to maintain access.
-            </span>
-          ) : (
-            <span className="font-medium">
-              No immediate action required—your current assignment and **expiry dates look great**.
-            </span>
-          )}
+        <h2 className="text-xl font-bold mb-4">No Update Required</h2>
+        <p className="text-gray-600 mb-4">Your expiry dates are still valid.</p>
+        <p>
+          <strong>Department:</strong> {assignment?.department || "N/A"}
         </p>
-
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6 text-base">
-          
-          {/* Department Info */}
-          <div className="p-3 bg-gray-100 rounded-lg">
-            <p className="font-semibold text-gray-500 flex items-center">
-              <span className="mr-2">🏢</span>Department
-            </p>
-            <p className="text-gray-900 font-medium mt-1">
-              {assignment?.department || <span className="italic text-gray-400">N/A</span>}
-            </p>
-          </div>
-
-          {/* Ward Info */}
-          <div className="p-3 bg-gray-100 rounded-lg">
-            <p className="font-semibold text-gray-500 flex items-center">
-              <span className="mr-2">🏥</span>Ward/Unit
-            </p>
-            <p className="text-gray-900 font-medium mt-1">
-              {assignment?.ward || <span className="italic text-gray-400">N/A</span>}
-            </p>
-          </div>
-
-          {/* Department Expiry Info */}
-          <div className={expiryCardClasses(isDeptExpiringSoon || isDeptExpired)}>
-            <p className="font-semibold text-gray-700 flex items-center">
-              <span className="mr-2">{expiryIcon(isDeptExpiringSoon || isDeptExpired)}</span>Department Expiry
-            </p>
-            <p className="mt-1">
-              {renderExpiryInfo(deptStatusData, expiry?.deptExpiry)}
-            </p>
-          </div>
-
-          {/* Ward Expiry Info */}
-          <div className={expiryCardClasses(isWardExpiringSoon || isWardExpired)}>
-            <p className="font-semibold text-gray-700 flex items-center">
-              <span className="mr-2">{expiryIcon(isWardExpiringSoon || isWardExpired)}</span>Ward Expiry
-            </p>
-            <p className="mt-1">
-              {renderExpiryInfo(wardStatusData, expiry?.wardExpiry)}
-            </p>
-          </div>
-
-        </div>
+        <p>
+          <strong>Ward:</strong> {assignment?.ward || "N/A"}
+        </p>
+        <p>
+          <strong>Department Expiry:</strong>{" "}
+          {expiry?.deptExpiry
+            ? new Date(expiry.deptExpiry).toLocaleDateString()
+            : "N/A"}
+        </p>
+        <p>
+          <strong>Ward Expiry:</strong>{" "}
+          {expiry?.wardExpiry
+            ? new Date(expiry.wardExpiry).toLocaleDateString()
+            : "N/A"}
+        </p>
       </div>
     );
   }
 
-  // --- FORM SUBMISSION HANDLER ---
+  // --- Handlers ---
+  const handleDeptChange = (e) => {
+    setForm({ ...form, deptId: e.target.value, wardName: "", beds: [] });
+  };
+
+  const handleWardChange = (e) => {
+    setForm({ ...form, wardName: e.target.value, beds: [] });
+  };
+
+  const handleBedToggle = (bedId) => {
+    const newBeds = form.beds.includes(bedId)
+      ? form.beds.filter(id => id !== bedId)
+      : [...form.beds, bedId];
+    setForm({ ...form, beds: newBeds });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Check if new dates are actually greater than the expired ones
-    const deptUpdateNeeded = isDeptExpired && (!form.deptExpiry || new Date(form.deptExpiry) <= new Date(expiry.deptExpiry));
-    const wardUpdateNeeded = isWardExpired && (!form.wardExpiry || new Date(form.wardExpiry) <= new Date(expiry.wardExpiry));
-
-    if (deptUpdateNeeded || wardUpdateNeeded) {
-        toast.error("Please enter a new date greater than the currently expired date.");
-        return;
-    }
 
     if (!userAssign?._id) {
       toast.error("No assignment found to update.");
@@ -193,103 +134,195 @@ const UpdateExpiry = () => {
     try {
       setLoading(true);
       await updateExpiryDates(userAssign._id, {
-        // Only send the form value if the field was expired, otherwise use the existing data
         deptExpiry: isDeptExpired ? form.deptExpiry : expiry.deptExpiry,
         wardExpiry: isWardExpired ? form.wardExpiry : expiry.wardExpiry,
+        department: isDeptExpired ? selectedDept?.name : assignment?.department,
+        ward: isDeptExpired ? form.wardName : isWardExpired ? form.wardName : assignment?.ward,
+        beds: form.beds, // Send the selected beds
       });
-      toast.success("Expiry updated successfully! 🎉");
-      
-      // Re-fetch and update local state to trigger a re-render
+      toast.success("Expiry updated successfully! ✅");
+
       const newExpiry = await fetchExpiry();
       setExpiry(newExpiry);
-      setForm({ deptExpiry: "", wardExpiry: "" }); // Clear form to re-enable required status check
-
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update expiry. Please try again.");
+      toast.error("Failed to update expiry.");
     } finally {
       setLoading(false);
     }
   };
 
-  // --- EXPIRY UPDATE FORM VIEW (ONLY when isAnyExpired is true) ---
-
+  // --- Form UI ---
   return (
     <div className="mt-6 max-w-lg mx-auto bg-white border border-red-300 shadow-2xl rounded-xl p-8">
-      
       <div className="flex items-center space-x-3 mb-4 border-b pb-3">
         <FaExclamationTriangle className="text-3xl text-red-500" />
         <h2 className="text-2xl font-bold text-gray-800">
-            Mandatory Update Required
+          Mandatory Update Required
         </h2>
       </div>
 
-      <p className="text-red-700 mb-6 bg-red-50 p-3 rounded-md text-sm font-medium">
-        **ACCESS REVOKED:** One or more of your assignment expiry dates has passed. You must update the required date(s) below.
-      </p>
-
       <form onSubmit={handleSubmit} className="space-y-6">
-        
-        {/* Department Expiry Input */}
+        {/* Department expired → show dept + ward + both expiries */}
         {isDeptExpired && (
-          <div className="relative border-l-4 border-red-500 pl-3 py-1">
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
-              New Department Expiry Date:
-              <span className="ml-2 text-xs font-normal text-red-500">
-                (CURRENTLY EXPIRED: {expiry?.deptExpiry ? new Date(expiry.deptExpiry).toLocaleDateString() : 'N/A'})
-              </span>
-            </label>
-            <div className="relative">
-                <input
-                    type="date"
-                    className="pl-10 pr-4 py-2 w-full border border-red-300 rounded-lg focus:ring-red-500 focus:border-red-500 transition duration-150"
-                    value={form.deptExpiry}
-                    min={todayISO} // Use today's ISO date string
-                    onChange={(e) => setForm({ ...form, deptExpiry: e.target.value })}
-                    required
-                />
-                <FaCalendarAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-red-400" />
+          <>
+            <div>
+              <label className="block font-semibold">Select Department:</label>
+              <select
+                className="border p-2 w-full rounded-md"
+                value={form.deptId}
+                onChange={handleDeptChange}
+                required
+              >
+                <option value="">-- Select Department --</option>
+                {departments.map((d) => (
+                  <option key={d._id} value={d._id}>
+                    {d.name}
+                  </option>
+                ))}
+              </select>
             </div>
-          </div>
+
+            {selectedDept && (
+              <div>
+                <label className="block font-semibold">Select Ward:</label>
+                <select
+                  className="border p-2 w-full rounded-md"
+                  value={form.wardName}
+                  onChange={handleWardChange}
+                  required
+                >
+                  <option value="">-- Select Ward --</option>
+                  {selectedDept.wards.map((w, idx) => (
+                    <option key={idx} value={w.name}>
+                      {w.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div>
+              <label className="block font-semibold">New Department Expiry:</label>
+              <input
+                type="date"
+                className="border p-2 w-full rounded-md"
+                value={form.deptExpiry}
+                min={minDate}
+                onChange={(e) =>
+                  setForm({ ...form, deptExpiry: e.target.value })
+                }
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block font-semibold">New Ward Expiry:</label>
+              <input
+                type="date"
+                className="border p-2 w-full rounded-md"
+                value={form.wardExpiry}
+                min={minDate}
+                onChange={(e) =>
+                  setForm({ ...form, wardExpiry: e.target.value })
+                }
+                required
+              />
+            </div>
+
+            {/* Beds checkboxes */}
+            {selectedWard && (
+              <div>
+                <label className="block font-semibold">Select Beds:</label>
+                {bedsToDisplay.length === 0 && (
+                  <p className="text-sm text-red-500 mt-1">No free beds available in this ward.</p>
+                )}
+                <div className="grid grid-cols-2 gap-2">
+                  {bedsToDisplay.map((bed) => (
+                    <label key={bed.id} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        value={bed.id}
+                        checked={form.beds.includes(bed.id)}
+                        onChange={() => handleBedToggle(bed.id)}
+                      />
+                      <span>
+                        Bed {bed.id} ({bed.status})
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
         )}
 
-        {/* Ward Expiry Input */}
-        {isWardExpired && (
-          <div className="relative border-l-4 border-red-500 pl-3 py-1">
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
-              New Ward Expiry Date:
-              <span className="ml-2 text-xs font-normal text-red-500">
-                (CURRENTLY EXPIRED: {expiry?.wardExpiry ? new Date(expiry.wardExpiry).toLocaleDateString() : 'N/A'})
-              </span>
-            </label>
-            <div className="relative">
-                <input
-                    type="date"
-                    className="pl-10 pr-4 py-2 w-full border border-red-300 rounded-lg focus:ring-red-500 focus:border-red-500 transition duration-150"
-                    value={form.wardExpiry}
-                    min={todayISO} // Use today's ISO date string
-                    onChange={(e) => setForm({ ...form, wardExpiry: e.target.value })}
-                    required
-                />
-                <FaCalendarAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-red-400" />
+        {/* Ward expired only → show ward + ward expiry (department fixed to current) */}
+        {isWardExpired && !isDeptExpired && (
+          <>
+            <div>
+              <label className="block font-semibold">Current Department:</label>
+              <input
+                type="text"
+                value={assignment?.department || "N/A"}
+                disabled
+                className="border p-2 w-full rounded-md bg-gray-100 text-gray-700"
+              />
             </div>
-          </div>
+
+            {departments
+              .find((d) => d.name === assignment?.department)
+              ?.wards && (
+                <div>
+                  <label className="block font-semibold">Select Ward:</label>
+                  <select
+                    className="border p-2 w-full rounded-md"
+                    value={form.wardName}
+                    onChange={handleWardChange}
+                    required
+                  >
+                    <option value="">-- Select Ward --</option>
+                    {departments
+                      .find((d) => d.name === assignment?.department)
+                      .wards.map((w, idx) => (
+                        <option key={idx} value={w.name}>
+                          {w.name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              )}
+
+            <div>
+              <label className="block font-semibold">New Ward Expiry:</label>
+              <input
+                type="date"
+                className="border p-2 w-full rounded-md"
+                value={form.wardExpiry}
+                min={minDate}
+                onChange={(e) =>
+                  setForm({ ...form, wardExpiry: e.target.value })
+                }
+                required
+              />
+            </div>
+          </>
         )}
 
         <button
           type="submit"
-          disabled={loading || (!isDeptExpired && !isWardExpired)} // Disable if no fields are active
-          className="cp w-full flex items-center justify-center space-x-2 px-4 py-3 bg-red-600 text-white font-bold rounded-lg shadow-md hover:bg-red-700 transition duration-150 disabled:bg-gray-400 disabled:cursor-not-allowed"
+          disabled={loading}
+          className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 disabled:bg-gray-400"
         >
           {loading ? (
             <>
               <FaSpinner className="animate-spin" />
-              <span>Submitting Update...</span>
+              <span>Submitting...</span>
             </>
           ) : (
             <>
               <FaCheckCircle />
-              <span>Confirm & Update Expired Dates</span>
+              <span>Confirm & Update</span>
             </>
           )}
         </button>

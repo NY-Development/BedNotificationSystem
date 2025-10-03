@@ -796,51 +796,73 @@ const handleSendSupport = async (e) => {
     </div>
   );
 
-  const renderAssignments = () => (
-    <div className="bg-white p-6 rounded-2xl shadow-xl overflow-hidden">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center"><FiClipboard className="mr-2 text-green-600" /> All Assignments</h2>
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200 text-sm sm:text-base">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left font-bold text-gray-600 uppercase">User</th>
-              <th className="px-6 py-3 text-left font-bold text-gray-600 uppercase">Role</th>
-              <th className="px-6 py-3 text-left font-bold text-gray-600 uppercase">Department</th>
-              <th className="px-6 py-3 text-left font-bold text-gray-600 uppercase">Ward</th>
-              <th className="px-6 py-3 text-left font-bold text-gray-600 uppercase">Beds</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {(searchTerm ? filteredAssignments : assignments).map((a) => (
-              <tr key={a._id} className="hover:bg-green-50 transition-colors">
-                <td className="px-6 py-4 font-medium text-gray-800">{a.user?.name}</td>
-                <td className="px-6 py-4 text-gray-600 font-medium">{getRoleName(a.user?.role)}</td>
-                <td className="px-6 py-4 font-medium text-indigo-700">{a.department?.name}</td>
-                <td className="px-6 py-4 text-gray-700">{a.ward || "N/A"}</td>
-                <td className="px-6 py-4">
-                  {/* The Bed List Chip Display */}
-                  {Array.isArray(a.beds) && a.beds.length > 0 ? (
-                        <div className="flex flex-wrap gap-2">
-                            {a.beds.map((bedId, index) => (
-                                <span 
-                                    key={index} 
-                                    className="px-3 py-1 text-xs font-semibold text-indigo-700 bg-indigo-100 rounded-full shadow-sm flex items-center"
-                                >
-                                    <FaBed className="mr-1" size={10} /> {bedId}
-                                </span>
-                            ))}
-                        </div>
+const renderAssignments = () => {
+  const today = new Date();
+  const todayString = today.toLocaleDateString();
+
+  return (
+    <div className="bg-white p-6 rounded-2xl shadow-xl overflow-hidden">
+      <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+        <FiClipboard className="mr-2 text-green-600" /> All Assignments
+      </h2>
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200 text-sm sm:text-base">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left font-bold text-gray-600 uppercase">User</th>
+              <th className="px-6 py-3 text-left font-bold text-gray-600 uppercase">Role</th>
+              <th className="px-6 py-3 text-left font-bold text-gray-600 uppercase">Department</th>
+              <th className="px-6 py-3 text-left font-bold text-gray-600 uppercase">Ward</th>
+              <th className="px-6 py-3 text-left font-bold text-gray-600 uppercase">Beds</th>
+              <th className="px-6 py-3 text-left font-bold text-gray-600 uppercase">Dept Expiry</th>
+              <th className="px-6 py-3 text-left font-bold text-gray-600 uppercase">Ward Expiry</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {(searchTerm ? filteredAssignments : assignments).map((a) => {
+              const deptExpiryDate = a.deptExpiry ? new Date(a.deptExpiry) : null;
+              const wardExpiryDate = a.wardExpiry ? new Date(a.wardExpiry) : null;
+
+              const isDeptExpired = deptExpiryDate && deptExpiryDate < today;
+              const isWardExpired = wardExpiryDate && wardExpiryDate < today;
+
+              return (
+                <tr key={a._id} className="hover:bg-green-50 transition-colors">
+                  <td className="px-6 py-4 font-medium text-gray-800">{a.user?.name}</td>
+                  <td className="px-6 py-4 text-gray-600 font-medium">{getRoleName(a.user?.role)}</td>
+                  <td className="px-6 py-4 font-medium text-indigo-700">{a.department?.name}</td>
+                  <td className="px-6 py-4 text-gray-700">{a.ward || "N/A"}</td>
+                  <td className="px-6 py-4">
+                    {Array.isArray(a.beds) && a.beds.length > 0 ? (
+                      <div className="flex flex-wrap gap-2">
+                        {a.beds.map((bedId, index) => (
+                          <span
+                            key={index}
+                            className="px-3 py-1 text-xs font-semibold text-indigo-700 bg-indigo-100 rounded-full shadow-sm flex items-center"
+                          >
+                            <FaBed className="mr-1" size={10} /> {bedId}
+                          </span>
+                        ))}
+                      </div>
                     ) : (
-                        <span className="text-gray-500 italic">No Beds</span>
+                      <span className="text-gray-500 italic">No Beds</span>
                     )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
+                  </td>
+                  <td className={`px-6 py-4 ${isDeptExpired ? 'text-red-500' : deptExpiryDate?.toLocaleDateString() === todayString ? 'text-red-500' : 'text-green-700'}`}>
+                    {isDeptExpired ? `❌ ${deptExpiryDate?.toLocaleDateString()}` : deptExpiryDate?.toLocaleDateString() || "N/A"}
+                  </td>
+                  <td className={`px-6 py-4 ${isWardExpired ? 'text-red-500' : wardExpiryDate?.toLocaleDateString() === todayString ? 'text-red-500' : 'text-green-700'}`}>
+                    {isWardExpired ? `❌ ${wardExpiryDate?.toLocaleDateString()}` : wardExpiryDate?.toLocaleDateString() || "N/A"}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
 
   const renderNotifications = () => (
     <div className="bg-white p-6 rounded-2xl shadow-xl">
