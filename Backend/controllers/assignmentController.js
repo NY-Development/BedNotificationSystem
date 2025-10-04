@@ -162,7 +162,7 @@ export const getMyAssignments = async (req, res) => {
 export const updateExpiryDates = async (req, res) => {
   try {
     const { id } = req.params; // assignment ID
-    const { deptExpiry, wardExpiry, department, ward } = req.body;
+    const { deptExpiry, wardExpiry, department, ward, beds } = req.body;
 
     const assignment = await Assignment.findById(id);
     if (!assignment) {
@@ -177,16 +177,23 @@ export const updateExpiryDates = async (req, res) => {
       return res.status(403).json({ message: "Not authorized to update expiry" });
     }
 
-    // Update fields
+    // Update expiry fields
     if (deptExpiry) assignment.deptExpiry = new Date(deptExpiry);
     if (wardExpiry) assignment.wardExpiry = new Date(wardExpiry);
+
+    // Update department / ward if changed
     if (department) assignment.department = department;
     if (ward) assignment.ward = ward;
+
+    // ✅ Update bed assignments
+    if (Array.isArray(beds)) {
+      assignment.beds = beds; // Directly replace with new list
+    }
 
     await assignment.save();
 
     res.json({
-      message: "Expiry and assignment updated successfully",
+      message: "Expiry, assignment, and bed data updated successfully",
       assignment,
     });
   } catch (err) {
@@ -194,7 +201,6 @@ export const updateExpiryDates = async (req, res) => {
     res.status(500).json({ message: err.message || "Server error" });
   }
 };
-
 
 // Update an assignment (admin or owner)
 export const updateAssignment = async (req, res) => {

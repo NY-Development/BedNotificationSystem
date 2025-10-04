@@ -32,7 +32,7 @@ export const AssignmentProvider = ({ children }) => {
       const data = await getMyAssignment();
       if (data && data.length > 0) {
         setUserAssign(data[0]);
-        return data[0]; // ✅ return it
+        return data[0];
       }
       return null;
     } catch (err) {
