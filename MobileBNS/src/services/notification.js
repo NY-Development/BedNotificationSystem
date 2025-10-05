@@ -1,6 +1,16 @@
-import API from './axios';
+import API from "./axios";
 
 export const getNotifications = async () => {
-  const res = await API.get('/notifications');
+  const res = await API.get("/notifications");
+  return res.data;
+};
+
+export const getUnreadNotificationsCount = async () => {
+  const res = await API.get("/notifications/unread/count");
+  return res.data;
+};
+
+export const markNotificationAsRead = async (id) => {
+  const res = await API.put(`/notifications/${id}/read`);
   return res.data;
 };

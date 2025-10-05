@@ -12,12 +12,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { useBed } from '../../context/BedContext';
 import { useAuth } from '../../context/AuthContext';
 import Toast from 'react-native-toast-message';
+import SearchBar from '../../components/SearchBar';
 
 export default function BedsScreen() {
   const { user } = useAuth();
   const { departments, loading, admit, discharge } = useBed();
   const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [showDepartmentModal, setShowDepartmentModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [expandedWard, setExpandedWard] = useState(null); // State to manage the expanded ward
 
   if (loading) {
     return (
@@ -27,7 +30,19 @@ export default function BedsScreen() {
     );
   }
 
-  const currentDepartment = selectedDepartment || (departments.length > 0 ? departments[0] : null);
+  // Filter departments based on the search term
+  const filteredDepartments = departments.map(dept => {
+    const filteredWards = dept.wards.map(ward => {
+      const filteredBeds = ward.beds.filter(bed => {
+        return ward.name.toLowerCase().includes(searchTerm.toLowerCase());
+      });
+      return { ...ward, beds: filteredBeds };
+    }).filter(ward => ward.beds.length > 0);
+    return { ...dept, wards: filteredWards };
+  }).filter(dept => dept.wards.length > 0);
+
+  const departmentsToDisplay = searchTerm ? filteredDepartments : departments;
+  const currentDepartment = selectedDepartment || (departmentsToDisplay.length > 0 ? departmentsToDisplay[0] : null);
 
   const handleAdmit = (deptId, wardName, bedId, bed) => {
     if (bed.assignedUser?._id === user._id) {
@@ -53,7 +68,7 @@ export default function BedsScreen() {
     }
   };
 
-  const renderBed = (bed, ward, department) => (
+  const renderBed = (bed) => (
     <View key={bed.id} style={[
       styles.bedCard,
       { borderLeftColor: bed.status === 'occupied' ? '#EF4444' : '#10B981' }
@@ -72,11 +87,11 @@ export default function BedsScreen() {
           </Text>
         </View>
       </View>
-      
+
       <Text style={styles.assignedUser}>
         Assigned to: {bed.assignedUser?.name || 'Not assigned'}
       </Text>
-      
+
       <View style={styles.bedActions}>
         <TouchableOpacity
           style={[
@@ -84,21 +99,21 @@ export default function BedsScreen() {
             styles.admitButton,
             bed.status === 'occupied' && styles.disabledButton
           ]}
-          onPress={() => handleAdmit(department._id, ward.name, bed.id, bed)}
+          onPress={() => handleAdmit(currentDepartment._id, ward.name, bed.id, bed)}
           disabled={bed.status === 'occupied'}
         >
           <Text style={styles.actionButtonText}>
             {bed.status === 'occupied' ? 'Patient Admitted' : 'Admit Patient'}
           </Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity
           style={[
             styles.actionButton,
             styles.dischargeButton,
             bed.status === 'available' && styles.disabledButton
           ]}
-          onPress={() => handleDischarge(department._id, ward.name, bed.id, bed)}
+          onPress={() => handleDischarge(currentDepartment._id, ward.name, bed.id, bed)}
           disabled={bed.status === 'available'}
         >
           <Text style={styles.actionButtonText}>
@@ -116,7 +131,7 @@ export default function BedsScreen() {
 
     return (
       <View key={ward.name} style={styles.wardCard}>
-        <View style={styles.wardHeader}>
+        <TouchableOpacity style={styles.wardHeader} onPress={() => setExpandedWard(expandedWard === ward.name ? null : ward.name)}>
           <Text style={styles.wardName}>{ward.name}</Text>
           <View style={styles.wardStats}>
             <View style={styles.statItem}>
@@ -128,11 +143,14 @@ export default function BedsScreen() {
               <Text style={styles.statLabel}>Available</Text>
             </View>
           </View>
-        </View>
-        
-        <ScrollView style={styles.bedsContainer}>
-          {ward.beds.map(bed => renderBed(bed, ward, currentDepartment))}
-        </ScrollView>
+          <Ionicons name={expandedWard === ward.name ? "chevron-up" : "chevron-down"} size={20} color="#6B7280" />
+        </TouchableOpacity>
+
+        {expandedWard === ward.name && (
+          <ScrollView style={styles.bedsContainer}>
+            {ward.beds.map(bed => renderBed(bed))}
+          </ScrollView>
+        )}
       </View>
     );
   };
@@ -150,6 +168,12 @@ export default function BedsScreen() {
           <Ionicons name="chevron-down" size={20} color="#6B7280" />
         </TouchableOpacity>
       </View>
+
+      <SearchBar
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        placeholder="Search wards..."
+      />
 
       {currentDepartment && (
         <ScrollView style={styles.content}>
@@ -172,7 +196,7 @@ export default function BedsScreen() {
               <Ionicons name="close" size={24} color="#6B7280" />
             </TouchableOpacity>
           </View>
-          
+
           <FlatList
             data={departments}
             keyExtractor={(item) => item._id}

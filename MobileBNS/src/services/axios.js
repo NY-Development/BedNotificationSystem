@@ -1,10 +1,11 @@
 import axios from 'axios';
-import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 
 const API = axios.create({
   baseURL: 'https://bnst-ao5j.vercel.app/api',
-  timeout: 10000,
+  // baseURL: 'http://localhost:5000/api',
+  withCredentials: true,
 });
 
 // Flag to track unauthorized toast
@@ -13,13 +14,9 @@ let hasShownUnauthorizedToast = false;
 // Attach token automatically
 API.interceptors.request.use(
   async (config) => {
-    try {
-      const token = await SecureStore.getItemAsync('token');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    } catch (error) {
-      console.error('Error getting token from secure store:', error);
+    const token = await AsyncStorage.getItem('token'); // Use AsyncStorage to get the token
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
@@ -32,22 +29,28 @@ API.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       if (!hasShownUnauthorizedToast) {
+        // Show a toast notification for unauthorized access
         Toast.show({
-          type: 'info',
-          text1: 'Authentication Required',
-          text2: 'Please log in to continue.',
+          type: 'error',
+          text1: "Please log in to continue.",
         });
         hasShownUnauthorizedToast = true;
       }
       return Promise.reject(error);
     }
 
-    // Reset flag for other errors
+    // Reset flag for other errors (if needed)
     if (error.response && error.response.status !== 401) {
       hasShownUnauthorizedToast = false;
     }
 
-    return Promise.reject(error);
+    // General error handling
+    Toast.show({
+      type: 'error',
+      text1: error.response?.data?.message || "Something went wrong!",
+    });
+
+    return Promise.reject(error); // Handle other errors normally
   }
 );
 

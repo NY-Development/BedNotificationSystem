@@ -10,7 +10,6 @@ import {
   FlatList,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Picker } from '@react-native-picker/picker';
 import { createAssignment, updateAssignment } from '../../services/assignment';
 import { fetchDepartments } from '../../services/bed';
 import { useBed } from '../../context/BedContext';
@@ -39,6 +38,12 @@ export default function AssignmentsScreen({ closeModal, updateAssign = false, is
 
   const selectedDept = departments.find((d) => d._id === form.deptId);
   const selectedWard = selectedDept?.wards.find((w) => w.name === form.wardName);
+
+  const bedsToDisplay = selectedWard
+    ? updateAssign
+      ? selectedWard.beds.filter(bed => !bed.assignedUser || bed.assignedUser.name === user.name)
+      : selectedWard.beds.filter(bed => !bed.assignedUser || form.beds.includes(bed.id))
+    : [];
 
   const handleSubmit = async () => {
     if (!form.deptId || !form.wardName || !form.deptExpiry || !form.wardExpiry || form.beds.length === 0) {
@@ -130,7 +135,7 @@ export default function AssignmentsScreen({ closeModal, updateAssign = false, is
         <Text style={styles.label}>Select Beds *</Text>
         <ScrollView style={styles.bedContainer} nestedScrollEnabled>
           <View style={styles.bedGrid}>
-            {selectedWard.beds.map((bed) => (
+            {bedsToDisplay.map((bed) => (
               <TouchableOpacity
                 key={bed.id}
                 style={[
@@ -298,6 +303,8 @@ export default function AssignmentsScreen({ closeModal, updateAssign = false, is
           />
         </View>
       </Modal>
+      
+      <Toast ref={(ref) => Toast.setRef(ref)} /> {/* Ensure Toast is included */}
     </ScrollView>
   );
 }
@@ -338,6 +345,14 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     backgroundColor: 'white',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.5,
+    elevation: 2,
   },
   selector: {
     flexDirection: 'row',
@@ -349,6 +364,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 12,
     backgroundColor: 'white',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.5,
+    elevation: 2,
   },
   selectorText: {
     fontSize: 16,
@@ -364,6 +387,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: 'white',
     padding: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.5,
+    elevation: 2,
   },
   bedGrid: {
     flexDirection: 'row',
@@ -379,6 +410,14 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     alignItems: 'center',
     backgroundColor: '#F9FAFB',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.5,
+    elevation: 2,
   },
   selectedBed: {
     backgroundColor: '#4F46E5',
@@ -407,6 +446,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 3,
   },
   disabledButton: {
     backgroundColor: '#9CA3AF',

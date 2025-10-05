@@ -5,46 +5,43 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Modal,
   FlatList,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAdmin } from '../../context/AdminContext';
 import { useAuth } from '../../context/AuthContext';
+import ConfirmModal from '../../components/ConfirmModal';
+import Toast from 'react-native-toast-message';
 
 export default function AdminScreen() {
   const { user } = useAuth();
   const {
     stats,
     users,
-    assignments,
     departments,
     loading,
-    loadStats,
-    loadUsers,
-    loadAssignments,
+    createWard,
+    removeWardById,
+    createBed,
+    removeBedById,
     loadDepartments,
+    loadUsers,
+    loadStats,
   } = useAdmin();
 
-  const [activeTab, setActiveTab] = useState('stats');
+  const [activeTab, setActiveTab] = useState('departments');
+  const [selectedDept, setSelectedDept] = useState(null);
+  const [newWardName, setNewWardName] = useState('');
+  const [selectedWard, setSelectedWard] = useState(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmData, setConfirmData] = useState({});
 
   useEffect(() => {
-    if (user?.role === 'admin') {
-      loadStats();
-      loadUsers();
-      loadAssignments();
-      loadDepartments();
-    }
+    loadDepartments();
+    loadUsers();
+    loadStats();
   }, [user]);
-
-  if (user?.role !== 'admin') {
-    return (
-      <View style={styles.unauthorizedContainer}>
-        <Ionicons name="lock-closed" size={80} color="#DC2626" />
-        <Text style={styles.unauthorizedTitle}>Access Denied</Text>
-        <Text style={styles.unauthorizedSubtitle}>Admin access required</Text>
-      </View>
-    );
-  }
 
   if (loading) {
     return (
@@ -54,123 +51,93 @@ export default function AdminScreen() {
     );
   }
 
-  const renderStatsTab = () => (
-    <ScrollView style={styles.tabContent}>
-      {stats && (
-        <View style={styles.statsGrid}>
-          <View style={styles.statCard}>
-            <Ionicons name="people" size={32} color="#3B82F6" />
-            <Text style={styles.statNumber}>{stats.totalUsers}</Text>
-            <Text style={styles.statLabel}>Total Users</Text>
-          </View>
-          
-          <View style={styles.statCard}>
-            <Ionicons name="business" size={32} color="#8B5CF6" />
-            <Text style={styles.statNumber}>{stats.totalDepartments}</Text>
-            <Text style={styles.statLabel}>Departments</Text>
-          </View>
-          
-          <View style={styles.statCard}>
-            <Ionicons name="bed" size={32} color="#10B981" />
-            <Text style={styles.statNumber}>{stats.beds?.total || 0}</Text>
-            <Text style={styles.statLabel}>Total Beds</Text>
-          </View>
-          
-          <View style={styles.statCard}>
-            <Ionicons name="checkmark-circle" size={32} color="#059669" />
-            <Text style={styles.statNumber}>{stats.beds?.available || 0}</Text>
-            <Text style={styles.statLabel}>Available</Text>
-          </View>
-          
-          <View style={styles.statCard}>
-            <Ionicons name="close-circle" size={32} color="#DC2626" />
-            <Text style={styles.statNumber}>{stats.beds?.occupied || 0}</Text>
-            <Text style={styles.statLabel}>Occupied</Text>
-          </View>
-        </View>
-      )}
-    </ScrollView>
-  );
-
-  const renderUsersTab = () => (
-    <FlatList
-      data={users}
-      keyExtractor={(item) => item._id}
-      renderItem={({ item }) => (
-        <View style={styles.userCard}>
-          <View style={styles.userInfo}>
-            <Text style={styles.userName}>{item.name}</Text>
-            <Text style={styles.userEmail}>{item.email}</Text>
-            <View style={styles.roleBadge}>
-              <Text style={styles.roleText}>{item.role.toUpperCase()}</Text>
-            </View>
-          </View>
-          <TouchableOpacity style={styles.userAction}>
-            <Ionicons name="chevron-forward" size={20} color="#6B7280" />
-          </TouchableOpacity>
-        </View>
-      )}
-      contentContainerStyle={styles.tabContent}
-    />
-  );
-
-  const renderDepartmentsTab = () => (
-    <FlatList
-      data={departments}
-      keyExtractor={(item) => item._id}
-      renderItem={({ item }) => (
-        <View style={styles.departmentCard}>
-          <Text style={styles.departmentName}>{item.name}</Text>
-          <Text style={styles.departmentInfo}>
-            {item.wards?.length || 0} wards
-          </Text>
-          <Text style={styles.departmentInfo}>
-            {item.wards?.reduce((total, ward) => total + (ward.beds?.length || 0), 0) || 0} beds
-          </Text>
-        </View>
-      )}
-      contentContainerStyle={styles.tabContent}
-    />
-  );
-
-  const tabs = [
-    { id: 'stats', title: 'Statistics', icon: 'bar-chart' },
-    { id: 'users', title: 'Users', icon: 'people' },
-    { id: 'departments', title: 'Departments', icon: 'business' },
-  ];
+  const openConfirm = (title, message, onConfirm) => {
+    setConfirmData({ title, message, onConfirm });
+    setConfirmOpen(true);
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.tabBar}>
-        {tabs.map((tab) => (
+        {['departments', 'users'].map((tab) => (
           <TouchableOpacity
-            key={tab.id}
+            key={tab}
             style={[
               styles.tab,
-              activeTab === tab.id && styles.activeTab
+              activeTab === tab && styles.activeTab,
             ]}
-            onPress={() => setActiveTab(tab.id)}
+            onPress={() => setActiveTab(tab)}
           >
-            <Ionicons 
-              name={tab.icon} 
-              size={20} 
-              color={activeTab === tab.id ? '#4F46E5' : '#6B7280'} 
+            <Ionicons
+              name={tab === 'departments' ? 'business' : 'people'}
+              size={20}
+              color={activeTab === tab ? '#4F46E5' : '#6B7280'}
             />
             <Text style={[
               styles.tabText,
-              activeTab === tab.id && styles.activeTabText
+              activeTab === tab && styles.activeTabText,
             ]}>
-              {tab.title}
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
             </Text>
           </TouchableOpacity>
         ))}
       </View>
 
-      <View style={styles.content}>
-        {activeTab === 'stats' && renderStatsTab()}
-        {activeTab === 'users' && renderUsersTab()}
-        {activeTab === 'departments' && renderDepartmentsTab()}
-      </View>
+      {/* Stats */}
+      {activeTab === 'departments' && stats && (
+        <View style={styles.statsContainer}>
+          <Text style={styles.statsTitle}>System Stats</Text>
+          <View style={styles.statsGrid}>
+            <View style={styles.statCard}>
+              <Ionicons name="people" size={32} color="#3B82F6" />
+              <Text style={styles.statNumber}>{stats.totalUsers}</Text>
+              <Text style={styles.statLabel}>Total Users</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Ionicons name="business" size={32} color="#8B5CF6" />
+              <Text style={styles.statNumber}>{stats.totalDepartments}</Text>
+              <Text style={styles.statLabel}>Total Departments</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Ionicons name="bed" size={32} color="#10B981" />
+              <Text style={styles.statNumber}>{stats.beds?.total || 0}</Text>
+              <Text style={styles.statLabel}>Total Beds</Text>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {/* Departments Tab */}
+      {activeTab === 'departments' && (
+        <View style={styles.departmentsContainer}>
+          <Text style={styles.departmentsTitle}>Departments</Text>
+          <FlatList
+            data={departments}
+            keyExtractor={(item) => item._id}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.departmentItem}
+                onPress={() => setSelectedDept(item)}
+              >
+                <Text style={styles.departmentName}>{item.name}</Text>
+                <Text style={styles.departmentInfo}>
+                  {item.wards.length} Wards
+                </Text>
+              </TouchableOpacity>
+            )}
+          />
+        </View>
+      )}
+
+      {/* Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmOpen}
+        title={confirmData.title}
+        message={confirmData.message}
+        onConfirm={confirmData.onConfirm}
+        onCancel={() => setConfirmOpen(false)}
+      />
+      <Toast ref={(ref) => Toast.setRef(ref)} /> {/* Ensure Toast is included */}
     </View>
   );
 }
@@ -179,23 +146,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
-  },
-  unauthorizedContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 40,
-  },
-  unauthorizedTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#DC2626',
-    marginTop: 16,
-  },
-  unauthorizedSubtitle: {
-    fontSize: 16,
-    color: '#6B7280',
-    marginTop: 8,
   },
   loadingContainer: {
     flex: 1,
@@ -218,7 +168,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 16,
-    paddingHorizontal: 8,
   },
   activeTab: {
     borderBottomWidth: 2,
@@ -228,30 +177,40 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6B7280',
     marginLeft: 8,
-    fontWeight: '500',
   },
   activeTabText: {
     color: '#4F46E5',
-    fontWeight: '600',
   },
-  content: {
-    flex: 1,
-  },
-  tabContent: {
+  statsContainer: {
     padding: 16,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  statsTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 16,
   },
   statsGrid: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
   statCard: {
+    flex: 1,
     backgroundColor: 'white',
     borderRadius: 12,
     padding: 20,
     alignItems: 'center',
-    width: '48%',
-    marginBottom: 16,
+    margin: 8,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -265,21 +224,16 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#1F2937',
-    marginTop: 8,
   },
   statLabel: {
     fontSize: 14,
     color: '#6B7280',
-    marginTop: 4,
-    textAlign: 'center',
   },
-  userCard: {
+  departmentsContainer: {
+    padding: 16,
     backgroundColor: 'white',
     borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
+    marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -289,58 +243,22 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  userInfo: {
-    flex: 1,
+  departmentsTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 16,
   },
-  userName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1F2937',
-    marginBottom: 4,
-  },
-  userEmail: {
-    fontSize: 14,
-    color: '#6B7280',
-    marginBottom: 8,
-  },
-  roleBadge: {
-    backgroundColor: '#EEF2FF',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    alignSelf: 'flex-start',
-  },
-  roleText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#4F46E5',
-  },
-  userAction: {
-    padding: 8,
-  },
-  departmentCard: {
-    backgroundColor: 'white',
-    borderRadius: 12,
+  departmentItem: {
     padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
   },
   departmentName: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#1F2937',
-    marginBottom: 8,
+    fontWeight: 'bold',
   },
   departmentInfo: {
     fontSize: 14,
     color: '#6B7280',
-    marginBottom: 4,
   },
 });

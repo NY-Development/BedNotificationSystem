@@ -24,7 +24,6 @@ function AppContent() {
 
   return (
     <NavigationContainer>
-      {/* {user && user.subscription?.isActive ? ( */}
       {user ? (
         <MainNavigator />
       ) : (
@@ -42,7 +41,7 @@ export default function App() {
           <AdminProvider>
             <AppContent />
             <StatusBar style="auto" />
-            <Toast />
+            <Toast ref={(ref) => Toast.setRef(ref)} /> {/* Set the ref for Toast */}
           </AdminProvider>
         </AssignmentProvider>
       </BedProvider>

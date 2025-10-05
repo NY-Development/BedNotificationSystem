@@ -1,14 +1,14 @@
-import API from './axios';
+import API from "./axios";
 
 // Get all departments with wards & beds
 export const fetchDepartments = async () => {
-  const res = await API.get('/departments');
+  const res = await API.get("/departments");
   return res.data;
 };
 
 // Admit patient to bed
 export const admitPatient = async ({ deptId, wardName, bedId }) => {
-  const res = await API.post('/departments/admit', {
+  const res = await API.post("/departments/admit", {
     deptId,
     wardName,
     bedId,
@@ -18,7 +18,7 @@ export const admitPatient = async ({ deptId, wardName, bedId }) => {
 
 // Discharge patient from bed
 export const dischargePatient = async ({ deptId, wardName, bedId }) => {
-  const res = await API.post('/departments/discharge', {
+  const res = await API.post("/departments/discharge", {
     deptId,
     wardName,
     bedId,

@@ -11,12 +11,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
 import { useAssignment } from '../../context/AssignmentContext';
 import AssignmentsScreen from './AssignmentsScreen';
+import { getUnreadNotificationsCount } from '../../services/notification';
 
 export default function DashboardScreen({ navigation }) {
   const { user } = useAuth();
   const { expiry, deptExpiry, wardExpiry, loading, fetchExpiry } = useAssignment();
   const [showAssignmentModal, setShowAssignmentModal] = useState(false);
   const [forceRequired, setForceRequired] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const hasExpiredAssignment = React.useMemo(() => {
     if (!expiry) return false;
@@ -37,6 +39,22 @@ export default function DashboardScreen({ navigation }) {
       }
     }
   }, [loading, user, hasExpiredAssignment]);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      if (user) {
+        try {
+          const { count } = await getUnreadNotificationsCount();
+          setUnreadCount(count);
+        } catch (err) {
+          console.error("Failed to fetch unread notification count", err);
+        }
+      }
+    };
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 60 * 1000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -100,6 +118,11 @@ export default function DashboardScreen({ navigation }) {
               <Text style={styles.cardTitle}>{item.title}</Text>
               <Text style={styles.cardSubtitle}>{item.subtitle}</Text>
             </View>
+            {item.title === 'Notifications' && unreadCount > 0 && (
+              <View style={styles.notificationBadge}>
+                <Text style={styles.badgeText}>{unreadCount}</Text>
+              </View>
+            )}
             <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
           </TouchableOpacity>
         ))}
@@ -201,10 +224,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6B7280',
   },
+  notificationBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: '#F44336',
+    borderRadius: 12,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  badgeText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 12,
+  },
   fab: {
     position: 'relative',
-    top: 20,
-    left: 700,
+    bottom: 20,
+    left: 10,
     width: 56,
     height: 56,
     borderRadius: 28,
