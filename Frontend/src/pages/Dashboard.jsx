@@ -14,7 +14,12 @@ const Dashboard = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [today, setToday] = useState();
   const navigate = useNavigate();
-
+  
+  useEffect(() => {
+    if (user && !user.firstLoginDone) {
+      setForceRequired(true); // Example condition
+    }
+  }, [user]);
   // redirect admins
   if (user?.role === "admin") {
     window.location.href = "/admin";
