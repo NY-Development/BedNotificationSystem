@@ -20,6 +20,9 @@ const Dashboard = () => {
       setForceRequired(true); // Example condition
       setOpen(true);
     }
+    if(user.firstLoginDone){
+      window.location.reload();
+    }
   }, [user]);
   // redirect admins
   if (user?.role === "admin") {
