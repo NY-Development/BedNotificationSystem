@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Department from "../models/Department.js";
 import User from "../models/User.js";
 import Assignment from "../models/Assignment.js";
