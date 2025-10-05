@@ -135,7 +135,12 @@ const Assignments = ({ closeModal, updateAssign = false, onFirstAssignmentComple
         {/* Department Selection */}
         <div>
           <label className="block font-semibold">Select Department:</label>
-          {departments.map((dept) => (
+          {!departments.length ? (
+            <div className="text-blue-500 italic animate-pulse">
+              Wait for fetching departments . . .
+            </div>
+          ) :(
+            departments.map((dept) => (
             <label key={dept._id} className="block">
               <input
                 type="radio"
@@ -148,7 +153,7 @@ const Assignments = ({ closeModal, updateAssign = false, onFirstAssignmentComple
               />{" "}
               {dept.name}
             </label>
-          ))}
+          )))}
         </div>
 
         {/* Department expiry */}
