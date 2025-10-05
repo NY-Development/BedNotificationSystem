@@ -18,6 +18,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (user && !user.firstLoginDone) {
       setForceRequired(true); // Example condition
+      setOpen(true);
     }
   }, [user]);
   // redirect admins
