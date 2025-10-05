@@ -158,7 +158,6 @@ export const getMyAssignments = async (req, res) => {
   }
 };
 
-// New: update only expiry dates
 export const updateExpiryDates = async (req, res) => {
   try {
     const { id } = req.params; // assignment ID

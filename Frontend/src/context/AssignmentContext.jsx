@@ -30,8 +30,9 @@ export const AssignmentProvider = ({ children }) => {
     if (!user) return null;
     try {
       const data = await getMyAssignment();
-      if (data && data.length > 0) {
+      if (data) {
         setUserAssign(data[0]);
+        console.log(data[0])
         return data[0];
       }
       return null;
