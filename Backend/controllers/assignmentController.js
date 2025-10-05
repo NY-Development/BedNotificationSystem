@@ -168,7 +168,7 @@ export const updateExpiryDates = async (req, res) => {
       return res.status(404).json({ message: "Assignment not found" });
     }
 
-    // authorization
+    // Authorization: only the assigned user or admin can update
     if (
       assignment.user.toString() !== req.user._id.toString() &&
       req.user.role !== "admin"
@@ -176,23 +176,37 @@ export const updateExpiryDates = async (req, res) => {
       return res.status(403).json({ message: "Not authorized to update expiry" });
     }
 
-    // Update expiry fields
+    //  Update expiry fields if provided
     if (deptExpiry) assignment.deptExpiry = new Date(deptExpiry);
     if (wardExpiry) assignment.wardExpiry = new Date(wardExpiry);
 
-    // Update department / ward if changed
-    if (department) assignment.department = department;
+    //  Department update — supports both ObjectId and name
+    if (department) {
+      if (mongoose.Types.ObjectId.isValid(department)) {
+        //  case 1: department is ObjectId
+        assignment.department = department;
+      } else {
+        //  case 2: department is name (e.g., "GynObs")
+        const deptDoc = await Department.findOne({ name: department });
+        if (!deptDoc) {
+          return res.status(400).json({ message: `Department '${department}' not found` });
+        }
+        assignment.department = deptDoc._id;
+      }
+    }
+
+    // Update ward if changed
     if (ward) assignment.ward = ward;
 
-    // ✅ Update bed assignments
+    //  Update bed assignments (replace with new list)
     if (Array.isArray(beds)) {
-      assignment.beds = beds; // Directly replace with new list
+      assignment.beds = beds;
     }
 
     await assignment.save();
 
     res.json({
-      message: "Expiry, assignment, and bed data updated successfully",
+      message: "Expiry, department, ward, and bed data updated successfully",
       assignment,
     });
   } catch (err) {
