@@ -53,6 +53,7 @@ const Navbar = () => {
               <Link
                 to="/update-expiry"
                 className="block px-4 py-2 hover:bg-gray-700 transition duration-200"
+                onClick={toggleMenu}
               >
                 Update Date
               </Link>
@@ -96,6 +97,7 @@ const Navbar = () => {
               <Link
                 to="/update-expiry"
                 className="block px-4 py-2 hover:bg-gray-700 transition duration-200"
+                onClick={toggleMenu}
               >
                 Update Date
               </Link>

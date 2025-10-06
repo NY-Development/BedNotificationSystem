@@ -57,7 +57,7 @@ function App() {
                     <Route path="/admin" element={<MainAdmin />} />
                     <Route path="/update-expiry" element={<UpdateExpiry />} />
                     <Route path="/support-responses" element={<SupportResponses />} />
-                    <Route path="*" element={<Home />} /> {/* fallback */}
+                    {/* <Route path="*" element={<Home />} /> fallback */}
                   </Routes>
                 </main>
                 <Footer />
