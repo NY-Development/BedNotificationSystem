@@ -1,6 +1,7 @@
 import { FaYoutube, FaInstagram, FaTelegramPlane, FaHeartbeat } from 'react-icons/fa';
 import PrivacyModal from "../components/PrivacyModal";
 import { useState } from 'react';
+import bedIcon from '../assets/medical-bed.png'
 
 const Footer = () => {
   const [showModal, setShowModal] = useState(false);
@@ -13,7 +14,8 @@ const Footer = () => {
           
           {/* Copyright & Product Info */}
           <div className="flex items-center mb-4 md:mb-0">
-            <FaHeartbeat className="text-white text-xl mr-2" />
+            <img src={bedIcon} alt="Bed Icon" className="mx-auto h-8 w-auto mr-2" />
+            {/* <FaHeartbeat className="text-white text-xl mr-2" /> */}
             <p className="text-gray-400">
               &copy; {new Date().getFullYear()} <span className="font-bold text-white">BNS</span> - Bed Notification System.
             </p>
