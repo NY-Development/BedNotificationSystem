@@ -26,6 +26,7 @@ import SupportWidget from "./components/SupportWidget";
 import MainAdmin from "./pages/MainAdmin";
 import UpdateExpiry from "./pages/UpdateExpiry";
 import SupportResponses from "./pages/SupportResponses";
+import { Analytics } from '@vercel/analytics/react';
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
             <AdminProvider>
               <SupervisorProvider>
               <div className="min-h-screen bg-gray-50">
+                <Analytics />
                 <Navbar />
                 <main className="min-h-screen text-center">
                   <Routes>
