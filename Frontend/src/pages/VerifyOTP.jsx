@@ -35,17 +35,18 @@ const VerifyOTP = () => {
       setError("");
       setMessage("Verifying OTP...");
       await checkOtp(userEmail, otp);
-      // setMessage("Account verified! Redirecting to payment...");  COMMENTED THIS FOR A TRIAL PERIOD.
+      setMessage("Account verified! Redirecting to payment...");
 
       // initiate payment instead of going to login
-      // setTimeout(() => {
-      //   initiateUserPayment(userEmail);
-      // }, 1500);
-
-      setMessage("Account verified! Redirecting to login...");
       setTimeout(() => {
-        navigate('/login');
-      }, 1500);
+        // initiateUserPayment(userEmail);
+        navigate('/screenshot');
+      }, 2000);
+
+      // setMessage("Account verified! Redirecting to login...");
+      // setTimeout(() => {
+      //   navigate('/login');
+      // }, 1500);
     } catch (err) {
       setError(err.message || "OTP verification failed");
       setMessage("");

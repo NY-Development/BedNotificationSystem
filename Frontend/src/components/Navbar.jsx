@@ -53,6 +53,7 @@ const Navbar = () => {
               <Link
                 to="/update-expiry"
                 className="block px-4 py-2 hover:bg-gray-700 transition duration-200"
+                onClick={toggleMenu}
               >
                 Update Date
               </Link>
@@ -68,8 +69,9 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <Link to="/login" className="hover:text-blue-400">Login</Link>
+              <Link to="/login" className="hover:text-blue-400 bg-white rounded-md p-2 px-6 text-black">Login</Link>
               <Link to="/register" className="hover:text-blue-400">Register</Link>
+              <Link to="/about" className="hover:text-blue-400">About Us</Link>
             </>
           )}
         </div>
@@ -96,6 +98,7 @@ const Navbar = () => {
               <Link
                 to="/update-expiry"
                 className="block px-4 py-2 hover:bg-gray-700 transition duration-200"
+                onClick={toggleMenu}
               >
                 Update Date
               </Link>
@@ -110,6 +113,7 @@ const Navbar = () => {
             <>
               <Link to="/login" onClick={toggleMenu} className="block px-4 py-2 hover:bg-gray-700 transition duration-200">Login</Link>
               <Link to="/register" onClick={toggleMenu} className="block px-4 py-2 hover:bg-gray-700 transition duration-200">Register</Link>
+              <Link to="/about" onClick={toggleMenu} className="block px-4 py-2 hover:bg-gray-700 transition duration-200">About Us</Link>
             </>
           )}
         </div>

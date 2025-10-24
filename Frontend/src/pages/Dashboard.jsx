@@ -14,37 +14,43 @@ const Dashboard = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [today, setToday] = useState();
   const navigate = useNavigate();
-  
+
+  // 🔹 Handle first-time login modal
   useEffect(() => {
-    if (user && !user.firstLoginDone) {
-      setForceRequired(true); // Example condition
-      setOpen(true);
+    if (user && user.firstLoginDone === false) {
+      setForceRequired(true);
+      setOpen(true); // Auto open modal
+      setUpdateAssign(false); // new assignment required
+    } else {
+      setForceRequired(false);
     }
   }, [user]);
-  // redirect admins
-  if (user?.role === "admin") {
-    window.location.href = "/admin";
-  }
 
-  // check if expiry reached
+  // 🔹 Admin redirect
+  useEffect(() => {
+    if (user?.role === "admin") {
+      window.location.href = "/admin";
+    }
+  }, [user]);
+
+  // 🔹 Expiry checks
   const hasExpiredAssignment = useMemo(() => {
     if (!expiry) return false;
-    setToday(new Date().toLocaleDateString("en-CA"));
-    const deptExpired = deptExpiry && today >= deptExpiry;
-    const wardExpired = wardExpiry && today >= wardExpiry;
+    const todayStr = new Date().toLocaleDateString("en-CA");
+    setToday(todayStr);
+    const deptExpired = deptExpiry && todayStr >= deptExpiry;
+    const wardExpired = wardExpiry && todayStr >= wardExpiry;
     return deptExpired || wardExpired;
-  }, [expiry, deptExpiry, wardExpiry, today]);
+  }, [expiry, deptExpiry, wardExpiry]);
 
-  // redirect to update-expiry if expired (and not intern)
+  // 🔹 Redirect to expiry update page
   useEffect(() => {
-    if (!loading && user) {
-      if (hasExpiredAssignment && user.role !== "intern") {
-        navigate("/update-expiry", { replace: true });
-      }
+    if (!loading && user && hasExpiredAssignment && user.role !== "intern") {
+      navigate("/update-expiry", { replace: true });
     }
   }, [loading, user, hasExpiredAssignment, navigate]);
 
-  // notifications
+  // 🔹 Notifications count
   useEffect(() => {
     const fetchUnreadCount = async () => {
       if (user) {
@@ -57,22 +63,18 @@ const Dashboard = () => {
       }
     };
     fetchUnreadCount();
-
     const interval = setInterval(fetchUnreadCount, 1 * 60 * 1000);
     return () => clearInterval(interval);
   }, [user]);
 
+  // 🔹 Guard for non-authenticated users
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
         <div className="text-center p-8 bg-white rounded-xl shadow-2xl">
-          <div className="text-6xl mb-4 animate-bounce">👋</div>
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">
-            Access Denied
-          </h2>
-          <p className="text-lg text-gray-600 mb-6">
-            Please log in to view this page.
-          </p>
+          <div className="text-6xl mb-4 animate-bounce">❌</div>
+          <h2 className="text-3xl font-bold text-gray-800 mb-2">Access Denied</h2>
+          <p className="text-lg text-gray-600 mb-6">Please log in to view this page.</p>
           <Link
             to="/login"
             className="inline-block px-8 py-3 text-white bg-indigo-600 hover:bg-indigo-700 transition duration-300 rounded-full shadow-lg transform hover:scale-105"
@@ -115,7 +117,7 @@ const Dashboard = () => {
             </p>
           </Link>
 
-          {/* Notifications Card */}
+          {/* Notifications */}
           {user?.role !== "intern" && (
             <>
               <Link
@@ -168,11 +170,10 @@ const Dashboard = () => {
                   View replies from admin to your requests.
                 </p>
               </Link>
-
             </>
           )}
 
-          {/* Admin Access Card */}
+          {/* Supervisor Access Card */}
           {user.role === "supervisor" && (
             <Link
               to="/supervisor"
@@ -192,28 +193,38 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Floating Button for Assignments */}
-      <button
-        onClick={() => {
-          setOpen(true);
-          setUpdateAssign(!!user.firstLoginDone);
-        }}
-        className="cursor-pointer fixed bottom-6 left-6 z-50 p-4 bg-indigo-600 text-white rounded-full shadow-lg transition-all duration-300 hover:bg-indigo-700 hover:scale-110"
-        aria-label="Open Assignments Menu"
-      >
-        <Menu size={24} />
-      </button>
+      {/* Floating Button */}
+      {!forceRequired && (
+        <button
+          onClick={() => {
+            setOpen(true);
+            setUpdateAssign(!!user.firstLoginDone);
+          }}
+          className="cursor-pointer fixed bottom-6 left-6 z-50 p-4 bg-indigo-600 text-white rounded-full shadow-lg transition-all duration-300 hover:bg-indigo-700 hover:scale-110"
+          aria-label="Open Assignments Menu"
+        >
+          <Menu size={24} />
+        </button>
+      )}
 
       {/* Modal */}
       <Modal
         isOpen={open}
-        onClose={() => setOpen(false)}
+        onClose={() => !forceRequired && setOpen(false)} // ⛔ prevent closing if forced
         forceRequired={forceRequired}
         updateAssign={updateAssign}
       >
         <Assignments
           updateAssign={updateAssign}
-          closeModal={() => setOpen(false)}
+          closeModal={() => {
+            // 🔄 Close modal only if not forced
+            if (!forceRequired) setOpen(false);
+          }}
+          onFirstAssignmentComplete={() => {
+            // ✅ Called when user saves their first assignment
+            setForceRequired(false);
+            setOpen(false);
+          }}
         />
       </Modal>
     </div>

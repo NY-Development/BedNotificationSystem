@@ -2,7 +2,7 @@ import { CircleCheckBig } from "lucide-react";
 import React from "react";
 
 const YearSubscriptionCard = ({ isSelected, onSelect }) => {
-  const yearlyBill = 400;
+  const yearlyBill = 1000;
 
   return (
     <div
