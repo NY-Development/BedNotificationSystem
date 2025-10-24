@@ -33,7 +33,7 @@ const Navbar = () => {
     <nav className="p-4 bg-gray-800 text-white shadow-lg">
       <div className="container mx-auto flex justify-between items-center">
         {/* Logo and Title */}
-        <Link to={user ? "/dashboard" : "/"} className="text-xl font-bold font-inter">
+        <Link to={user && user?.subscription?.isActive ? "/dashboard" : "/"} className="text-xl font-bold font-inter">
           <div className="flex items-center space-x-2">
             <img src={bedIcon} alt="Bed Icon" className="h-8" />
             <p>BNS</p>
@@ -42,7 +42,7 @@ const Navbar = () => {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center space-x-4 font-medium">
-          {user ? (
+          {user && user?.subscription?.isActive ? (
             <>
               <div className="items-center justify-center cursor-pointer">
                 <button className="cp flex space-x-2 items-center text-gray-300" onClick={openProfileModal}>
@@ -87,7 +87,7 @@ const Navbar = () => {
       {/* Mobile Menu Dropdown */}
       {isMenuOpen && (
         <div className="md:hidden mt-4 space-y-2 font-medium">
-          {user ? (
+          {user && user?.subscription?.isActive ? (
             <>
               <div className="items-center justify-center cursor-pointer">
                 <button className="cp flex space-x-2 items-center text-gray-300" onClick={openProfileModal}>

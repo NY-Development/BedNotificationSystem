@@ -41,7 +41,7 @@ const MyAssignments = () => {
   }, [user]); 
 
 
-  if (!user) {
+  if (!user?.subscription?.isActive) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
         <div className="text-center p-8 bg-white rounded-xl shadow-2xl">
@@ -240,26 +240,6 @@ const MyAssignments = () => {
                     <FaBed className='mr-2 text-blue-500' /> Assigned Beds in {ward}
                 </h2>
                 
-                {/* Assignment Expiry Information Card (Moved here for relevance) */}
-                <div className='flex justify-between items-center p-4 mb-6 bg-yellow-50 border-l-4 border-yellow-500 rounded-lg shadow-inner'>
-                    <div className='flex items-center'>
-                        <FaHourglassEnd className='text-xl text-yellow-600 mr-3' />
-                        <div>
-                            <p className='text-sm font-semibold text-yellow-800'>Assignment Expiry:</p>
-                            <p className='text-md text-gray-700'>
-                                Ward: <span className='font-bold'>{formatDate(userAssign.wardExpiry)}</span> | 
-                                Department: <span className='font-bold'>{formatDate(userAssign.deptExpiry)}</span>
-                            </p>
-                        </div>
-                    </div>
-                    <Link
-                      to="/update-expiry"
-                      className="text-sm font-semibold text-blue-600 hover:text-blue-800 transition duration-150"
-                    >
-                      Update Dates &rarr;
-                    </Link>
-                </div>
-                
                 {/* Beds Grid */}
                 <div className='grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
                   {groupedBeds[ward].map((bedObject) => (
@@ -325,6 +305,25 @@ const MyAssignments = () => {
                       </div>
                     </div>
                   ))}
+                </div>
+                {/* Assignment Expiry Information Card (Moved here for relevance) */}
+                <div className='flex justify-between items-center p-4 mt-6 bg-yellow-50 border-l-4 border-yellow-500 rounded-lg shadow-inner'>
+                    <div className='flex items-center'>
+                        <FaHourglassEnd className='text-xl text-yellow-600 mr-3' />
+                        <div>
+                            <p className='text-sm font-semibold text-yellow-800'>Assignment Expiry:</p>
+                            <p className='text-md text-gray-700'>
+                                Ward: <span className='font-bold'>{formatDate(userAssign.wardExpiry)}</span> | 
+                                Department: <span className='font-bold'>{formatDate(userAssign.deptExpiry)}</span>
+                            </p>
+                        </div>
+                    </div>
+                    <Link
+                      to="/update-expiry"
+                      className="text-sm font-semibold text-blue-600 hover:text-blue-800 transition duration-150"
+                    >
+                      Update Dates &rarr;
+                    </Link>
                 </div>
               </div>
             ))}

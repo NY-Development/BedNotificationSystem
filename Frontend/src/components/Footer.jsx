@@ -27,7 +27,7 @@ const Footer = () => {
 
           {/* Social Media Links */}
           <div className="flex items-center space-x-6">
-            <span className="text-gray-500 sm:inline">Connect with the NYDev:</span>
+            <span className="text-white sm:inline">Connect with the NYDev:</span>
             
             <a
               href="https://www.youtube.com/@NYDev-t6p"
@@ -63,7 +63,7 @@ const Footer = () => {
         </div>
         
         {/* Optional: Add a simple policy/terms area */}
-        <div className="mt-6 pt-4 border-t border-gray-700 text-center text-xs text-gray-500">
+        <div className="mt-6 pt-4 border-t border-gray-700 text-center text-md text-white">
             <button onClick={() => setShowModal(true)} className="cp hover:text-white mr-4">Privacy Policy</button>
             <Link to="/support">Support</Link>
         </div>

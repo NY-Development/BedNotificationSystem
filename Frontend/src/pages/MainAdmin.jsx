@@ -40,6 +40,7 @@ import { useAuth } from "../context/AuthContext";
 import SearchBar from "../components/SearchBar";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
+import ConfirmModal from "../components/ConfirmModal";
 
 import { 
     FiUsers, 
@@ -351,29 +352,73 @@ const handleSubscriptionAction = async (userId, action) => {
   }
 };
 
-// ---- Delete User ----
-const handleDeleteUser = async (userId) => {
-  if (!window.confirm("Are you sure you want to delete this user?")) return;
-  try {
-    await deleteUser(userId);
-    toast.success("User deleted successfully");
-    loadData();
-  } catch (err) {
-    toast.error("Failed to delete user");
-  }
-};
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: null,
+  });
 
-// ---- Department Management ----
-const handleDeleteDepartment = async (deptId) => {
-  if (!window.confirm("Delete this department? All wards will be removed!")) return;
-  try {
-    await deleteDepartment(deptId);
-    toast.success("Department deleted successfully");
-    loadData();
-  } catch (err) {
-    toast.error("Failed to delete department");
-  }
-};
+  const openConfirm = (title, message, onConfirm) => {
+    setConfirmModal({
+      isOpen: true,
+      title,
+      message,
+      onConfirm,
+    });
+  };
+
+  // ---- USER ----
+  const handleDeleteUser = (userId) => {
+    openConfirm("Delete User", "Are you sure you want to delete this user?", async () => {
+      try {
+        await deleteUser(userId);
+        toast.success("User deleted successfully");
+        loadData();
+      } catch {
+        toast.error("Failed to delete user");
+      }
+    });
+  };
+
+  // ---- DEPARTMENT ----
+  const handleDeleteDepartment = (deptId) => {
+    openConfirm("Delete Department", "Delete this department? All wards will be removed!", async () => {
+      try {
+        await deleteDepartment(deptId);
+        toast.success("Department deleted successfully");
+        loadData();
+      } catch {
+        toast.error("Failed to delete department");
+      }
+    });
+  };
+
+  // ---- WARD ----
+  const handleDeleteWard = (deptId, wardId) => {
+    openConfirm("Delete Ward", "Delete this ward? All beds will be removed!", async () => {
+      try {
+        await deleteWard(deptId, wardId);
+        toast.success("Ward deleted successfully");
+        loadData();
+      } catch {
+        toast.error("Failed to delete ward");
+      }
+    });
+  };
+
+  // ---- BED ----
+  const handleDeleteBed = (deptId, wardId, bedId) => {
+    openConfirm("Delete Bed", "Delete this bed?", async () => {
+      try {
+        await deleteBed(deptId, wardId, bedId);
+        toast.success("Bed deleted successfully");
+        loadData();
+      } catch {
+        toast.error("Failed to delete bed");
+      }
+    });
+  };
 
 // ---- Ward Management ----
 const handleAddWard = async (deptId, wardName) => {
@@ -386,17 +431,6 @@ const handleAddWard = async (deptId, wardName) => {
   }
 };
 
-const handleDeleteWard = async (deptId, wardId) => {
-  if (!window.confirm("Delete this ward? All beds will be removed!")) return;
-  try {
-    await deleteWard(deptId, wardId);
-    toast.success("Ward deleted successfully");
-    loadData();
-  } catch (err) {
-    toast.error("Failed to delete ward");
-  }
-};
-
 // ---- Bed Management ----
 const handleAddBed = async (deptId, wardId, bedId) => {
   try {
@@ -405,17 +439,6 @@ const handleAddBed = async (deptId, wardId, bedId) => {
     loadData();
   } catch (err) {
     toast.error("Failed to add bed");
-  }
-};
-
-const handleDeleteBed = async (deptId, wardId, bedId) => {
-  if (!window.confirm("Delete this bed?")) return;
-  try {
-    await deleteBed(deptId, wardId, bedId);
-    toast.success("Bed deleted successfully");
-    loadData();
-  } catch (err) {
-    toast.error("Failed to delete bed");
   }
 };
 
@@ -649,6 +672,7 @@ const handleSendSupport = async (e) => {
         <table className="min-w-full divide-y divide-gray-200 text-sm sm:text-base">
           <thead className="bg-gray-50">
             <tr>
+              <th className="px-4 sm:px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Number</th>
               <th className="px-4 sm:px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Name</th>
               <th className="px-4 sm:px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Email</th>
               <th className="px-4 sm:px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Role</th>
@@ -659,8 +683,9 @@ const handleSendSupport = async (e) => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {(searchTerm ? filteredUsers : users).map((u) => (
+            {(searchTerm ? filteredUsers : users).map((u, i) => (
               <tr key={u._id} className="hover:bg-indigo-50 transition-colors">
+                <td className="px-4 sm:px-6 py-4 whitespace-nowrap">{i + 1}</td>
                 <td className="flex items-center px-4 sm:px-6 py-4 whitespace-nowrap font-medium text-gray-800">
                   <img 
                   src={`${u.image}`} 
@@ -1048,6 +1073,14 @@ const renderAssignments = () => {
             {tab === "role-requests" && renderRoleRequests()}
           </div>
         )}
+        {/* ✅ Confirmation Modal */}
+        <ConfirmModal
+          isOpen={confirmModal.isOpen}
+          title={confirmModal.title}
+          message={confirmModal.message}
+          onConfirm={confirmModal.onConfirm}
+          onCancel={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+        />
       </div>
     )
   );

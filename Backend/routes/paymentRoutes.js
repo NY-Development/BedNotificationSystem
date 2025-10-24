@@ -14,7 +14,7 @@ const router = express.Router();
 router.post("/initiate", protect, initiatePayment); // ✅ protected
 
 // POST → upload payment screenshot
-router.post("/upload-screenshot", protect, upload.single("screenshot"), uploadPaymentScreenshot); // ✅ protected
+router.post("/upload-screenshot", upload.single("screenshot"), uploadPaymentScreenshot); // ✅ protected
 
 // POST → Chapa callback (webhook)
 router.post("/callback", paymentCallback);

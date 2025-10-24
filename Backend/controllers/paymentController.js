@@ -31,7 +31,7 @@ export const uploadPaymentScreenshot = async (req, res) => {
     await user.save();
 
     res.status(200).json({
-      message: "Payment screenshot uploaded successfully",
+      message: "Payment screenshot uploaded successfully, Login once activated.",
       screenshotUrl: uploadResponse.url,
     });
   } catch (err) {
