@@ -2,6 +2,7 @@ import React from 'react';
 import bedIcon from '../assets/medical-bed.png';
 import regImage from '../assets/hospitalHallway.jpg'; // Import the image
 import { useAuth } from '../context/AuthContext'
+import { FaHeartbeat } from 'react-icons/fa';
 
 const Home = () => {
 
@@ -20,6 +21,7 @@ const Home = () => {
         <div className="relative z-10 min-h-screen flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8 text-white">
           <div className="max-w-4xl mx-auto text-center">
             <img src={bedIcon} alt="Bed Icon" className="mx-auto h-24 w-auto mb-6" />
+            {/* <FaHeartbeat className='h-20 w-20 ml-70'/> */}
             <h1 className="text-5xl font-extrabold tracking-tight sm:text-6xl md:text-7xl">
               <span className="block">Hospital Bed </span>
               <span className="block text-indigo-400 mt-2">Notification System</span>

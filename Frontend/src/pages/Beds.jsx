@@ -5,6 +5,7 @@ import { useBed } from "../context/BedContext";
 import toast from "react-hot-toast";
 import GoBack from '../components/GoBack';
 import SearchBar from '../components/SearchBar'; // Import the new SearchBar component
+import { Link } from "react-router-dom";
 
 const Beds = () => {
   const { user } = useAuth();
@@ -29,6 +30,23 @@ const Beds = () => {
     );
   }
 
+    if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+        <div className="text-center p-8 bg-white rounded-xl shadow-2xl">
+          <div className="text-6xl mb-4 animate-bounce">❌</div>
+          <h2 className="text-3xl font-bold text-gray-800 mb-2">Access Denied</h2>
+          <p className="text-lg text-gray-600 mb-6">Please log in to view this page.</p>
+          <Link
+            to="/login"
+            className="inline-block px-8 py-3 text-white bg-indigo-600 hover:bg-indigo-700 transition duration-300 rounded-full shadow-lg transform hover:scale-105"
+          >
+            Go to Login
+          </Link>
+        </div>
+      </div>
+    );
+  }
   // Filter departments based on the search term
   const filteredDepartments = departments.map(dept => {
     const filteredWards = dept.wards.map(ward => {

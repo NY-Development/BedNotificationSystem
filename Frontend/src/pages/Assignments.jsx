@@ -6,7 +6,7 @@ import { useBed } from "../context/BedContext";
 import { useAuth } from "../context/AuthContext";
 import { useAssignment } from "../context/AssignmentContext"; 
 
-const Assignments = ({ closeModal, updateAssign = false }) => {
+const Assignments = ({ closeModal, updateAssign = false, onFirstAssignmentComplete }) => {
   const { loadDepartments } = useBed();
   const { user } = useAuth();
   const { userAssign, getUserAssignment } = useAssignment();
@@ -84,7 +84,13 @@ const Assignments = ({ closeModal, updateAssign = false }) => {
       } else {
         await createAssignment(form);
         toast.success("Assignment saved!");
-        window.location.reload();
+        
+        // If it's their first login, trigger callback to unforce modal
+        if (typeof onFirstAssignmentComplete === "function") {
+          onFirstAssignmentComplete();
+        } else {
+          window.location.reload();
+        }        
       }
       loadDepartments();
       closeModal();
@@ -129,7 +135,12 @@ const Assignments = ({ closeModal, updateAssign = false }) => {
         {/* Department Selection */}
         <div>
           <label className="block font-semibold">Select Department:</label>
-          {departments.map((dept) => (
+          {!departments.length ? (
+            <div className="text-blue-500 italic animate-pulse">
+              Wait for fetching departments . . .
+            </div>
+          ) :(
+            departments.map((dept) => (
             <label key={dept._id} className="block">
               <input
                 type="radio"
@@ -142,7 +153,7 @@ const Assignments = ({ closeModal, updateAssign = false }) => {
               />{" "}
               {dept.name}
             </label>
-          ))}
+          )))}
         </div>
 
         {/* Department expiry */}

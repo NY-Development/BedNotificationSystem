@@ -39,6 +39,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import SearchBar from "../components/SearchBar";
 import toast from "react-hot-toast";
+import { Link } from "react-router-dom";
 
 import { 
     FiUsers, 

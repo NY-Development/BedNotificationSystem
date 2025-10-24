@@ -35,6 +35,7 @@ export const uploadPaymentScreenshot = async (req, res) => {
       screenshotUrl: uploadResponse.url,
     });
   } catch (err) {
+    console.error("Error uploading payment screenshot:", err);
     res.status(500).json({
       message: "Error uploading payment screenshot",
       error: err.message,
