@@ -2,25 +2,30 @@ import axios from "axios";
 import User from "../models/User.js";
 import imagekit from "../config/imageKit.js";
 
-// Upload payment screenshot
 export const uploadPaymentScreenshot = async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    const userId = req.user._id; // assume protect middleware sets req.user
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: "User not found" });
+    const { userId } = req.body; // 🟢 get userId from the form-data body
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
 
-    // Upload to ImageKit
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // 🟣 Upload to ImageKit
     const uploadResponse = await imagekit.upload({
       file: req.file.buffer, // file buffer from multer
-      fileName: `payment_${userId}_${Date.now()}`, // unique file name
+      fileName: `payment_${userId}_${Date.now()}`, // unique name
       folder: "/payment_screenshots",
     });
 
-    // Save URL in user's subscription
+    // 🟢 Save URL in user's subscription
     user.subscription.paymentScreenshot = uploadResponse.url;
     await user.save();
 
@@ -35,7 +40,6 @@ export const uploadPaymentScreenshot = async (req, res) => {
     });
   }
 };
-
 export const initiatePayment = async (req, res) => {
   const { email } = req.body;
 
