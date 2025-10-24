@@ -1,6 +1,6 @@
 import API from "./axios";
 
-// Initiate payment after OTP verification
+// 💰 Initiate payment (for Chapa)
 export const initiatePayment = async (email) => {
   try {
     const res = await API.post("/payment/initiate", { email });
@@ -11,7 +11,7 @@ export const initiatePayment = async (email) => {
   }
 };
 
-// (Optional) Verify payment from backend after Chapa redirect
+// ✅ Verify payment from backend after redirect
 export const verifyPayment = async (tx_ref) => {
   try {
     const res = await API.get(`/payment/verify/${tx_ref}`);
@@ -22,16 +22,32 @@ export const verifyPayment = async (tx_ref) => {
   }
 };
 
+// 🔁 Trigger callback manually (optional)
 export const triggerPaymentCallback = async ({ tx_ref, status, email }) => {
   try {
-    const res = await API.post("/payment/callback", {
-      tx_ref,
-      status,
-      email,
-    });
+    const res = await API.post("/payment/callback", { tx_ref, status, email });
     return res.data;
   } catch (err) {
     console.error("Payment callback failed:", err.response?.data || err.message);
     throw new Error(err.response?.data?.message || "Payment callback failed");
+  }
+};
+
+// 📸 Upload screenshot manually (for offline payments)
+export const uploadPaymentScreenshot = async (file) => {
+  try {
+    const email = localStorage.getItem("email");
+    const formData = new FormData();
+    formData.append("screenshot", file);
+    formData.append("email", email);
+
+    const res = await API.post("/payment/upload-screenshot", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    return res.data;
+  } catch (err) {
+    console.error("Screenshot upload failed:", err.response?.data || err.message);
+    throw new Error(err.response?.data?.message || "Screenshot upload failed");
   }
 };

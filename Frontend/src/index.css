@@ -6,7 +6,15 @@
   }
   .dashboard-card {
   @apply flex flex-col items-center text-center p-8 rounded-2xl shadow-lg transform transition-transform duration-300 hover:scale-105;
-}
+  }
+  /* Hide scrollbar but keep scrolling (works in Chrome/Safari/Edge/Firefox) */
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+  }
 }
 
 @keyframes custom-spin {

@@ -2,6 +2,7 @@ import { FaYoutube, FaInstagram, FaTelegramPlane, FaHeartbeat } from 'react-icon
 import PrivacyModal from "../components/PrivacyModal";
 import { useState } from 'react';
 import bedIcon from '../assets/medical-bed.png'
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   const [showModal, setShowModal] = useState(false);
@@ -64,6 +65,7 @@ const Footer = () => {
         {/* Optional: Add a simple policy/terms area */}
         <div className="mt-6 pt-4 border-t border-gray-700 text-center text-xs text-gray-500">
             <button onClick={() => setShowModal(true)} className="cp hover:text-white mr-4">Privacy Policy</button>
+            <Link to="/support">Support</Link>
         </div>
       </div>
       <PrivacyModal isOpen={showModal} onClose={() => setShowModal(false)} />

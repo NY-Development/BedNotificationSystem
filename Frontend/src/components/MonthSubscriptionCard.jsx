@@ -2,7 +2,7 @@ import { CircleCheckBig } from "lucide-react";
 import React from "react";
 
 const MonthSubscriptionCard = ({ isSelected, onSelect }) => {
-  const monthBill = 50;
+  const monthBill = 100;
 
   return (
     <div
@@ -42,7 +42,7 @@ const MonthSubscriptionCard = ({ isSelected, onSelect }) => {
           </li>
           <li className="flex items-start space-x-2">
             <CircleCheckBig className="text-current" />
-            <span><strong>Low upfront cost</strong> for tighter budgets.</span>
+            <span><strong>Low upfront cost:</strong> for tighter budgets.</span>
           </li>
         </ul>
       </div>

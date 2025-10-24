@@ -72,7 +72,7 @@ const Dashboard = () => {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
         <div className="text-center p-8 bg-white rounded-xl shadow-2xl">
-          <div className="text-6xl mb-4 animate-bounce">👋</div>
+          <div className="text-6xl mb-4 animate-bounce">❌</div>
           <h2 className="text-3xl font-bold text-gray-800 mb-2">Access Denied</h2>
           <p className="text-lg text-gray-600 mb-6">Please log in to view this page.</p>
           <Link

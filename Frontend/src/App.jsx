@@ -27,6 +27,9 @@ import MainAdmin from "./pages/MainAdmin";
 import UpdateExpiry from "./pages/UpdateExpiry";
 import SupportResponses from "./pages/SupportResponses";
 import { Analytics } from '@vercel/analytics/react';
+import Screenshot from "./pages/Screenshot";
+import AboutUs from "./pages/AboutUs";
+import Support from "./pages/Support";
 
 function App() {
   return (
@@ -47,6 +50,8 @@ function App() {
                     <Route path="/register" element={<Register />} />
                     <Route path="/verify-otp" element={<VerifyOTP />} />
                     <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/about" element={<AboutUs />} />
+                    <Route path="/support" element={<Support />} />
                     <Route path="/beds" element={<Beds />} />
                     <Route path="/notifications" element={<Notifications />} />
                     <Route path="/assignments" element={<Assignments />} /> 
@@ -59,6 +64,7 @@ function App() {
                     <Route path="/admin" element={<MainAdmin />} />
                     <Route path="/update-expiry" element={<UpdateExpiry />} />
                     <Route path="/support-responses" element={<SupportResponses />} />
+                    <Route path="/screenshot" element={<Screenshot />} />
                     {/* <Route path="*" element={<Home />} /> fallback */}
                   </Routes>
                 </main>
