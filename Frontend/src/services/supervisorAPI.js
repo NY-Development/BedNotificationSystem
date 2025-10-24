@@ -1,5 +1,11 @@
 import API from "./axios";
 
+// ----- Users -----
+export const getAllUsers = async () => {
+  const res = await API.get("/supervisor/users");
+  return res.data;
+};
+
 // ----- Departments -----
 export const getAllDepartments = async () => {
   const res = await API.get("/supervisor/departments");

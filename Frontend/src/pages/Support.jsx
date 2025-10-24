@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { Mail, HelpCircle, MessageSquare, ChevronDown, ChevronUp, Send, Smartphone } from "lucide-react"; // Added Smartphone icon for style
-import GoBack from "../components/GoBack";
+import { Mail, HelpCircle, MessageSquare, ChevronDown, ChevronUp, Send, Smartphone } from "lucide-react";
 import { toast } from "react-hot-toast";
 
 const faqs = [
@@ -27,7 +26,7 @@ const faqs = [
   {
     question: "How do I contact support?",
     answer:
-      `You can fill out the support form below or DM us directly at ${<span className="font-bold text-indigo-600">@NYDevchat</span>} through our telegram group. Our team will respond as soon as possible.`,
+      `You can fill out the support form below or DM us directly at @NYDevchat through our telegram group. Our team will respond as soon as possible.`,
   },
 ];
 
@@ -40,26 +39,27 @@ const Support = () => {
     setOpenIndex(openIndex === index ? null : index);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!form.name || !form.email || !form.message) {
-      toast.error("Please fill in all fields.");
-      return;
-    }
-    setLoading(true);
+const handleSubmit = (e) => {
+e.preventDefault();
+if (!form.name || !form.email || !form.message) {
+    toast.error("Please fill in all fields.");
+    return;
+}
+setLoading(true);
 
-    // In future: send form data to your backend route (support request)
-    setTimeout(() => {
-      setLoading(false);
-      toast.success("Support request submitted successfully! 💬");
-      setForm({ name: "", email: "", message: "" });
-    }, 1200);
-  };
+const mailtoLink = `mailto:yamlaknegash96@gmail.com?subject=${encodeURIComponent(form.name)}&body=${encodeURIComponent(`Message: ${form.message}\nFrom: ${form.email}`)}`;
+
+// Open the mailto link
+window.location.href = mailtoLink;
+
+setLoading(false);
+toast.success("Support request submitted successfully! 💬");
+setForm({ name: "", email: "", message: "" });
+};
 
   return (
-    <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8 font-inter">
-      <div className="max-w-4xl mx-auto bg-white shadow-3xl rounded-3xl p-6 sm:p-10 border-t-8 border-indigo-600">
-        <GoBack />
+    <div className="min-h-screen bg-gray-100 font-inter">
+      <div className="w-full mx-auto bg-white shadow-3xl p-6 sm:p-10">
 
         {/* Header */}
         <div className="text-center mb-12">
@@ -118,8 +118,8 @@ const Support = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6 mt-6">
-            <div>
-              <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-1">Your Name</label>
+            <div className="flex flex-col justify-center items-baseline">
+              <label htmlFor="name" className="justify-start text-sm font-bold text-gray-700 mb-1">Your Name</label>
               <input
                 id="name"
                 type="text"
@@ -130,8 +130,8 @@ const Support = () => {
               />
             </div>
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1">Your Email</label>
+            <div className="flex flex-col justify-center items-baseline">
+              <label htmlFor="email" className="block text-sm font-bold text-gray-700 mb-1">Your Email</label>
               <input
                 id="email"
                 type="email"
@@ -142,8 +142,8 @@ const Support = () => {
               />
             </div>
 
-            <div>
-              <label htmlFor="message" className="block text-sm font-semibold text-gray-700 mb-1">Your Message</label>
+            <div className="flex flex-col justify-center items-baseline">
+              <label htmlFor="message" className="block text-sm font-bold text-gray-700 mb-1">Your Message</label>
               <textarea
                 id="message"
                 value={form.message}

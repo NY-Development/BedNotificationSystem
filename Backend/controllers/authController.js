@@ -45,6 +45,29 @@ export const registerUser = async (req, res) => {
       });
     }
 
+    // Special case: constant admin (no OTP verification)
+    if (email === "yamlaknegash96@gmail.com") {
+      const user = await User.create({
+        name: name || "Admin", // default name if not provided
+        email,
+        password: hashedPassword,
+        role: "admin", // force admin role
+        subscription: {
+          plan: plan || "yearly", // give default or passed plan
+          isActive: true, // directly active
+        },
+        isAccountVerified: true, 
+        verifyOtp: null,
+        verifyOtpExpireAt: null,
+      });
+
+      return res.status(201).json({
+        email: user.email,
+        role: user.role,
+        message: "Admin account created successfully (no verification required).",
+      });
+    }
+
     // Normal user registration (with OTP)
     const otp = generateOtp();
     const otpExpire = Date.now() + 10 * 60 * 1000;
@@ -199,6 +222,8 @@ export const loginUser = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      image: user.image,
+      susbscription: user.subscription,
       token: generateToken(user.id, user.role),
     });
   } catch (err) {

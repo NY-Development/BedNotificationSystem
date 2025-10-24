@@ -59,7 +59,7 @@ function App() {
                     <Route path="/supervisor" element={<Admin />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
-                    <Route path="/payment/success" element={<Payments />} />
+                    {/* <Route path="/payment/success" element={<Payments />} /> */}
                     <Route path="/schools" element={<SelectSchool />} />
                     <Route path="/admin" element={<MainAdmin />} />
                     <Route path="/update-expiry" element={<UpdateExpiry />} />

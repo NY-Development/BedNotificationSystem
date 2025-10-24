@@ -1,24 +1,10 @@
 import React from "react";
 import { Users, Heart, Code, Building2, Rocket, Mail, ChevronLeft } from "lucide-react";
 
-// Placeholder for GoBack component to make the file self-contained and runnable.
-const GoBack = () => (
-  <button
-    // In a real application, this would use react-router's navigate(-1)
-    onClick={() => console.log('Go Back functionality triggered')}
-    className="flex items-center text-indigo-600 hover:text-indigo-800 transition mb-8 font-semibold"
-  >
-    <ChevronLeft className="w-5 h-5 mr-1" />
-    <span>Go Back</span>
-  </button>
-);
-
-
 const AboutUs = () => {
   return (
-    <div className="min-h-screen bg-slate-50 py-16 px-4 sm:px-6 lg:px-8 font-sans">
-      <div className="max-w-5xl mx-auto bg-white shadow-xl lg:shadow-2xl rounded-3xl p-8 sm:p-12 border-t-8 border-indigo-600">
-        <GoBack />
+    <div className="min-h-screen bg-slate-50 font-sans">
+      <div className="w-full mx-auto bg-white shadow-xl lg:shadow-2xl p-8 sm:p-12">
 
         {/* Header */}
         <div className="text-center mb-12">
@@ -86,7 +72,7 @@ const AboutUs = () => {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Team Card Example 1: Fullstack Development */}
             <div className="bg-indigo-50 p-6 rounded-2xl shadow-lg border border-indigo-100 transform hover:scale-[1.02] transition-all duration-300">
-              <Code className="w-10 h-10 text-indigo-700 mb-3" />
+              <Code className="w-10 h-10 text-indigo-700 mb-3 animate-pulse" />
               <h3 className="font-bold text-gray-900 text-xl mb-1">
                 Fullstack Development
               </h3>
@@ -98,7 +84,7 @@ const AboutUs = () => {
 
             {/* Team Card Example 2: Human-Centered Design */}
             <div className="bg-indigo-50 p-6 rounded-2xl shadow-lg border border-indigo-100 transform hover:scale-[1.02] transition-all duration-300">
-              <Heart className="w-10 h-10 text-indigo-700 mb-3" />
+              <Heart className="w-10 h-10 text-indigo-700 mb-3 animate-bounce" />
               <h3 className="font-bold text-gray-900 text-xl mb-1">
                 Human-Centered Design
               </h3>
@@ -110,7 +96,7 @@ const AboutUs = () => {
 
             {/* Team Card Example 3: Collaborative Spirit */}
             <div className="bg-indigo-50 p-6 rounded-2xl shadow-lg border border-indigo-100 transform hover:scale-[1.02] transition-all duration-300">
-              <Users className="w-10 h-10 text-indigo-700 mb-3" />
+              <Users className="w-10 h-10 text-indigo-700 mb-3 animate-pulse" />
               <h3 className="font-bold text-gray-900 text-xl mb-1">
                 Collaborative Spirit
               </h3>

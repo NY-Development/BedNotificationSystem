@@ -1,6 +1,17 @@
 import Department from "../models/Department.js";
+import User from "../models/User.js";
 
+export const getAllUsers = async (req, res) => {
+  try {
+    // exclude admins
+    const users = await User.find({ role: { $ne: "admin" } })
+      .select("-password -verifyOtp -resetOtp");
 
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 // get all departments with wards and beds
 export const getAllDepartments = async (req, res) => {
   try {

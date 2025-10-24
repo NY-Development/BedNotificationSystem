@@ -77,7 +77,9 @@ const Screenshot = () => {
     try {
       setLoading(true);
       const res = await uploadPaymentScreenshot(file);
-      toast.success(res.message || "Screenshot uploaded successfully!");
+      toast.success(res.message || "Screenshot uploaded successfully!", {
+    duration: 5000,
+    });
       
       // Clear inputs and preview
       setFile(null);
@@ -92,7 +94,7 @@ const Screenshot = () => {
       setTimeout(() => {
         setShowModal(false);
         navigate("/login");
-      }, 5000);
+      }, 1500);
 
     } catch (err) {
       toast.error(err.message || "Upload failed.");

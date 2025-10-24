@@ -28,7 +28,7 @@ const Notifications = () => {
     fetchNotifications();
   };
 
-  if (!user) {
+  if (!user?.subscription?.isActive) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
         <div className="text-center p-8 bg-white rounded-xl shadow-2xl">
