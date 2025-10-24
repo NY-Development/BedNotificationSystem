@@ -8,24 +8,25 @@ export const uploadPaymentScreenshot = async (req, res) => {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    const { userId } = req.body; // 🟢 get userId from the form-data body
-    if (!userId) {
-      return res.status(400).json({ message: "User ID is required" });
+    const { email } = req.body; // get email from the form-data body
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
     }
 
-    const user = await User.findById(userId);
+    // Find user by email
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // 🟣 Upload to ImageKit
+    // Upload to ImageKit
     const uploadResponse = await imagekit.upload({
       file: req.file.buffer, // file buffer from multer
-      fileName: `payment_${userId}_${Date.now()}`, // unique name
+      fileName: `payment_${user._id}_${Date.now()}`, // use user._id for uniqueness
       folder: "/payment_screenshots",
     });
 
-    // 🟢 Save URL in user's subscription
+    // Save URL in user's subscription
     user.subscription.paymentScreenshot = uploadResponse.url;
     await user.save();
 
