@@ -40,10 +40,10 @@ function App() {
           <AssignmentProvider>
             <AdminProvider>
               <SupervisorProvider>
-              <div className="min-h-screen bg-gray-50">
+              <div className="min-h-screen bg-gray-50 scrollbar-hide">
                 <Analytics />
                 <Navbar />
-                <main className="min-h-screen text-center">
+                <main className="min-h-screen text-center scrollbar-hide">
                   <Routes>
                     <Route path="/" element={<Home />} /> 
                     <Route path="/login" element={<Login />} />

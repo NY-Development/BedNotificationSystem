@@ -15,11 +15,11 @@ const Home = () => {
     {user ? (
       navigate('/dashboard')
     ) : (
-      <div className="relative min-h-screen bg-cover bg-center" style={{ backgroundImage: `url(${regImage})` }}>
+      <div className="relative min-h-screen bg-cover bg-center scrollbar-hide" style={{ backgroundImage: `url(${regImage})` }}>
         {/* Semi-transparent overlay */}
-        <div className="absolute inset-0 bg-gray-900 opacity-70"></div>
-        <div className="relative z-10 min-h-screen flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8 text-white">
-          <div className="max-w-4xl mx-auto text-center">
+        <div className="absolute inset-0 bg-gray-900 opacity-70 scrollbar-hide"></div>
+        <div className="relative z-10 min-h-screen flex flex-col justify-center scrollbar-hide items-center py-12 px-4 sm:px-6 lg:px-8 text-white">
+          <div className="max-w-4xl mx-auto text-center scrollbar-hide">
             <img src={bedIcon} alt="Bed Icon" className="mx-auto h-24 w-auto mb-6" />
             {/* <FaHeartbeat className='h-20 w-20 ml-70'/> */}
             <h1 className="text-5xl font-extrabold tracking-tight sm:text-6xl md:text-7xl">

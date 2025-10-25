@@ -362,7 +362,7 @@ const Admin = () => {
 
       {/* Tab 2: Users */}
       {activeTab === "users" && (
-        <div className="bg-white shadow-lg p-6 rounded-xl border border-gray-200">
+        <div className="bg-white shadow-lg p-6 rounded-xl border border-gray-200 overflow-x-auto scroolbar-hide">
           <h2 className="text-2xl font-bold mb-6 flex items-center space-x-2 text-gray-800">
             <Users size={24} />
             <span>Users</span>
@@ -371,9 +371,9 @@ const Admin = () => {
           {users.length === 0 ? (
             <p className="text-gray-600">No users found.</p>
           ) : (
-            <table className="min-w-full border-collapse border border-gray-200">
+            <table className="overflow-x-auto border border-gray-200 scrollbar-hide md:">
               <thead>
-                <tr className="bg-gray-100">
+                <tr className="bg-gray-100 overflow-x-auto scrollbar-hide">
                   <th className="border border-gray-200 px-4 py-2 text-left">
                     Name
                   </th>
@@ -393,7 +393,7 @@ const Admin = () => {
               </thead>
               <tbody>
                 {users.map((u) => (
-                  <tr key={u._id} className="hover:bg-gray-50">
+                  <tr key={u._id} className="hover:bg-gray-50 overflow-x-auto scrollbar-hide">
                     <td className="border border-gray-200 px-4 py-2">
                       {u.name}
                     </td>
