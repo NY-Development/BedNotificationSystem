@@ -34,6 +34,7 @@ const Register = () => {
       setMessage("Registering...");
       localStorage.setItem("selectedPlan", subscriptionPlan); //for the later use on the screenshot page.
       localStorage.setItem("email", email);
+      localStorage.setItem("role", role);
       const response = await register(name, email, password, phone, role, subscriptionPlan);
       setMessage(response.message);
       navigate("/verify-otp", { state: { email } });
@@ -209,13 +210,13 @@ const Register = () => {
                   >
                     <option value="c1">C1</option>
                     <option value="c2">C2</option>
-                    <option value="intern">Intern</option>
+                    <option value="intern">Staff</option>
                     {/* Here later on update it with if the email is Selamawitilahun07@gmail.com the only role available will be Admin. */}
                   </select>
                 </div>
 
                 {/* Subscription Cards with responsive layout */}
-                <div className="mt-6">
+                {role !== 'intern' ? (<div className="mt-6">
                   <h3 className="text-lg font-semibold mb-4 text-center text-indigo-600">
                     Choose your subscription plan
                   </h3>
@@ -227,9 +228,12 @@ const Register = () => {
                     <YearSubscriptionCard
                       isSelected={subscriptionPlan === "yearly"}
                       onSelect={() => setSubscriptionPlan("yearly")}
+                      role={role}
                     />
                   </div>
-                </div>
+                </div>) : (
+                    <p className="font-bold text-green-500 text-xl">No Subscription for Staffs.</p>
+                )}
                 {/* 👆COMMENTED FOR A TRIAL PERIOD.   */}
               </div>
               {/* ✅ Privacy & Terms Checkbox */}

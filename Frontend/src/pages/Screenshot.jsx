@@ -23,10 +23,26 @@ const Screenshot = () => {
   const fileInputRef = useRef(null);
   const [copied, setCopied] = useState(false);
 
-  const storedPlan = localStorage.getItem("selectedPlan") || "monthly";
-  const plan = storedPlan;
-  const amount = plan === "monthly" ? 100 : 1000;
+  // ✅ Function to dynamically determine amount
+  const getSubscriptionAmount = () => {
+    const c1YearlyBill = 799.9;
+    const c2YearlyBill = 599.9;
+    const monthlyBill = 100;
 
+    const role = localStorage.getItem("role");
+    const plan = localStorage.getItem("selectedPlan");
+
+    if (plan === "monthly") return monthlyBill;
+
+    if (plan === "yearly") {
+      return role === "c1" ? c1YearlyBill : c2YearlyBill;
+    }
+
+    return monthlyBill; // default fallback
+  };
+
+  const plan = localStorage.getItem("selectedPlan") || "monthly";
+  const amount = getSubscriptionAmount();
   const AccountNumber = 1000403196928;
   const AccountName = "Yamlak Negash Dugo";
 
@@ -51,7 +67,7 @@ const Screenshot = () => {
     );
   }
 
-  // 🧩 Prevent user from navigating away or refreshing
+  // 🧩 Prevent user from leaving until upload is complete
   useEffect(() => {
     const handleBeforeUnload = (e) => {
       if (!file) {
@@ -115,6 +131,7 @@ const Screenshot = () => {
         duration: 5000,
       });
 
+      // Reset state
       setFile(null);
       setPreview(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -122,6 +139,7 @@ const Screenshot = () => {
 
       setShowModal(true);
 
+      // Redirect after 5 seconds
       setTimeout(() => {
         setShowModal(false);
         navigate("/login");
