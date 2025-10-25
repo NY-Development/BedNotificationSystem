@@ -11,7 +11,7 @@ const generateToken = (id, role) => {
 
 // Register
 export const registerUser = async (req, res) => {
-  const { name, email, password, role, plan } = req.body;
+  const { name, email, password, role,phone, plan } = req.body;
 
   try {
     const userExists = await User.findOne({ email });
@@ -77,6 +77,7 @@ export const registerUser = async (req, res) => {
       email,
       password: hashedPassword,
       role,
+      phone,
       subscription: {
         plan,          // store plan but inactive
         isActive: false,
@@ -278,6 +279,7 @@ export const getProfile = async (req, res) => {
     res.json({
       name: user.name,
       email: user.email,
+      phone:user.phone,
       role: user.role,
       firstLoginDone: user.firstLoginDone,
       subscription: user.subscription,
