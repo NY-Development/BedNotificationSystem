@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 const VerifyOTP = () => {
   const [otp, setOtp] = useState("");
@@ -35,18 +36,22 @@ const VerifyOTP = () => {
       setError("");
       setMessage("Verifying OTP...");
       await checkOtp(userEmail, otp);
-      setMessage("Account verified! Redirecting to payment...");
+      if(localStorage.getItem("role") === 'intern'){ //Cause Intern don't pay.
+        toast.success("Redirecting to Login . . .", {duration: 2000});
+        navigate("/login");
+      } else{
+        setMessage("Account verified! Redirecting to payment...");
+        // initiate payment instead of going to login
+        setTimeout(() => {
+          // initiateUserPayment(userEmail);
+          navigate('/screenshot');
+        }, 2000);
 
-      // initiate payment instead of going to login
-      setTimeout(() => {
-        // initiateUserPayment(userEmail);
-        navigate('/screenshot');
-      }, 2000);
-
-      // setMessage("Account verified! Redirecting to login...");
-      // setTimeout(() => {
-      //   navigate('/login');
-      // }, 1500);
+        // setMessage("Account verified! Redirecting to login...");
+        // setTimeout(() => {
+        //   navigate('/login');
+        // }, 1500);
+        }
     } catch (err) {
       setError(err.message || "OTP verification failed");
       setMessage("");
