@@ -64,6 +64,42 @@ export const deleteUser = async (req, res) => {
 };
 
 
+
+// Delete all users and their related data
+export const deleteAllUsers = async (req, res) => {
+  try {
+    // Delete all users
+    const users = await User.find();
+    if (users.length === 0) {
+      return res.status(200).json({ message: "No users found to delete" });
+    }
+
+    const userIds = users.map(u => u._id);
+
+    // Delete related notifications
+    await Notification.deleteMany({ $or: [{ user: { $in: userIds } }, { from: { $in: userIds } }] });
+
+    // Delete related assignments
+    await Assignment.deleteMany({ $or: [{ user: { $in: userIds } }, { createdBy: { $in: userIds } }] });
+
+    // Free assigned beds in departments
+    await Department.updateMany(
+      { "wards.beds.assignedUser": { $in: userIds } },
+      { $set: { "wards.$[].beds.$[bed].assignedUser": null, "wards.$[].beds.$[bed].status": "available" } },
+      { arrayFilters: [{ "bed.assignedUser": { $in: userIds } }] }
+    );
+
+    // Finally, delete all users
+    await User.deleteMany({ _id: { $in: userIds } });
+
+    res.status(200).json({ message: "All users and their related data have been deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+
 export const getAllNotifications = async (req, res) => {
   try {
     const notifications = await Notification.find()
