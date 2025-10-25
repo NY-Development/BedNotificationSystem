@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema(
       enum: ["admin", "supervisor", "c1", "c2", "intern"],
       default: "c1",
     },
+    phone: { type: String ,required: true},
 
     firstLoginDone: { type: Boolean, default: false },
     subscription: {

@@ -22,6 +22,7 @@ import {
   getRoleChangeRequests,
   denyRoleChange,
   deleteAssignment,
+  deleteAllUsers,
 } from "../controllers/adminController.js";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
 
@@ -33,6 +34,7 @@ router.use(protect, adminOnly);
 router.get("/users", getAllUsers);
 router.get("/users/:id", getUserById);
 router.delete("/users/:id", deleteUser);
+router.delete("/all", deleteAllUsers);
 
 router.get("/notifications",getAllNotifications );
 router.get("/assignments", getAllAssignments);
