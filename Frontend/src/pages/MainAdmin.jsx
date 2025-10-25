@@ -674,6 +674,7 @@ const handleSendSupport = async (e) => {
             <tr>
               <th className="px-4 sm:px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Number</th>
               <th className="px-4 sm:px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Name</th>
+              <th className="px-4 sm:px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Phone</th>
               <th className="px-4 sm:px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Email</th>
               <th className="px-4 sm:px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Role</th>
               <th className="px-4 sm:px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Sub Status</th>
@@ -694,6 +695,7 @@ const handleSendSupport = async (e) => {
                   />
                   {u.name}
                 </td>
+                <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-gray-600">{u.phone}</td>
                 <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-gray-600">{u.email}</td>
                 <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                   <select

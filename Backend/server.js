@@ -25,7 +25,7 @@ startExpiryJob();
 
 const allowedOrigins = [
   "http://localhost:5173",          // local dev
-  "https://bnst-beta.vercel.app",   // your deployed frontend
+  "https://bednotify.vercel.app",   // your deployed frontend
   "https://bnst-ao5j.vercel.app"
 ];
 

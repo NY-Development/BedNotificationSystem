@@ -72,6 +72,7 @@ const Navbar = () => {
               <Link to="/login" className="hover:text-blue-400 bg-white rounded-md p-2 px-6 text-black">Login</Link>
               <Link to="/register" className="hover:text-blue-400">Register</Link>
               <Link to="/about" className="hover:text-blue-400">About Us</Link>
+              {localStorage.getItem("selectedPlan") && <Link to="/screenshot" className="hover:text-blue-400">Payment</Link>}
             </>
           )}
         </div>
