@@ -382,12 +382,23 @@ export const activateSubscription = async (req, res) => {
     user.subscription.paidAt = new Date();
     await user.save();
 
+    // ✉️ Send activation email
     await sendEmailToUser(
       user.email,
       "✅ Subscription Activated",
-      `Hi ${user.name || user.email},<br>Your <strong>${user.subscription.plan}</strong> subscription has been activated.<br>
-       <strong>Start:</strong> ${startDate.toDateString()}<br>
-       <strong>End:</strong> ${endDate.toDateString()}`
+      `
+      <p>Hi ${user.name || user.email},</p>
+      <p>Your <strong>${user.subscription.plan}</strong> subscription has been <strong>activated successfully!</strong></p>
+      <p><strong>Start Date:</strong> ${startDate.toDateString()}<br>
+      <strong>End Date:</strong> ${endDate.toDateString()}</p>
+      <p>You can now log in to your account and enjoy all premium features 🎉</p>
+      <p>
+        👉 <a href="https://bednotify.vercel.app" target="_blank" style="color: #007BFF; text-decoration: none;">
+        Click here to login to BNS
+        </a>
+      </p>
+      <p>Thank you for subscribing!<br>— The BNS Team</p>
+      `
     );
 
     res.status(200).json({
@@ -398,6 +409,7 @@ export const activateSubscription = async (req, res) => {
     res.status(500).json({ message: "Error activating subscription", error: err.message });
   }
 };
+
 
 //  Deactivate subscription
 export const deactivateSubscription = async (req, res) => {
