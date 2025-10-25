@@ -25,12 +25,12 @@ export const deleteUser = async (id) => {
 
 // ----- Subscription Management -----
 export const activateSubscription = async (userId) => {
-    const res = await API.put(`/admin/subscriptions/activate/${userId}`);
+    const res = await API.put(`/admin/${userId}/activate`);
     return res.data;
 };
 
 export const deactivateSubscription = async (userId) => {
-    const res = await API.put(`/admin/subscriptions/deactivate/${userId}`);
+    const res = await API.put(`/admin/${userId}/deactivate`);
     return res.data;
 };
 

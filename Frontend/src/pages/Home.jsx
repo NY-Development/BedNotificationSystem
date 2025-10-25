@@ -3,17 +3,17 @@ import bedIcon from '../assets/medical-bed.png';
 import regImage from '../assets/hospitalHallway.jpg'; // Import the image
 import { useAuth } from '../context/AuthContext'
 import { FaHeartbeat } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
 
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <>
     {user ? (
-      <div className="m-2 p-2 font-semibold">
-        When the user is logged in
-      </div>
+      navigate('/dashboard')
     ) : (
       <div className="relative min-h-screen bg-cover bg-center" style={{ backgroundImage: `url(${regImage})` }}>
         {/* Semi-transparent overlay */}

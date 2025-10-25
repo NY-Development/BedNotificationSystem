@@ -84,7 +84,7 @@ const Assignments = ({ closeModal, updateAssign = false, onFirstAssignmentComple
       } else {
         await createAssignment(form);
         toast.success("Assignment saved!");
-        
+        window.location.reload();        
         // If it's their first login, trigger callback to unforce modal
         if (typeof onFirstAssignmentComplete === "function") {
           onFirstAssignmentComplete();
