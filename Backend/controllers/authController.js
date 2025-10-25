@@ -11,7 +11,7 @@ const generateToken = (id, role) => {
 
 // Register
 export const registerUser = async (req, res) => {
-  const { name, email, password, role,phone, plan } = req.body;
+  const { name, email, password, role, phone, plan } = req.body;
 
   try {
     const userExists = await User.findOne({ email });
@@ -22,56 +22,80 @@ export const registerUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Special case: constant admin (no OTP verification)
+    // 🔹 Constant supervisor (Selamawit) — always verified and active
     if (email === "Selamawitilahun07@gmail.com") {
       const user = await User.create({
-        name: name || "Admin", // default name if not provided
+        name: name || "Supervisor",
         email,
         password: hashedPassword,
-        role: "supervisor", // force supervisor role
+        role: "supervisor",
         subscription: {
-          plan: plan || "yearly", // give default or passed plan
-          isActive: true, // directly active
+          plan: plan || "yearly",
+          isActive: true,
         },
-        isAccountVerified: true, 
-        verifyOtp: null,
-        verifyOtpExpireAt: null,
+        isAccountVerified: true,
       });
 
       return res.status(201).json({
         email: user.email,
         role: user.role,
-        message: "Supervisor account created successfully (no verification required).",
+        message: "Supervisor account created successfully (auto-verified).",
       });
     }
 
-    // Special case: constant admin (no OTP verification)
+    // 🔹 Constant admin (Yemlak) — always verified and active
     if (email === "yamlaknegash96@gmail.com") {
       const user = await User.create({
-        name: name || "Admin", // default name if not provided
+        name: name || "Admin",
         email,
         password: hashedPassword,
-        role: "admin", // force admin role
+        role: "admin",
         subscription: {
-          plan: plan || "yearly", // give default or passed plan
-          isActive: true, // directly active
+          plan: plan || "yearly",
+          isActive: true,
         },
-        isAccountVerified: true, 
-        verifyOtp: null,
-        verifyOtpExpireAt: null,
+        isAccountVerified: true,
       });
 
       return res.status(201).json({
         email: user.email,
         role: user.role,
-        message: "Admin account created successfully (no verification required).",
+        message: "Admin account created successfully (auto-verified).",
       });
     }
 
-    // Normal user registration (with OTP)
+    // 🔹 Intern users — active subscription, but must verify via OTP
     const otp = generateOtp();
-    const otpExpire = Date.now() + 10 * 60 * 1000;
+    const otpExpire = Date.now() + 10 * 60 * 1000; // expires in 10 mins
 
+    if (role === "intern") {
+      const user = await User.create({
+        name,
+        email,
+        password: hashedPassword,
+        role,
+        phone,
+        subscription: {
+          plan: plan || "monthly",
+          isActive: true, // auto-active for interns
+          startDate: new Date(),
+          endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+        },
+        verifyOtp: otp,
+        verifyOtpExpireAt: otpExpire,
+        isAccountVerified: false, //  interns must still verify
+      });
+
+      await sendEmail(email, "Verify Your Account", `Your OTP is: ${otp}`);
+
+      return res.status(201).json({
+        email: user.email,
+        role: user.role,
+        message: "Intern registered. Please check your email for OTP verification.",
+      });
+    }
+
+    // 🔹 Other normal users — inactive until payment and OTP
     const user = await User.create({
       name,
       email,
@@ -79,7 +103,7 @@ export const registerUser = async (req, res) => {
       role,
       phone,
       subscription: {
-        plan,          // store plan but inactive
+        plan,
         isActive: false,
       },
       verifyOtp: otp,
@@ -93,12 +117,10 @@ export const registerUser = async (req, res) => {
       message: "User registered. Please check your email for OTP.",
     });
   } catch (err) {
-    console.error("Registration error: ", err);
+    console.error("Registration error:", err);
     res.status(500).json({ message: err.message });
   }
 };
-
-
 
 // Verify OTP
 export const verifyUserOtp = async (req, res) => {
