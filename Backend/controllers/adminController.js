@@ -2,6 +2,7 @@ import User from "../models/User.js";
 import Department from "../models/Department.js";
 import Assignment from "../models/Assignment.js";
 import Notification from "../models/Notification.js";
+import { sendEmailToUser } from "../utils/notificationtoAdmin.js";
 
 // Get all users (excluding admins)
 export const getAllUsers = async (req, res) => {
@@ -363,26 +364,17 @@ export const getAllSubscriptions = async (req, res) => {
 export const activateSubscription = async (req, res) => {
   try {
     const { userId } = req.params;
-
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // ensure screenshot exists before activation
     if (!user.subscription.paymentScreenshot) {
       return res.status(400).json({ message: "No payment screenshot uploaded for this user" });
     }
 
-    // set start date = now
     const startDate = new Date();
-    let endDate;
-
-    if (user.subscription.plan === "yearly") {
-      endDate = new Date(startDate);
-      endDate.setFullYear(endDate.getFullYear() + 1); // add 1 year
-    } else {
-      endDate = new Date(startDate);
-      endDate.setMonth(endDate.getMonth() + 1); // add 1 month
-    }
+    let endDate = new Date(startDate);
+    if (user.subscription.plan === "yearly") endDate.setFullYear(endDate.getFullYear() + 1);
+    else endDate.setMonth(endDate.getMonth() + 1);
 
     user.subscription.isActive = true;
     user.subscription.startDate = startDate;
@@ -390,6 +382,17 @@ export const activateSubscription = async (req, res) => {
     user.subscription.paidAt = new Date();
 
     await user.save();
+
+    // Send email to user
+    const subject = "Your Subscription is Activated ✅";
+    const html = `
+      <p>Hi ${user.name || user.email},</p>
+      <p>Your <strong>${user.subscription.plan}</strong> subscription has been activated successfully.</p>
+      <p>Start Date: ${startDate.toDateString()}</p>
+      <p>End Date: ${endDate.toDateString()}</p>
+      <p>Thank you for your payment!</p>
+    `;
+    await sendEmailToUser(user.email, subject, html);
 
     res.status(200).json({
       message: `Subscription (${user.subscription.plan}) activated successfully`,
@@ -404,18 +407,30 @@ export const activateSubscription = async (req, res) => {
 export const deactivateSubscription = async (req, res) => {
   try {
     const { userId } = req.params;
-
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
     user.subscription.isActive = false;
     await user.save();
 
-    res.status(200).json({ message: "Subscription deactivated successfully", subscription: user.subscription });
+    // Send email to user
+    const subject = "Your Subscription is Deactivated ❌";
+    const html = `
+      <p>Hi ${user.name || user.email},</p>
+      <p>Your subscription has been deactivated.</p>
+      <p>If you have any questions, please contact support.</p>
+    `;
+    await sendEmailToUser(user.email, subject, html);
+
+    res.status(200).json({
+      message: "Subscription deactivated successfully",
+      subscription: user.subscription,
+    });
   } catch (err) {
     res.status(500).json({ message: "Error deactivating subscription", error: err.message });
   }
 };
+
 
 //  Admin approves role change
 export const updateUserRole = async (req, res) => {

@@ -31,3 +31,17 @@ export const sendEmailToAdmins = async (subject, html) => {
     console.error("Error sending admin email:", err);
   }
 };
+
+export const sendEmailToUser = async (to, subject, html) => {
+  try {
+    await transporter.sendMail({
+      from: `"Subscription Service" <${adminEmails[0]}>`,
+      to,
+      subject,
+      html,
+    });
+    console.log(`Email sent to user ${to} successfully.`);
+  } catch (err) {
+    console.error("Error sending email to user:", err);
+  }
+};
