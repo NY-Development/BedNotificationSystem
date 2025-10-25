@@ -5,14 +5,17 @@ import { toast } from 'react-hot-toast';
 import MonthSubscriptionCard from "../components/MonthSubscriptionCard";
 import YearSubscriptionCard from "../components/YearSubscriptionCard";
 import homeImage from "../assets/homeImage.jpg";
-import bedIcon from '../assets/medical-bed.png'; // ✅ RESTORED: Import the bed icon
-// ✅ KEPT: Lucide icons for form fields
-import { User, Mail, Lock, UserCheck } from 'lucide-react'; 
+import bedIcon from '../assets/medical-bed.png';
+import { User, Mail, Lock, UserCheck, Phone, Eye, EyeOff } from 'lucide-react'; 
 import PrivacyModal from "../components/PrivacyModal";
 
 const Register = () => {
+  const [showPassword, setShowPassword] = useState(false);
+
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("c1");
   const [message, setMessage] = useState("");
@@ -31,7 +34,7 @@ const Register = () => {
       setMessage("Registering...");
       localStorage.setItem("selectedPlan", subscriptionPlan); //for the later use on the screenshot page.
       localStorage.setItem("email", email);
-      const response = await register(name, email, password, role, subscriptionPlan);
+      const response = await register(name, email, password, phone, role, subscriptionPlan);
       setMessage(response.message);
       navigate("/verify-otp", { state: { email } });
     } catch (err) {
@@ -133,24 +136,60 @@ const Register = () => {
                     onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
-                {/* Password Input with Icon */}
+                {/* Password Input with Eye Toggle */}
+                <div className="relative">
+                <label htmlFor="password" className="sr-only">
+                    Password
+                </label>
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Lock className="h-5 w-5 text-gray-400" />
+                </div>
+
+                <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
+                    required
+                    className="appearance-none relative block w-full pl-10 pr-10 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                />
+
+                {/* 👁 Eye Toggle Button */}
+                <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+                >
+                    {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                    ) : (
+                    <Eye className="h-5 w-5" />
+                    )}
+                </button>
+                </div>
+
+                {/* Phone Input with Icon */}
                 <div className="relative">
-                  <label htmlFor="password" className="sr-only">
-                    Password
+                  <label htmlFor="phone" className="sr-only">
+                    Phone Number
                   </label>
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Lock className="h-5 w-5 text-gray-400" />
+                        <Phone className="h-5 w-5 text-gray-400" />
                     </div>
                   <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete="new-password"
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    autoComplete="tel"
                     required
+                    pattern="^(\+2519\d{8}|09\d{8})$"
                     className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="0911223344"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
                   />
                 </div>
                 {/* Role Select with Icon */}
