@@ -367,35 +367,31 @@ export const activateSubscription = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (!user.subscription.paymentScreenshot) {
-      return res.status(400).json({ message: "No payment screenshot uploaded for this user" });
-    }
+    if (!user.subscription.paymentScreenshot)
+      return res.status(400).json({ message: "No payment screenshot uploaded" });
 
     const startDate = new Date();
-    let endDate = new Date(startDate);
-    if (user.subscription.plan === "yearly") endDate.setFullYear(endDate.getFullYear() + 1);
-    else endDate.setMonth(endDate.getMonth() + 1);
+    const endDate = new Date(startDate);
+    user.subscription.plan === "yearly"
+      ? endDate.setFullYear(endDate.getFullYear() + 1)
+      : endDate.setMonth(endDate.getMonth() + 1);
 
     user.subscription.isActive = true;
     user.subscription.startDate = startDate;
     user.subscription.endDate = endDate;
     user.subscription.paidAt = new Date();
-
     await user.save();
 
-    // Send email to user
-    const subject = "Your Subscription is Activated ✅";
-    const html = `
-      <p>Hi ${user.name || user.email},</p>
-      <p>Your <strong>${user.subscription.plan}</strong> subscription has been activated successfully.</p>
-      <p>Start Date: ${startDate.toDateString()}</p>
-      <p>End Date: ${endDate.toDateString()}</p>
-      <p>Thank you for your payment!</p>
-    `;
-    await sendEmailToUser(user.email, subject, html);
+    await sendEmailToUser(
+      user.email,
+      "✅ Subscription Activated",
+      `Hi ${user.name || user.email},<br>Your <strong>${user.subscription.plan}</strong> subscription has been activated.<br>
+       <strong>Start:</strong> ${startDate.toDateString()}<br>
+       <strong>End:</strong> ${endDate.toDateString()}`
+    );
 
     res.status(200).json({
-      message: `Subscription (${user.subscription.plan}) activated successfully`,
+      message: `Subscription (${user.subscription.plan}) activated successfully.`,
       subscription: user.subscription,
     });
   } catch (err) {
@@ -413,23 +409,21 @@ export const deactivateSubscription = async (req, res) => {
     user.subscription.isActive = false;
     await user.save();
 
-    // Send email to user
-    const subject = "Your Subscription is Deactivated ❌";
-    const html = `
-      <p>Hi ${user.name || user.email},</p>
-      <p>Your subscription has been deactivated.</p>
-      <p>If you have any questions, please contact support.</p>
-    `;
-    await sendEmailToUser(user.email, subject, html);
+    await sendEmailToUser(
+      user.email,
+      "❌ Subscription Deactivated",
+      `Hi ${user.name || user.email},<br>Your subscription has been deactivated. Please contact support if you believe this is a mistake.`
+    );
 
     res.status(200).json({
-      message: "Subscription deactivated successfully",
+      message: "Subscription deactivated successfully.",
       subscription: user.subscription,
     });
   } catch (err) {
     res.status(500).json({ message: "Error deactivating subscription", error: err.message });
   }
 };
+
 
 
 //  Admin approves role change
