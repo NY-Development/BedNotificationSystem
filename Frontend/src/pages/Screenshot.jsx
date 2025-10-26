@@ -27,7 +27,7 @@ const Screenshot = () => {
   const getSubscriptionAmount = () => {
     const c1YearlyBill = 799.9;
     const c2YearlyBill = 599.9;
-    const monthlyBill = 100;
+    const monthlyBill = 99.9;
 
     const role = localStorage.getItem("role");
     const plan = localStorage.getItem("selectedPlan");
