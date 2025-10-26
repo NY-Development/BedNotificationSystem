@@ -393,7 +393,7 @@ export const activateSubscription = async (req, res) => {
       <strong>End Date:</strong> ${endDate.toDateString()}</p>
       <p>You can now log in to your account and enjoy all premium features 🎉</p>
       <p>
-        👉 <a href="https://bednotify.vercel.app" target="_blank" style="color: #007BFF; text-decoration: none;">
+        👉 <a href="https://bednotify.vercel.app/login" target="_blank" style="color: #007BFF; text-decoration: none;">
         Click here to login to BNS
         </a>
       </p>
