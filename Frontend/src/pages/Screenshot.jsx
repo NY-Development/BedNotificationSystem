@@ -23,49 +23,24 @@ const Screenshot = () => {
   const fileInputRef = useRef(null);
   const [copied, setCopied] = useState(false);
 
+  // 🧮 Plan & Role Info
+  const plan = localStorage.getItem("selectedPlan");
+  const role = localStorage.getItem("role");
+
   // ✅ Function to dynamically determine amount
   const getSubscriptionAmount = () => {
     const c1YearlyBill = 799.9;
     const c2YearlyBill = 599.9;
     const monthlyBill = 99.9;
 
-    const role = localStorage.getItem("role");
-    const plan = localStorage.getItem("selectedPlan");
-
     if (plan === "monthly") return monthlyBill;
-
-    if (plan === "yearly") {
-      return role === "c1" ? c1YearlyBill : c2YearlyBill;
-    }
-
-    return monthlyBill; // default fallback
+    if (plan === "yearly") return role === "c1" ? c1YearlyBill : c2YearlyBill;
+    return monthlyBill;
   };
 
-  const plan = localStorage.getItem("selectedPlan") || "monthly";
   const amount = getSubscriptionAmount();
   const AccountNumber = 1000403196928;
   const AccountName = "Yamlak Negash Dugo";
-
-  // 🚫 If no plan, block access
-  if (localStorage.getItem("selectedPlan") === null) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-        <div className="text-center p-8 bg-white rounded-xl shadow-2xl">
-          <div className="text-6xl mb-4 text-red-500">❌</div>
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">Access Denied</h2>
-          <p className="text-lg text-gray-600 mb-6">
-            Please select a subscription plan to view this page.
-          </p>
-          <Link
-            to="/register"
-            className="inline-block px-8 py-3 text-white bg-indigo-600 hover:bg-indigo-700 transition duration-300 rounded-full shadow-lg transform hover:scale-[1.02]"
-          >
-            Register Now
-          </Link>
-        </div>
-      </div>
-    );
-  }
 
   // 🧩 Prevent user from leaving until upload is complete
   useEffect(() => {
@@ -114,7 +89,7 @@ const Screenshot = () => {
       setCopied(true);
       toast.success("Account Number copied!");
       setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
+    } catch {
       toast.error("Failed to copy text.");
     }
   };
@@ -149,6 +124,29 @@ const Screenshot = () => {
       setLoading(false);
     }
   };
+
+  // 🚫 Render Access Denied inside JSX (not early return)
+  if (!plan) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+        <div className="text-center p-8 bg-white rounded-xl shadow-2xl">
+          <div className="text-6xl mb-4 text-red-500">❌</div>
+          <h2 className="text-3xl font-bold text-gray-800 mb-2">
+            Access Denied
+          </h2>
+          <p className="text-lg text-gray-600 mb-6">
+            Please select a subscription plan to view this page.
+          </p>
+          <Link
+            to="/register"
+            className="inline-block px-8 py-3 text-white bg-indigo-600 hover:bg-indigo-700 transition duration-300 rounded-full shadow-lg transform hover:scale-[1.02]"
+          >
+            Register Now
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
