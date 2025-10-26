@@ -131,13 +131,12 @@ const Screenshot = () => {
         duration: 5000,
       });
 
+      setShowModal(true);
       // Reset state
       setFile(null);
       setPreview(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
       localStorage.removeItem("selectedPlan");
-
-      setShowModal(true);
 
       // Redirect after 5 seconds
       setTimeout(() => {
@@ -279,7 +278,7 @@ const Screenshot = () => {
 
       {/* ✅ Success Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center p-4 z-50 transition-opacity duration-300">
+        <div className="fixed inset-0 backdrop-blur-xs flex items-center justify-center p-4 z-50 transition-opacity duration-300">
           <div className="bg-white rounded-xl shadow-2xl p-8 max-w-sm w-full text-center transform scale-100 transition-transform duration-300">
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
             <h2 className="text-xl font-bold text-gray-800 mb-4">
@@ -289,9 +288,9 @@ const Screenshot = () => {
               Your payment screenshot has been sent for admin review.
             </p>
             <p className="text-indigo-600 font-medium mb-2">
-              Please wait for confirmation before logging in.
+              Please wait for confirmation through your email before logging in.
             </p>
-            <p className="text-sm text-gray-500 italic">
+            <p className="text-sm text-gray-500 italic font-extrabold animate-pulse">
               Redirecting to login in 5 seconds...
             </p>
           </div>
