@@ -112,9 +112,10 @@ const Login = () => {
               alt="Bed Icon"
               className="mx-auto h-20 w-auto mb-4"
             />
-            <h1 className="text-white text-4xl lg:text-5xl font-extrabold px-6">
+            <h1 className="font-extrabold text-indigo-400 text-5xl italic">BNS</h1>
+            <h2 className="text-white text-4xl lg:text-3xl px-6 italic">
               Your Medical Practice, Simplified
-            </h1>
+            </h2>
           </div>
         </div>
 
