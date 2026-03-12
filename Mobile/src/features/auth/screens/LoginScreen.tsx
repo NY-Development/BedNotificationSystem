@@ -7,13 +7,23 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, type LoginFormData } from '@/src/features/auth/schemas/authSchemas';
 import { useLogin } from '@/src/hooks/useAuth';
 import { Input } from '@/src/components/ui/Input';
-import { Hospital, Mail, Lock, LogIn, Eye, EyeOff, ScanFace } from 'lucide-react-native';
+import { Hospital, Mail, Lock, LogIn, Eye, EyeOff, ScanFace, Building2 } from 'lucide-react-native';
 import { Icon } from '@/components/ui/icon';
+import { ThemeToggle } from '@/src/components/ui/ThemeToggle';
+import { FloatingHelpButton, QuickHelpModal } from '@/src/components/ui/QuickHelpModal';
+import { useUniversityStore } from '@/src/store/universityStore';
 
 export default function LoginScreen() {
   const router = useRouter();
   const loginMutation = useLogin();
+  const { selectedUniversity, loadSelectedUniversity } = useUniversityStore();
   const [showPassword, setShowPassword] = useState(false);
+  const [isHelpVisible, setIsHelpVisible] = useState(false);
+
+  // Load selected university on mount
+  React.useEffect(() => {
+    loadSelectedUniversity();
+  }, []);
 
   const {
     control,
@@ -26,7 +36,7 @@ export default function LoginScreen() {
 
   const onSubmit = (data: LoginFormData) => {
     loginMutation.mutate(data, {
-      onSuccess: () => router.replace('/dashboard'),
+      onSuccess: () => router.replace('/(staff)/dashboard'),
       onError: () => {},
     });
   };
@@ -38,6 +48,17 @@ export default function LoginScreen() {
         className="flex-1">
         {/* Header Section */}
         <View className="overflow-hidden rounded-b-[2.5rem] bg-primary px-6 pb-12 pt-14">
+          <View className="absolute right-8 top-8 z-10">
+            <Pressable
+              onPress={() => router.push('/(auth)/university-choice')}
+              className="flex-row items-center gap-2 rounded-full bg-white/20 px-3 py-2 active:bg-white/30">
+              <Icon as={Building2} className="text-white" size={16} />
+              <Text className="text-xs font-bold text-white">
+                {selectedUniversity || 'Select University'}
+              </Text>
+            </Pressable>
+            <ThemeToggle variant="ghost" size={20} />
+          </View>
           <View className="items-center gap-4">
             <View className="rounded-2xl bg-white/20 p-3">
               <Icon as={Hospital} className="text-white" size={36} />
@@ -143,7 +164,17 @@ export default function LoginScreen() {
               </Text>
               <View className="flex-1 border-t border-border" />
             </View>
-
+            {/* Login Link */}
+            <View className="items-center">
+              <Text className="text-sm text-muted-foreground">
+                New to our app?{' '}
+                <Text
+                  onPress={() => router.push('/(auth)/register')}
+                  className="font-bold text-primary">
+                  Signup Here
+                </Text>
+              </Text>
+            </View>
             {/* Biometric Button */}
             <Pressable className="h-12 w-full flex-row items-center justify-center gap-2 rounded-xl border border-border bg-accent active:opacity-80">
               <Icon as={ScanFace} className="text-primary" size={22} />
@@ -153,9 +184,11 @@ export default function LoginScreen() {
 
           {/* Help Link */}
           <View className="mt-8 items-center">
-            <Text className="text-sm text-muted-foreground">
-              Having trouble? <Text className="font-medium text-primary">Contact IT Support</Text>
-            </Text>
+            <Pressable onPress={() => router.push('/(system)/contact')}>
+              <Text className="text-sm text-muted-foreground">
+                Having trouble? <Text className="font-medium text-primary">Contact IT Support</Text>
+              </Text>
+            </Pressable>
           </View>
         </ScrollView>
 
@@ -164,6 +197,10 @@ export default function LoginScreen() {
           <Text className="text-xs text-muted-foreground">v1.0.4 | Secure 256-bit Encryption</Text>
         </View>
       </KeyboardAvoidingView>
+
+      {/* Quick Help Support */}
+      <FloatingHelpButton onPress={() => setIsHelpVisible(true)} />
+      <QuickHelpModal isVisible={isHelpVisible} onClose={() => setIsHelpVisible(false)} />
     </SafeAreaView>
   );
 }

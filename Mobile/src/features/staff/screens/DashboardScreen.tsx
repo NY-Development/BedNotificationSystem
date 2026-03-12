@@ -20,6 +20,7 @@ import {
   ChevronRight,
 } from 'lucide-react-native';
 import { Icon } from '@/components/ui/icon';
+import { ThemeToggle } from '@/src/components/ui/ThemeToggle';
 import type { Bed } from '@/src/types';
 
 export default function StaffDashboardScreen() {
@@ -116,11 +117,14 @@ export default function StaffDashboardScreen() {
                 </View>
               </View>
             </View>
-            <Pressable
-              onPress={() => router.push('/(staff)/notifications')}
-              className="rounded-full p-2">
-              <Icon as={Bell} className="text-foreground" size={24} />
-            </Pressable>
+            <View className="flex-row items-center">
+              <Pressable
+                onPress={() => router.push('/(staff)/notifications')}
+                className="rounded-full p-2">
+                <Icon as={Bell} className="text-foreground" size={24} />
+              </Pressable>
+              <ThemeToggle variant="ghost" />
+            </View>
           </View>
           <Text className="mt-4 text-2xl font-bold text-foreground">Bed Notification System</Text>
         </View>

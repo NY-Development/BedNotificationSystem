@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { ScreenWrapper } from '@/src/components/layout/ScreenWrapper';
 import { Hospital, ArrowRight } from 'lucide-react-native';
 import { Icon } from '@/components/ui/icon';
+import { ThemeToggle } from '@/src/components/ui/ThemeToggle';
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -13,17 +14,18 @@ export default function WelcomeScreen() {
       <View className="h-12 w-full" />
 
       {/* Header Logo */}
-      <View className="flex-row items-center justify-center px-6 py-4">
+      <View className="flex-row items-center justify-between px-6 py-4">
         <View className="flex-row items-center gap-2">
           <View className="h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
             <Icon as={Hospital} className="text-primary" size={24} />
           </View>
           <Text className="text-xl font-bold tracking-tight text-foreground">BNS</Text>
         </View>
+        <ThemeToggle variant="ghost" />
       </View>
 
       {/* Main Content */}
-      <View className="flex-1 items-center justify-center px-6 pb-8 pt-4">
+      <View className="mb-30 flex-1 items-center justify-center px-6 pb-8 pt-4">
         {/* Hero Image Placeholder */}
         <View className="mb-8 aspect-square w-full max-w-[320px] items-center justify-center overflow-hidden rounded-2xl border border-border bg-card shadow-lg">
           <View className="absolute inset-0 rounded-full bg-primary/10 opacity-60 blur-3xl" />
@@ -56,7 +58,7 @@ export default function WelcomeScreen() {
       </View>
 
       {/* Bottom Action Area */}
-      <View className="gap-3 px-6 pb-8 pt-4">
+      <View className="mt-22 gap-3 px-6 pb-8">
         <Pressable
           onPress={() => router.push('/(auth)/register')}
           className="h-14 w-full items-center justify-center rounded-xl bg-primary shadow-md active:opacity-90">

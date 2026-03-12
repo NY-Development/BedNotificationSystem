@@ -4,12 +4,16 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ShieldX, ArrowLeft, Headset } from 'lucide-react-native';
 import { Icon } from '@/components/ui/icon';
+import { ThemeToggle } from '@/src/components/ui/ThemeToggle';
 
 export default function AccessDeniedScreen() {
   const router = useRouter();
 
   return (
     <SafeAreaView className="flex-1 bg-background">
+      <View className="absolute right-4 top-14 z-10">
+        <ThemeToggle variant="ghost" />
+      </View>
       <View className="flex-1 items-center justify-center px-6 pb-10">
         {/* Icon */}
         <View className="mb-8 rounded-full bg-destructive/10 p-6">

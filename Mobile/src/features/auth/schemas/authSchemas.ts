@@ -16,10 +16,10 @@ export const registerSchema = z.object({
     .regex(/[A-Z]/, 'Must contain an uppercase letter')
     .regex(/[!@#$%^&*(),.?":{}|<>]/, 'Must contain a special character'),
   phone: z.string().min(10, 'Phone number must be at least 10 digits'),
-  role: z.enum(['user', 'supervisor', 'admin'], {
+  role: z.enum(['c1', 'c2', 'intern'], {
     message: 'Role is required',
   }),
-  plan: z.enum(['month', 'year'], { message: 'Plan is required' }),
+  subscriptionPlan: z.enum(['monthly', 'yearly'], { message: 'Plan is required' }).optional(),
   agreeToTerms: z.literal(true, {
     message: 'You must agree to the terms',
   }),

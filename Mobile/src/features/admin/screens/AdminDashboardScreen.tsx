@@ -18,6 +18,7 @@ import {
   UserPlus,
 } from 'lucide-react-native';
 import { Icon } from '@/components/ui/icon';
+import { ThemeToggle } from '@/src/components/ui/ThemeToggle';
 
 export default function AdminDashboardScreen() {
   const router = useRouter();
@@ -51,11 +52,14 @@ export default function AdminDashboardScreen() {
             <Text className="text-lg font-bold text-foreground">{user?.name ?? 'Admin'}</Text>
           </View>
         </View>
-        <Pressable
-          onPress={() => router.push('/(admin)/profile')}
-          className="h-10 w-10 items-center justify-center rounded-full">
-          <Icon as={Settings} className="text-foreground" size={24} />
-        </Pressable>
+        <View className="flex-row items-center">
+          <Pressable
+            onPress={() => router.push('/(admin)/profile')}
+            className="h-10 w-10 items-center justify-center rounded-full">
+            <Icon as={Settings} className="text-foreground" size={24} />
+          </Pressable>
+          <ThemeToggle variant="ghost" />
+        </View>
       </View>
 
       <ScrollView className="flex-1" contentContainerClassName="pb-24">

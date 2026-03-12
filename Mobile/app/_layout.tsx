@@ -10,6 +10,8 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/src/lib/queryClient';
 import { useEffect } from 'react';
 import { useAuthStore } from '@/src/store/authStore';
+import { useThemeStore } from '@/src/store/themeStore';
+import { ToastProvider } from '@/src/components/ui/Toast';
 import * as SplashScreen from 'expo-splash-screen';
 
 SplashScreen.preventAutoHideAsync();
@@ -17,12 +19,19 @@ SplashScreen.preventAutoHideAsync();
 export { ErrorBoundary } from 'expo-router';
 
 export default function RootLayout() {
-  const { colorScheme } = useColorScheme();
+  const { colorScheme, setColorScheme } = useColorScheme();
   const { loadToken, isLoading } = useAuthStore();
+  const { loadTheme } = useThemeStore();
 
   useEffect(() => {
     loadToken();
-  }, [loadToken]);
+    loadTheme().then(() => {
+      const saved = useThemeStore.getState().colorScheme;
+      if (saved && saved !== colorScheme) {
+        setColorScheme(saved);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     if (!isLoading) {
@@ -33,16 +42,18 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider value={NAV_THEME[colorScheme ?? 'light']}>
-        <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="index" />
-          <Stack.Screen name="(auth)" />
-          <Stack.Screen name="(onboarding)" />
-          <Stack.Screen name="(staff)" />
-          <Stack.Screen name="(admin)" />
-          <Stack.Screen name="(system)" />
-        </Stack>
-        <PortalHost />
+        <ToastProvider>
+          <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="index" />
+            <Stack.Screen name="(auth)" />
+            <Stack.Screen name="(onboarding)" />
+            <Stack.Screen name="(staff)" />
+            <Stack.Screen name="(admin)" />
+            <Stack.Screen name="(system)" />
+          </Stack>
+          <PortalHost />
+        </ToastProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

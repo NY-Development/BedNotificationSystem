@@ -13,6 +13,7 @@ import {
   BarChart3,
 } from 'lucide-react-native';
 import { Icon } from '@/components/ui/icon';
+import { ThemeToggle } from '@/src/components/ui/ThemeToggle';
 
 const lockedFeatures = [
   { icon: BedDouble, label: 'Bed Management System' },
@@ -26,6 +27,9 @@ export default function ExpiredSubscriptionScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
+      <View className="absolute right-4 top-14 z-10">
+        <ThemeToggle variant="ghost" />
+      </View>
       <ScrollView contentContainerClassName="flex-grow items-center justify-center px-6 py-10">
         {/* Icon */}
         <View className="mb-8 rounded-full bg-warning/10 p-6">

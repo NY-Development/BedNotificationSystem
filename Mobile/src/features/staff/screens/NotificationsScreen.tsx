@@ -7,6 +7,7 @@ import { LoadingSpinner } from '@/src/components/ui/LoadingSpinner';
 import { EmptyState } from '@/src/components/ui/EmptyState';
 import { AlertTriangle, Sparkles, ClipboardList, Bell, UserCheck } from 'lucide-react-native';
 import { Icon } from '@/components/ui/icon';
+import { ThemeToggle } from '@/src/components/ui/ThemeToggle';
 import type { Notification } from '@/src/types';
 
 type FilterType = 'all' | 'urgent' | 'unread';
@@ -83,9 +84,12 @@ export default function NotificationsScreen() {
       <View className="bg-background px-6 pb-4 pt-4">
         <View className="mb-4 flex-row items-center justify-between">
           <Text className="text-3xl font-bold text-foreground">Alerts</Text>
-          <Pressable>
-            <Text className="text-sm font-semibold text-primary">Mark all as read</Text>
-          </Pressable>
+          <View className="flex-row items-center gap-2">
+            <Pressable>
+              <Text className="text-sm font-semibold text-primary">Mark all as read</Text>
+            </Pressable>
+            <ThemeToggle variant="ghost" />
+          </View>
         </View>
 
         {/* Segmented Filter */}

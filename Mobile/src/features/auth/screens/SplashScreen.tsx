@@ -1,23 +1,60 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ScreenWrapper } from '@/src/components/layout/ScreenWrapper';
+import { OnboardingScreen } from '@/src/components/ui/OnboardingScreen';
 import { BedDouble, Activity } from 'lucide-react-native';
 import { Icon } from '@/components/ui/icon';
+import { ThemeToggle } from '@/src/components/ui/ThemeToggle';
 
 export default function SplashScreen() {
   const router = useRouter();
   const progress = useRef(new Animated.Value(0)).current;
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    Animated.timing(progress, {
-      toValue: 1,
-      duration: 2500,
-      useNativeDriver: false,
-    }).start(() => {
-      router.replace('/(onboarding)/welcome');
-    });
+    const initializeApp = async () => {
+      try {
+        // Check if user has seen the tour
+        const hasSeenTour = await AsyncStorage.getItem('hasSeenBnsTour');
+
+        // Start the splash animation
+        Animated.timing(progress, {
+          toValue: 1,
+          duration: 2500,
+          useNativeDriver: false,
+        }).start(() => {
+          if (hasSeenTour === 'true') {
+            // User has seen onboarding, go to welcome screen
+            router.replace('/(onboarding)/welcome');
+          } else {
+            // Show onboarding
+            setShowOnboarding(true);
+            setIsLoading(false);
+          }
+        });
+      } catch (error) {
+        console.error('Error checking onboarding status:', error);
+        // On error, show onboarding to be safe
+        setShowOnboarding(true);
+        setIsLoading(false);
+      }
+    };
+
+    initializeApp();
   }, [progress, router]);
+
+  const handleOnboardingComplete = () => {
+    setShowOnboarding(false);
+    router.replace('/(onboarding)/welcome');
+  };
+
+  // Show onboarding if needed
+  if (showOnboarding && !isLoading) {
+    return <OnboardingScreen onComplete={handleOnboardingComplete} />;
+  }
 
   const widthInterpolation = progress.interpolate({
     inputRange: [0, 1],
@@ -31,7 +68,9 @@ export default function SplashScreen() {
 
   return (
     <ScreenWrapper className="items-center justify-between p-8">
-      <View className="h-12 w-full" />
+      <View className="h-12 w-full items-end">
+        <ThemeToggle variant="ghost" />
+      </View>
       <View className="flex-1 items-center justify-center">
         <View className="mb-8 h-32 w-32 items-center justify-center rounded-[2.5rem] bg-card shadow-xl">
           <Icon as={BedDouble} className="text-primary" size={64} />

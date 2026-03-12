@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import { Icon } from '@/components/ui/icon';
+import { ThemeToggle } from '@/src/components/ui/ThemeToggle';
 
 interface HeaderProps {
   title: string;
@@ -11,6 +12,7 @@ interface HeaderProps {
   showBack?: boolean;
   rightElement?: React.ReactNode;
   rightAction?: React.ReactNode;
+  showThemeToggle?: boolean;
   className?: string;
 }
 
@@ -20,9 +22,12 @@ export function Header({
   showBack = false,
   rightElement,
   rightAction,
+  showThemeToggle = true,
   className,
 }: HeaderProps) {
   const router = useRouter();
+
+  const right = rightElement ?? rightAction;
 
   return (
     <View
@@ -43,7 +48,10 @@ export function Header({
           {!!subtitle && <Text className="text-xs text-muted-foreground">{subtitle}</Text>}
         </View>
       </View>
-      {rightElement ?? rightAction}
+      <View className="flex-row items-center gap-2">
+        {right}
+        {showThemeToggle && <ThemeToggle variant="ghost" />}
+      </View>
     </View>
   );
 }
