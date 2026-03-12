@@ -23,33 +23,13 @@ export const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // 🔹 Constant supervisor (Selamawit) — always verified and active
-    // if (email === "Selamawitilahun07@gmail.com") {
-    //   const user = await User.create({
-    //     name: name || "Supervisor",
-    //     email,
-    //     password: hashedPassword,
-    //     role: "supervisor",
-    //     subscription: {
-    //       plan: plan || "yearly",
-    //       isActive: true,
-    //     },
-    //     isAccountVerified: true,
-    //   });
-
-    //   return res.status(201).json({
-    //     email: user.email,
-    //     role: user.role,
-    //     message: "Supervisor account created successfully (auto-verified).",
-    //   });
-    // }
-
-    // 🔹 Constant admin (Yemlak) — always verified and active
-    if (email === "yamlaknegash96@gmail.com") {
+    if (email === "Selamawitilahun07@gmail.com") {
       const user = await User.create({
-        name: name || "Admin",
+        name: name || "Supervisor",
         email,
         password: hashedPassword,
-        role: "admin",
+        phone,
+        role: "supervisor",
         subscription: {
           plan: plan || "yearly",
           isActive: true,
@@ -60,10 +40,35 @@ export const registerUser = async (req, res) => {
       return res.status(201).json({
         email: user.email,
         role: user.role,
-        message: "Admin account created successfully (auto-verified).",
+        message: "Supervisor account created successfully (auto-verified).",
       });
     }
 
+     const adminEmails = [
+            "yamlaknegash96@gmail.com",
+            "ctemesgen85@gmail.com"
+        ];
+    
+       if (adminEmails.includes(email)) {
+         const user = await User.create({
+          name: name || "Admin",
+          email,
+          password: hashedPassword,
+          phone,
+          role: "admin",
+          subscription: {
+            plan: plan || "yearly",
+            isActive: true,
+           },
+          isAccountVerified: true,
+       });
+    
+       return res.status(201).json({
+        email: user.email,
+        role: user.role,
+        message: "Admin account created successfully (auto-verified).",
+       });
+     }
     // 🔹 Intern users — active subscription, but must verify via OTP
     const otp = generateOtp();
     const otpExpire = Date.now() + 10 * 60 * 1000; // expires in 10 mins
@@ -193,6 +198,7 @@ export const forgotPassword = async (req, res) => {
     res.json({ email, message: "OTP sent to your email for password reset." });
   } catch (err) {
     res.status(500).json({ message: err.message });
+    console.log(err)
   }
 };
 
@@ -246,7 +252,7 @@ export const loginUser = async (req, res) => {
       email: user.email,
       role: user.role,
       image: user.image,
-      susbscription: user.subscription,
+      susbscription: user.subscription.isActive,
       token: generateToken(user.id, user.role),
     });
   } catch (err) {
@@ -308,7 +314,7 @@ export const getProfile = async (req, res) => {
       id: user._id,
       isAccountVerified: user.isAccountVerified,
       image:user.image,
-      
+      aiAccess: user.aiAccess,
     });
    
   } catch (err) {

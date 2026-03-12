@@ -3,7 +3,7 @@ import { useAssignment } from "../context/AssignmentContext";
 import { updateExpiryDates } from "../services/assignment";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-hot-toast";
-import { AlertTriangle, CheckCircle, Loader2, BedSingle, CalendarDays, Zap } from "lucide-react";
+import { AlertTriangle, CheckCircle, Loader2, BedSingle, CalendarDays, Zap, Lock } from "lucide-react";
 import GoBack from "../components/GoBack";
 import { getDepartments } from "../services/department";
 import { Link } from "react-router-dom";
@@ -74,28 +74,32 @@ const UpdateExpiry = () => {
     );
   }
 
-    if (!user?.subscription?.isActive) {
+  if (!user?.subscription?.isActive) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-        <div className="text-center p-8 bg-white rounded-xl shadow-2xl">
-          <div className="text-6xl mb-4 animate-bounce">❌</div>
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">Access Denied</h2>
-          <p className="text-lg text-gray-600 mb-6">Please log in to view this page.</p>
-          <Link
-            to="/login"
-            className="inline-block px-8 py-3 text-white bg-indigo-600 hover:bg-indigo-700 transition duration-300 rounded-full shadow-lg transform hover:scale-105"
-          >
-            Go to Login
-          </Link>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+        <div className="max-w-md w-full bg-white p-8 rounded-[3rem] shadow-2xl text-center border-2 border-slate-100">
+           <div className="w-20 h-20 bg-rose-50 text-rose-600 rounded-3xl flex items-center justify-center mx-auto mb-6">
+              <Lock size={40} />
+           </div>
+           <h2 className="text-2xl font-black text-slate-900 uppercase italic">Access Denied</h2>
+           <p className="text-slate-500 text-sm mt-3 mb-8 font-bold">
+             You need an active Platform Subscription to access the Update-Ward Live Feed.
+           </p>
+           <button 
+             onClick={() => window.location.href = '/screenshot'} 
+             className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest"
+           >
+             Upgrade Plan
+           </button>
         </div>
       </div>
     );
-  };
+  }
   // --- Data References ---
   const selectedDept = departments.find((d) => d._id === form.deptId);
   const selectedWard = selectedDept?.wards.find((w) => w.name === form.wardName);
   const bedsToDisplay = selectedWard
-    ? selectedWard.beds.filter((bed) => !bed.assignedUser)
+    ? selectedWard.beds //updated so that selected beds bu others are also shown.
     : [];
 
   // --- Dates ---

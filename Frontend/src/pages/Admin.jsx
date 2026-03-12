@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useSupervisor } from "../context/SupervisorContext";
 import ConfirmModal from "../components/ConfirmModal";
 import GoBack from "../components/GoBack";
-import { Hospital, Bed, Users } from "lucide-react";
+import { Hospital, Bed, Users, Plus, Trash2, LayoutList, ShieldAlert, Layers } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { getAllUsers } from "../services/supervisorAPI";
 import { Link } from "react-router-dom";
@@ -22,10 +22,8 @@ const Admin = () => {
   } = useSupervisor();
 
   const { user } = useAuth();
-
   const [activeTab, setActiveTab] = useState("departments");
   const [users, setUsers] = useState([]);
-
   const [selectedDept, setSelectedDept] = useState(null);
   const [selectedWard, setSelectedWard] = useState(null);
   const [newDeptName, setNewDeptName] = useState("");
@@ -34,16 +32,10 @@ const Admin = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmData, setConfirmData] = useState({});
 
-  // ---- Load departments on mount ----
-  useEffect(() => {
-    loadDepartments();
-  }, []);
+  useEffect(() => { loadDepartments(); }, []);
 
-  // ---- Load users when "Users" tab active ----
   useEffect(() => {
-    if (activeTab === "users") {
-      loadUsers();
-    }
+    if (activeTab === "users") loadUsers();
   }, [activeTab]);
 
   const loadUsers = async () => {
@@ -51,7 +43,7 @@ const Admin = () => {
       const data = await getAllUsers();
       setUsers(data);
     } catch (err) {
-      toast.error("Failed to load users");
+      toast.error("Failed to load user database");
     }
   };
 
@@ -62,369 +54,262 @@ const Admin = () => {
 
   if (loading) {
     return (
-      <p className="p-8 text-center text-xl font-medium text-gray-700 animate-pulse">
-        Loading...
-      </p>
+      <div className="min-h-screen bg-slate-50/50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-12 w-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Initializing Admin Terminal...</p>
+        </div>
+      </div>
     );
   }
 
   if (!user?.subscription?.isActive) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-        <div className="text-center p-8 bg-white rounded-xl shadow-2xl">
-          <div className="text-6xl mb-4 animate-bounce">❌</div>
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">
-            Access Denied
-          </h2>
-          <p className="text-lg text-gray-600 mb-6">
-            Please log in to view this page.
-          </p>
-          <Link
-            to="/login"
-            className="inline-block px-8 py-3 text-white bg-indigo-600 hover:bg-indigo-700 transition duration-300 rounded-full shadow-lg transform hover:scale-105"
-          >
-            Go to Login
-          </Link>
+      <div className="min-h-screen bg-slate-50/50 flex items-center justify-center p-6">
+        <div className="max-w-md w-full p-12 text-center bg-white rounded-[2.5rem] border border-slate-200 shadow-xl">
+          <ShieldAlert size={64} className="text-rose-500 mx-auto mb-6" />
+          <h2 className="text-3xl font-black text-slate-900 tracking-tighter italic mb-4">Access Denied</h2>
+          <p className="text-slate-500 font-bold mb-8 uppercase text-[10px] tracking-widest">Supervisor privileges required</p>
+          <Link to="/login" className="block py-4 bg-slate-900 text-white rounded-xl font-black uppercase tracking-widest hover:bg-indigo-600 transition-all">Authenticate</Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-8 max-w-6xl mx-auto min-h-screen bg-gray-50">
-      <GoBack />
-      <h1 className="text-4xl font-extrabold text-gray-900 mb-6">
-        Supervisor Panel
-      </h1>
+    <div className="min-h-screen bg-slate-50/50 pt-28 pb-20 px-6 font-sans">
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-6"><GoBack /></div>
 
-      {/* Tabs */}
-      <div className="flex space-x-4 border-b mb-6">
-        <button
-          onClick={() => setActiveTab("departments")}
-          className={`cp pb-2 px-4 font-semibold ${
-            activeTab === "departments"
-              ? "border-b-4 border-indigo-600 text-indigo-700"
-              : "text-gray-500 hover:text-gray-700"
-          }`}
-        >
-          Departments
-        </button>
-        <button
-          onClick={() => setActiveTab("users")}
-          className={`cp pb-2 px-4 font-semibold ${
-            activeTab === "users"
-              ? "border-b-4 border-indigo-600 text-indigo-700"
-              : "text-gray-500 hover:text-gray-700"
-          }`}
-        >
-          Users
-        </button>
-      </div>
-
-      {/* Tab 1: Departments */}
-      {activeTab === "departments" && (
-        <div className="bg-white shadow-lg p-6 rounded-xl border border-gray-200">
-          <h2 className="text-2xl font-bold mb-6 flex items-center space-x-2 text-gray-800">
-            <Hospital size={24} />
-            <span>Departments & Wards</span>
-          </h2>
-
-          {/* Create Department */}
-          <div className="mb-6 flex md:flex-row flex-col md:space-x-2 space-y-2">
-            <input
-              type="text"
-              value={newDeptName}
-              onChange={(e) => setNewDeptName(e.target.value)}
-              placeholder="New department name"
-              className="border border-gray-300 p-2 rounded-lg flex-1 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            />
-            <button
-              onClick={() => {
-                if (newDeptName.trim()) {
-                  createDepartment(newDeptName.trim());
-                  setNewDeptName("");
-                }
-              }}
-              className="cp p-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700"
-            >
-              Add Department
-            </button>
+        {/* Operational Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-slate-200 pb-8 mb-10 gap-6">
+          <div>
+            <div className="flex items-center gap-2 mb-2 text-indigo-600">
+              <Layers size={16} />
+              <span className="text-[10px] font-black uppercase tracking-[0.3em]">Operational Infrastructure</span>
+            </div>
+            <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter italic leading-none uppercase">Supervisor Panel</h1>
           </div>
-
-          {/* Department List */}
-          <div className="space-y-4">
-            {departments.map((dept) => (
-              <div
-                key={dept._id}
-                className={`p-4 rounded-lg border transition-all ${
-                  selectedDept?._id === dept._id
-                    ? "bg-indigo-50 border-indigo-400"
-                    : "bg-gray-50 border-gray-200"
+          
+          {/* Navigation Tabs */}
+          <div className="flex bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm">
+            {[
+              { id: "departments", label: "Facility Assets", icon: Hospital },
+              { id: "users", label: "User Database", icon: Users }
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`cp flex items-center gap-2 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                  activeTab === tab.id ? "bg-slate-900 text-white shadow-lg" : "text-slate-400 hover:text-slate-600"
                 }`}
               >
-                <div className="flex md:flex-row flex-col space-y-2 justify-between items-center">
-                  <h3 className="text-xl font-semibold text-gray-800">
-                    {dept.name}
-                  </h3>
-                  <div className="flex flex-row space-x-2">
-                    <button
-                      onClick={() => {
-                        if (selectedDept?._id === dept._id) {
-                          setSelectedDept(null);
-                          setSelectedWard(null);
-                        } else {
-                          setSelectedDept(dept);
-                          setSelectedWard(null);
-                        }
+                <tab.icon size={14} /> {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Tab 1: Departments & Infrastructure */}
+        {activeTab === "departments" && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Left: Department Controls */}
+            <div className="lg:col-span-5 space-y-6">
+              <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm">
+                <h3 className="text-[10px] font-black uppercase tracking-widest text-indigo-600 mb-6 flex items-center gap-2">
+                  <Plus size={14} /> Registry: New Department
+                </h3>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newDeptName}
+                    onChange={(e) => setNewDeptName(e.target.value)}
+                    placeholder="ENTER DEPT NAME"
+                    className="flex-1 bg-slate-50 border-none rounded-xl px-4 text-xs font-bold uppercase tracking-tight focus:ring-2 focus:ring-indigo-500 transition-all"
+                  />
+                  <button
+                    onClick={() => { if (newDeptName.trim()) { createDepartment(newDeptName.trim()); setNewDeptName(""); } }}
+                    className="p-4 bg-indigo-600 text-white rounded-xl hover:bg-slate-900 transition-all shadow-md"
+                  >
+                    <Plus size={18} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Department Feed */}
+              <div className="space-y-3">
+                {departments.map((dept) => (
+                  <div
+                    key={dept._id}
+                    onClick={() => { setSelectedDept(dept); setSelectedWard(null); }}
+                    className={`group cp p-5 rounded-2xl border-2 transition-all flex justify-between items-center ${
+                      selectedDept?._id === dept._id 
+                      ? "bg-white border-indigo-600 shadow-lg" 
+                      : "bg-white border-transparent hover:border-slate-200"
+                    }`}
+                  >
+                    <div>
+                      <h4 className="font-black text-slate-900 italic uppercase tracking-tighter">{dept.name}</h4>
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">
+                        Capacity: {dept.wards.length} Wards
+                      </p>
+                    </div>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openConfirm("Decommission", `Purge ${dept.name}?`, () => removeDepartment(dept._id));
                       }}
-                      className={`cp px-2 py-1 rounded-md text-white ${
-                        selectedDept?._id === dept._id
-                          ? "bg-gray-600 hover:bg-gray-700"
-                          : "bg-blue-600 hover:bg-blue-700"
-                      }`}
+                      className="cp opacity-100 p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
                     >
-                      {selectedDept?._id === dept._id
-                        ? "Hide Wards"
-                        : "Show Wards"}
-                    </button>
-                    <button
-                      onClick={() =>
-                        openConfirm(
-                          "Remove Department",
-                          `Are you sure you want to delete department "${dept.name}"?`,
-                          () => removeDepartment(dept._id)
-                        )
-                      }
-                      className="cp px-2 py-1 bg-red-600 text-white rounded-md hover:bg-red-700"
-                    >
-                      Remove
+                      <Trash2 size={16} />
                     </button>
                   </div>
-                </div>
+                ))}
+              </div>
+            </div>
 
-                {/* Wards */}
-                {selectedDept?._id === dept._id && (
-                  <div className="mt-4">
-                    <h4 className="font-semibold text-gray-700 mb-3">
-                      Wards in {dept.name}
-                    </h4>
-                    <ul className="space-y-3">
-                      {dept.wards.map((ward) => (
-                        <li
-                          key={ward._id}
-                          className={`p-3 rounded-lg flex md:flex-row flex-col justify-between items-center ${
-                            selectedWard?._id === ward._id
-                              ? "bg-indigo-100 border-2 border-indigo-400"
-                              : "bg-white border border-gray-200 hover:bg-gray-100"
-                          }`}
-                        >
-                          <span className="font-medium text-gray-700">
-                            {ward.name} ({ward.beds.length} beds)
-                          </span>
-                          <div className="space-x-2 flex">
-                            <button
-                              onClick={() =>
-                                setSelectedWard(
-                                  selectedWard?._id === ward._id ? null : ward
-                                )
-                              }
-                              className={`cp px-2 py-1 rounded-md text-white ${
-                                selectedWard?._id === ward._id
-                                  ? "bg-gray-600 hover:bg-gray-700"
-                                  : "bg-green-600 hover:bg-green-700"
-                              }`}
-                            >
-                              {selectedWard?._id === ward._id
-                                ? "Hide Beds"
-                                : "Show Beds"}
-                            </button>
-                            <button
-                              onClick={() =>
-                                openConfirm(
-                                  "Remove Ward",
-                                  `Are you sure you want to remove ward "${ward.name}"?`,
-                                  () => removeWardById(dept._id, ward._id)
-                                )
-                              }
-                              className="cp px-2 py-1 bg-red-600 text-white rounded-md hover:bg-red-700"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
+            {/* Right: Ward & Bed Context (Drill Down) */}
+            <div className="lg:col-span-7">
+              {selectedDept ? (
+                <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 shadow-sm min-h-[400px]">
+                  <div className="flex justify-between items-center mb-8 pb-4 border-b border-slate-100">
+                    <div>
+                      <h2 className="text-2xl font-black text-slate-900 italic uppercase tracking-tighter">{selectedDept.name}</h2>
+                      <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Active Sector Configuration</p>
+                    </div>
+                  </div>
 
-                    {/* Add Ward */}
-                    <div className="mt-4 flex md:flex-row flex-col md:space-x-2 space-y-2">
+                  {/* Ward Entry */}
+                  <div className="mb-10">
+                    <div className="flex gap-2 mb-6">
                       <input
                         type="text"
                         value={newWardName}
                         onChange={(e) => setNewWardName(e.target.value)}
-                        placeholder="New ward name"
-                        className="border border-gray-300 p-2 rounded-lg flex-1 focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                        placeholder="ADD WARD TO SECTOR"
+                        className="flex-1 bg-slate-50 border-none rounded-xl px-4 text-xs font-bold uppercase tracking-tight focus:ring-2 focus:ring-emerald-500"
                       />
                       <button
-                        onClick={() => {
-                          if (newWardName.trim()) {
-                            createWard(dept._id, newWardName.trim());
-                            setNewWardName("");
-                          }
-                        }}
-                        className="cp p-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700"
+                        onClick={() => { if (newWardName.trim()) { createWard(selectedDept._id, newWardName.trim()); setNewWardName(""); } }}
+                        className="cp py-4 px-6 bg-emerald-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-900 transition-all shadow-md"
                       >
-                        Add Ward
+                        Deploy Ward
                       </button>
                     </div>
-                  </div>
-                )}
 
-                {/* Beds */}
-                {selectedWard && selectedDept?._id === dept._id && (
-                  <div className="mt-6">
-                    <h4 className="font-semibold text-gray-700 mb-3">
-                      Beds in {selectedWard.name}
-                    </h4>
-                    <ul className="space-y-3">
-                      {selectedWard.beds.map((bed) => (
-                        <li
-                          key={bed._id}
-                          className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border"
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {selectedDept.wards.map((ward) => (
+                        <div
+                          key={ward._id}
+                          onClick={() => setSelectedWard(ward)}
+                          className={`cp p-4 rounded-2xl border-2 transition-all flex flex-col gap-3 ${
+                            selectedWard?._id === ward._id ? "bg-emerald-50 border-emerald-500 shadow-md" : "bg-white border-slate-100"
+                          }`}
                         >
-                          <div className="flex items-center space-x-2">
-                            <Bed size={20} />
-                            <span className="font-semibold text-gray-700">
-                              {bed.id}
-                            </span>
-                            <span
-                              className={`text-sm px-2 py-1 rounded-full ${
-                                bed.status === "occupied"
-                                  ? "bg-red-100 text-red-700"
-                                  : "bg-green-100 text-green-700"
-                              }`}
-                            >
-                              {bed.status}
-                            </span>
+                          <div className="flex justify-between">
+                            <span className="cp font-black text-slate-900 uppercase text-xs italic">{ward.name}</span>
+                            <button onClick={() => removeWardById(selectedDept._id, ward._id)} className="cp text-rose-400 hover:text-rose-600">
+                              <Trash2 size={12} />
+                            </button>
                           </div>
-                          <button
-                            onClick={() =>
-                              openConfirm(
-                                "Remove Bed",
-                                `Are you sure you want to remove bed "${bed.id}"?`,
-                                () =>
-                                  removeBedById(
-                                    dept._id,
-                                    selectedWard._id,
-                                    bed._id
-                                  )
-                              )
-                            }
-                            className="cp px-2 py-1 bg-red-600 text-white rounded-md hover:bg-red-700"
-                          >
-                            Remove
-                          </button>
-                        </li>
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{ward.beds.length} Active Units</span>
+                        </div>
                       ))}
-                    </ul>
-
-                    {/* Add Bed */}
-                    <div className="mt-4 flex md:flex-row flex-col md:space-x-2 space-y-2">
-                      <input
-                        type="text"
-                        value={newBedId}
-                        onChange={(e) => setNewBedId(e.target.value)}
-                        placeholder="New bed ID"
-                        className="border border-gray-300 p-2 rounded-lg flex-1 focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      />
-                      <button
-                        onClick={() => {
-                          if (newBedId.trim()) {
-                            createBed(
-                              dept._id,
-                              selectedWard._id,
-                              newBedId.trim()
-                            );
-                            setNewBedId("");
-                          }
-                        }}
-                        className="cp p-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700"
-                      >
-                        Add Bed
-                      </button>
                     </div>
                   </div>
-                )}
-              </div>
-            ))}
+
+                  {/* Bed Configuration */}
+                  {selectedWard && (
+                    <div className="pt-8 border-t border-slate-100 animate-in fade-in slide-in-from-top-4">
+                      <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6 italic">
+                        Units: {selectedWard.name}
+                      </h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+                        {selectedWard.beds.map((bed) => (
+                          <div key={bed._id} className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Bed size={12} className={bed.status === "occupied" ? "text-rose-500" : "text-emerald-500"} />
+                              <span className="text-[10px] font-black text-slate-700">{bed.id}</span>
+                            </div>
+                            <button onClick={() => removeBedById(selectedDept._id, selectedWard._id, bed._id)} className="text-slate-300 hover:text-rose-500 transition-all">
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={newBedId}
+                          onChange={(e) => setNewBedId(e.target.value)}
+                          placeholder="UNIT ID"
+                          className="bg-slate-100 border-none rounded-lg px-3 text-[10px] font-black uppercase tracking-tight flex-1"
+                        />
+                        <button
+                          onClick={() => { if (newBedId.trim()) { createBed(selectedDept._id, selectedWard._id, newBedId.trim()); setNewBedId(""); } }}
+                          className="cp p-2.5 bg-slate-900 text-white rounded-lg hover:bg-indigo-600 transition-all"
+                        >
+                          <Plus size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="h-full flex flex-col items-center justify-center p-12 bg-white rounded-[2.5rem] border-2 border-dashed border-slate-200 text-slate-300">
+                  <LayoutList size={48} strokeWidth={1} className="mb-4" />
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em]">Select Department to view Infrastructure</p>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Tab 2: Users */}
-      {activeTab === "users" && (
-        <div className="bg-white shadow-lg p-6 rounded-xl border border-gray-200 overflow-x-auto scroolbar-hide">
-          <h2 className="text-2xl font-bold mb-6 flex items-center space-x-2 text-gray-800">
-            <Users size={24} />
-            <span>Users</span>
-          </h2>
-
-          {users.length === 0 ? (
-            <p className="text-gray-600">No users found.</p>
-          ) : (
-            <table className="overflow-x-auto border border-gray-200 scrollbar-hide md:">
-              <thead>
-                <tr className="bg-gray-100 overflow-x-auto scrollbar-hide">
-                  <th className="border border-gray-200 px-4 py-2 text-left">
-                    Name
-                  </th>
-                  <th className="border border-gray-200 px-4 py-2 text-left">
-                    Email
-                  </th>
-                  <th className="border border-gray-200 px-4 py-2 text-left">
-                    Role
-                  </th>
-                  <th className="border border-gray-200 px-4 py-2 text-left">
-                    Subscription Status
-                  </th>
-                  <th className="border border-gray-200 px-4 py-2 text-left">
-                    Subscription Ends
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((u) => (
-                  <tr key={u._id} className="hover:bg-gray-50 overflow-x-auto scrollbar-hide">
-                    <td className="border border-gray-200 px-4 py-2">
-                      {u.name}
-                    </td>
-                    <td className="border border-gray-200 px-4 py-2">
-                      {u.email}
-                    </td>
-                    <td className="border border-gray-200 px-4 py-2">
-                      {u.role}
-                    </td>
-                    <td className={`${u?.subscription?.isActive ? 'text-green-500' : 'text-red-500'} font-bold border border-gray-200 px-4 py-2`}>
-                      {u?.subscription?.isActive ? 'Active' : 'Inactive'}
-                    </td>
-                    <td className="border border-gray-200 px-4 py-2">
-                      {u?.subscription?.endDate || 'N/A'}
-                    </td>
+        {/* Tab 2: Users */}
+        {activeTab === "users" && (
+          <div className="bg-white border border-slate-200 rounded-[2.5rem] shadow-sm overflow-hidden animate-in fade-in duration-500">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200">
+                    {["Personnel", "Terminal Access", "Authorization", "Subscription", "Expiry"].map((h) => (
+                      <th key={h} className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-      )}
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {users.map((u) => (
+                    <tr key={u._id} className="hover:bg-slate-50/50 transition-all group">
+                      <td className="px-8 py-5 font-black text-slate-900 italic uppercase text-sm tracking-tight">{u.name}</td>
+                      <td className="px-8 py-5 font-bold text-slate-500 text-xs">{u.email}</td>
+                      <td className="px-8 py-5">
+                        <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${u.role === 'admin' ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500'}`}>
+                          {u.role}
+                        </span>
+                      </td>
+                      <td className="px-8 py-5">
+                        <div className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest ${u?.subscription?.isActive ? 'text-emerald-500' : 'text-rose-400'}`}>
+                          <div className={`h-1.5 w-1.5 rounded-full ${u?.subscription?.isActive ? 'bg-emerald-500 animate-pulse' : 'bg-rose-400'}`}></div>
+                          {u?.subscription?.isActive ? 'Active' : 'Expired'}
+                        </div>
+                      </td>
+                      <td className="px-8 py-5 font-bold text-slate-400 text-xs">{u?.subscription?.endDate || '---'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
-      {/* Confirmation Modal */}
-      <ConfirmModal
-        isOpen={confirmOpen}
-        title={confirmData.title}
-        message={confirmData.message}
-        onConfirm={confirmData.onConfirm}
-        onCancel={() => setConfirmOpen(false)}
-      />
+        <ConfirmModal
+          isOpen={confirmOpen}
+          title={confirmData.title}
+          message={confirmData.message}
+          onConfirm={confirmData.onConfirm}
+          onCancel={() => setConfirmOpen(false)}
+        />
+      </div>
     </div>
   );
 };

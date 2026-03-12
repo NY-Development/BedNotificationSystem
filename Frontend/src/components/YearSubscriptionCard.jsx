@@ -4,73 +4,53 @@ import React from "react";
 const YearSubscriptionCard = ({ isSelected, onSelect, role }) => {
   const c1YearlyBill = 799.9;
   const c2YearlyBill = 599.9;
-
-  // 🧩 Dynamically choose the amount based on role
   const yearlyAmount = role === "c1" ? c1YearlyBill : c2YearlyBill;
 
   return (
     <div
       onClick={onSelect}
-      className={`relative flex-1 rounded-3xl p-8 flex flex-col justify-between transition-all duration-300 ease-in-out cursor-pointer shadow-md
-        ${
-          isSelected
-            ? "bg-gray-900 text-white shadow-xl"
-            : "bg-gray-100 text-gray-900 border border-gray-300 hover:shadow-lg"
-        }
-      `}
+      className={`cp relative flex-1 rounded-[2rem] p-8 flex flex-col justify-between transition-all duration-300 border-2 
+        ${isSelected 
+          ? "bg-slate-900 border-indigo-500 shadow-2xl shadow-indigo-500/10 scale-[1.02]" 
+          : "bg-white border-slate-100 hover:border-slate-200 shadow-sm"
+        }`}
     >
       {/* Radio Selector */}
-      <div className="absolute top-4 right-4">
-        <input
-          type="radio"
-          name="subscription"
-          checked={isSelected}
-          onChange={onSelect}
-          className="form-radio h-5 w-5 text-gray-900 cursor-pointer"
-        />
+      <div className="absolute top-6 right-6">
+        <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? "border-indigo-500 bg-indigo-500" : "border-slate-300"}`}>
+          {isSelected && <div className="h-2.5 w-2.5 rounded-full bg-white" />}
+        </div>
       </div>
 
       {/* Save Tag */}
-      <div className="absolute top-6 -right-3 transform rotate-45 bg-green-500 text-white text-xs font-bold px-8 py-1 rounded-full shadow-md">
-        Save 20%
+      <div className="absolute -top-3 left-6 bg-emerald-500 text-white text-[10px] font-black px-4 py-1 rounded-full uppercase tracking-widest shadow-lg shadow-emerald-500/20">
+        Save 20% Yearly
       </div>
 
-      {/* Card Content */}
       <div>
-        <h2 className="text-2xl font-bold mb-2">Yearly Subscription</h2>
-        <p
-          className={`text-5xl font-extrabold mb-6 ${
-            isSelected ? "text-gray-200" : "text-green-600"
-          }`}
-        >
-          {yearlyAmount} ETB{" "}
-          <span
-            className={`text-lg font-medium ${
-              isSelected ? "text-gray-300" : "text-gray-500"
-            }`}
-          >
-            /year
+        <h2 className={`text-xl font-black mb-1 ${isSelected ? "text-white" : "text-slate-900"}`}>{role==='c1'? '40 Weeks' : '32 Weeks'}</h2>
+        <div className="flex items-baseline gap-1 mb-6">
+          <span className={`text-4xl font-black tracking-tighter ${isSelected ? "text-white" : "text-slate-900"}`}>
+            {yearlyAmount}
           </span>
-        </p>
-        <ul className="space-y-3 text-sm">
-          <li className="flex items-start space-x-2">
-            <CircleCheckBig className="text-current" />
-            <span>
-              <strong>Save 20%:</strong> Cheaper than monthly.
-            </span>
-          </li>
-          <li className="flex items-start space-x-2">
-            <CircleCheckBig className="text-current" />
-            <span>
-              <strong>Continuous Access:</strong> No interruptions.
-            </span>
-          </li>
-          <li className="flex items-start space-x-2">
-            <CircleCheckBig className="text-current" />
-            <span>
-              <strong>Exclusive Features:</strong> Members-only content.
-            </span>
-          </li>
+          <span className={`text-sm font-bold uppercase tracking-widest ${isSelected ? "text-indigo-300" : "text-slate-400"}`}>
+            ETB/yr
+          </span>
+        </div>
+
+        <ul className="space-y-4">
+          {[
+            { label: "Save 20%", desc: "Best value for long-term." },
+            { label: "Uninterrupted", desc: "12 months of ward access." },
+            { label: "Priority", desc: "Members-only server speed." }
+          ].map((item, i) => (
+            <li key={i} className="flex items-start gap-3">
+              <CircleCheckBig className={`h-5 w-5 shrink-0 ${isSelected ? "text-indigo-400" : "text-emerald-500"}`} />
+              <p className={`text-xs leading-relaxed ${isSelected ? "text-slate-300" : "text-slate-500"}`}>
+                <strong className={isSelected ? "text-white" : "text-slate-900"}>{item.label}:</strong> {item.desc}
+              </p>
+            </li>
+          ))}
         </ul>
       </div>
     </div>

@@ -350,10 +350,10 @@ export const addBed = async (req, res) => {
   }
 };
 
-//  Get all users with subscription details
+// Get all users with subscription and AI details
 export const getAllSubscriptions = async (req, res) => {
   try {
-    const users = await User.find().select("name email role subscription image");
+    const users = await User.find().select("name email role subscription aiAccess image");
     res.status(200).json(users);
   } catch (err) {
     res.status(500).json({ message: "Error fetching subscriptions", error: err.message });
@@ -371,15 +371,29 @@ export const activateSubscription = async (req, res) => {
       return res.status(400).json({ message: "No payment screenshot uploaded" });
 
     const startDate = new Date();
-    const endDate = new Date(startDate);
-    user.subscription.plan === "yearly"
-      ? endDate.setFullYear(endDate.getFullYear() + 1)
-      : endDate.setMonth(endDate.getMonth() + 1);
+    let endDate;
+    let amount = 0;
+
+    // Calculate endDate and amount based on plan
+    if (user.subscription.plan === "weekly") {
+      endDate = new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days
+      amount = 25; // weekly price
+    } else if (user.subscription.plan === "monthly") {
+      endDate = new Date(startDate);
+      endDate.setMonth(endDate.getMonth() + 1);
+      amount = 100; // monthly price
+    } else if (user.subscription.plan === "yearly") {
+      endDate = new Date(startDate);
+      endDate.setFullYear(endDate.getFullYear() + 1);
+      amount = 1000; // yearly price
+    }
 
     user.subscription.isActive = true;
     user.subscription.startDate = startDate;
     user.subscription.endDate = endDate;
-    user.subscription.paidAt = new Date();
+    user.subscription.amountPaid = amount;
+    user.subscription.paidAt = startDate;
+
     await user.save();
 
     // ✉️ Send activation email
@@ -409,6 +423,7 @@ export const activateSubscription = async (req, res) => {
     res.status(500).json({ message: "Error activating subscription", error: err.message });
   }
 };
+
 
 
 //  Deactivate subscription
@@ -575,5 +590,135 @@ export const deleteAssignment = async (req, res) => {
   } catch (err) {
     console.error("deleteAssignment error:", err);
     return res.status(500).json({ message: err.message || "Server error" });
+  }
+};
+
+// ================== Send Global Notification to All Users ==================
+export const sendGlobalNotification = async (req, res) => {
+  try {
+    const { subject, message } = req.body;
+
+    if (!subject || !message) {
+      return res.status(400).json({ error: "Subject and message are required." });
+    }
+
+    // Fetch all users (emails only)
+    const users = await User.find({}, "email");
+    if (!users || users.length === 0) {
+      return res.status(404).json({ error: "No users found to notify." });
+    }
+
+    // Send in controlled batches to avoid long-running single function timeouts
+    const BATCH_SIZE = 25; // adjustable
+    const batches = [];
+    for (let i = 0; i < users.length; i += BATCH_SIZE) {
+      batches.push(users.slice(i, i + BATCH_SIZE));
+    }
+
+    let sent = 0;
+    for (const batch of batches) {
+      // fire off the batch concurrently and wait for them to settle
+      const promises = batch.map(u => sendEmailToUser(u.email, subject, message));
+      const results = await Promise.allSettled(promises);
+      sent += results.filter(r => r.status === 'fulfilled').length;
+      // small pause between batches (optional) — keep short to avoid function hanging
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Notification dispatch started (batched).",
+      totalRecipients: users.length,
+      sent,
+    });
+  } catch (error) {
+    console.error("❌ Error sending global notification:", error);
+    res.status(500).json({ error: "Failed to send notifications." });
+  }
+};
+
+
+// ✅ Approve (activate) AI Access
+export const activateAIAccess = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Check if screenshot exists for AI
+    if (!user.aiAccess || !user.aiAccess.paymentScreenshot)
+      return res.status(400).json({ message: "No AI payment screenshot uploaded" });
+
+    const startDate = new Date();
+    let endDate;
+    let amount = 0;
+
+    // Logic for AI Pricing
+    if (user.aiAccess.plan === "monthly") {
+      endDate = new Date(startDate);
+      endDate.setMonth(endDate.getMonth() + 1);
+      amount = 49.9; 
+    } else if (user.aiAccess.plan === "yearly") {
+      endDate = new Date(startDate);
+      endDate.setFullYear(endDate.getFullYear() + 1);
+      amount = 399.9;
+    }
+
+    // Update AI Access fields
+    user.aiAccess.isActive = true;
+    user.aiAccess.startDate = startDate;
+    user.aiAccess.endDate = endDate;
+    user.aiAccess.amountPaid = amount;
+    user.aiAccess.paidAt = startDate;
+
+    await user.save();
+
+    // ✉️ Send AI activation email
+    await sendEmailToUser(
+      user.email,
+      "🤖 AI Tools Activated!",
+      `
+      <p>Hi ${user.name || user.email},</p>
+      <p>Your <strong>AI Tools Access</strong> (${user.aiAccess.plan} plan) has been <strong>activated!</strong></p>
+      <p><strong>Status:</strong> Active ✅<br>
+      <strong>Expiry Date:</strong> ${endDate.toDateString()}</p>
+      <p>You can now use the Ward AI Assistant and other smart features in the platform.</p>
+      <p>Enjoy your AI-powered experience!<br>— The BNS Team</p>
+      `
+    );
+
+    res.status(200).json({
+      message: `AI Access (${user.aiAccess.plan}) activated successfully.`,
+      aiAccess: user.aiAccess,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Error activating AI access", error: err.message });
+  }
+};
+
+// ❌ Deactivate AI Access
+export const deactivateAIAccess = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (!user.aiAccess) return res.status(400).json({ message: "User has no AI access profile" });
+
+    user.aiAccess.isActive = false;
+    await user.save();
+
+    await sendEmailToUser(
+      user.email,
+      "⚠️ AI Access Deactivated",
+      `Hi ${user.name || user.email},<br>Your AI Tools access has been deactivated. If your subscription expired, please renew it to continue using AI features.`
+    );
+
+    res.status(200).json({
+      message: "AI Access deactivated successfully.",
+      aiAccess: user.aiAccess,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Error deactivating AI access", error: err.message });
   }
 };

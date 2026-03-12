@@ -23,23 +23,44 @@ export const deleteUser = async (id) => {
   return res.data;
 };
 
-// ----- Subscription Management -----
+// ----- Subscription Management (Platform) -----
 export const activateSubscription = async (userId) => {
-    const res = await API.put(`/admin/${userId}/activate`);
-    return res.data;
+  const res = await API.put(`/admin/${userId}/activate`);
+  return res.data;
 };
 
 export const deactivateSubscription = async (userId) => {
-    const res = await API.put(`/admin/${userId}/deactivate`);
+  const res = await API.put(`/admin/${userId}/deactivate`);
+  return res.data;
+};
+
+// ----- AI Access Management -----
+// 🤖 Activate AI Premium Access
+export const activateAIAccess = async (userId) => {
+  try {
+    const res = await API.put(`/admin/ai/${userId}/activate`);
     return res.data;
+  } catch (err) {
+    throw new Error(err.response?.data?.message || "AI Activation failed");
+  }
+};
+
+// 🤖 Deactivate AI Premium Access
+export const deactivateAIAccess = async (userId) => {
+  try {
+    const res = await API.put(`/admin/ai/${userId}/deactivate`);
+    return res.data;
+  } catch (err) {
+    throw new Error(err.response?.data?.message || "AI Deactivation failed");
+  }
 };
 
 export const updateUserData = async (userId, newRole) => {
-    const res = await API.put('/admin/data', {
-        type: "userRole",
-        payload: { userId, newRole }
-    });
-    return res.data;
+  const res = await API.put('/admin/data', {
+    type: "userRole",
+    payload: { userId, newRole }
+  });
+  return res.data;
 };
 
 // ----- Assignments -----

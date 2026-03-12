@@ -1,5 +1,7 @@
 import hospitalImage from '../assets/homeImage.jpg';
 import HallWay from '../assets/hospitalHallway.jpg';
+import addisLogo from '../assets/AA.png';
+import gonderLogo from '../assets/Gonder.png';
 
 const generateBeds = () => {
   return Array.from({ length: 50 }, (_, i) => {
@@ -13,6 +15,17 @@ const generateBeds = () => {
     };
   });
 };
+
+export const Universities = [
+  {
+    name: "Addis Ababa",
+    image: addisLogo,
+    description: "Seek Wisdom, Elevate Your Intellect and Serve Humanity \n AAU provides an exceptional educational experience to all students that prepares them for successful completion, employability and job creation."   },
+  {
+    name: "Gonder",
+    image: gonderLogo, 
+    description: "The University of Gondar offers an astonishing academic undergraduate and postgraduate programs in different subject's areas."   }
+];
 
 const hosData = {
   schools: [

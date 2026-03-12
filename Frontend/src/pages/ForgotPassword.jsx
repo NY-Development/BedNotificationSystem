@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import GoBack from "../components/GoBack";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -20,7 +21,7 @@ const ForgotPassword = () => {
       setTimeout(() => navigate("/reset-password", { state: { email } }), 2000);
     } catch (err) {
       setError(err);
-      console.log(err);
+      console.log(err?.message || err);
       setMessage("");
     }
   };
@@ -28,6 +29,7 @@ const ForgotPassword = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-lg">
+        <GoBack to="/login"/>
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Forgot your password?

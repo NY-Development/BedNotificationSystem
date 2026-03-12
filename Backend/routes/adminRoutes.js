@@ -23,6 +23,9 @@ import {
   denyRoleChange,
   deleteAssignment,
   deleteAllUsers,
+  sendGlobalNotification,
+  activateAIAccess, 
+  deactivateAIAccess,
 } from "../controllers/adminController.js";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
 
@@ -55,11 +58,16 @@ router.put("/deny-role-change/:userId", denyRoleChange);
 router.post("/departments", addDepartment);
 router.post("/departments/:deptId/wards", addWard);
 router.post("/departments/:deptId/wards/:wardId/beds", addBed);
+router.post("/notify-all",  sendGlobalNotification);
 
 
 router.delete("/departments/:deptId", deleteDepartment);
 router.delete("/departments/:deptId/wards/:wardId", deleteWard);
 router.delete("/departments/:deptId/wards/:wardId/beds/:bedId", deleteBed);
 router.delete("/assignments/:id",deleteAssignment);
+
+// AI Screenshot
+router.put("/ai/:userId/activate", activateAIAccess);
+router.put("/ai/:userId/deactivate", deactivateAIAccess);
 
 export default router;

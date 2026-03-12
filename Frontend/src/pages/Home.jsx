@@ -1,53 +1,95 @@
-import React from 'react';
-import bedIcon from '../assets/medical-bed.png';
-import regImage from '../assets/hospitalHallway.jpg'; // Import the image
-import { useAuth } from '../context/AuthContext'
-import { FaHeartbeat } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import bedIcon from "../assets/medical-bed.png";
+import regImage from "../assets/hospitalHallway.jpg";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import IntroPage from "./IntroPage";
 
 const Home = () => {
-
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  const [introVisible, setIntroVisible] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  useEffect(() => {
+    const hasSeenTour = localStorage.getItem("hasSeenBnsTour");
+
+    // 1. Priority: If they haven't seen the tour (or reset it via Support), show it.
+    if (!hasSeenTour) {
+      setIntroVisible(true);
+    } 
+    // 2. If they have seen the tour and are logged in, send them to dashboard.
+    else if (user) {
+      navigate("/dashboard");
+    } 
+    // 3. Otherwise, just show the landing page.
+    else {
+      setShowWelcome(true);
+    }
+  }, [user, navigate]);
+
   return (
-    <>
-    {user ? (
-      navigate('/dashboard')
-    ) : (
-      <div className="relative min-h-screen bg-cover bg-center scrollbar-hide" style={{ backgroundImage: `url(${regImage})` }}>
-        {/* Semi-transparent overlay */}
-        <div className="absolute inset-0 bg-gray-900 opacity-70 scrollbar-hide"></div>
-        <div className="relative z-10 min-h-screen flex flex-col justify-center scrollbar-hide items-center py-12 px-4 sm:px-6 lg:px-8 text-white">
-          <div className="max-w-4xl mx-auto text-center scrollbar-hide">
-            <img src={bedIcon} alt="Bed Icon" className="mx-auto h-24 w-auto mb-6" />
-            {/* <FaHeartbeat className='h-20 w-20 ml-70'/> */}
-            <h1 className="text-5xl font-extrabold tracking-tight sm:text-6xl md:text-7xl">
-              <span className="block">Hospital Bed </span>
-              <span className="block text-indigo-400 mt-2">Notification System</span>
-            </h1>
-            <p className="mt-6 text-xl max-w-2xl mx-auto text-gray-300">
-              A modern, lightweight system for real-time bed assignment and patient admission notifications.
-            </p>
-            <div className="mt-10 flex justify-center space-x-4">
-              <a
-                href="/login"
-                className="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300 ease-in-out"
-              >
-                Log in
-              </a>
-              <a
-                href="/register"
-                className="inline-flex items-center px-8 py-3 border-2 border-indigo-400 text-base font-medium rounded-md text-white bg-transparent hover:bg-indigo-700/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300 ease-in-out"
-              >
-                Sign Up
-              </a>
-            </div>
+    <div className="relative min-h-screen bg-slate-950">
+      {/* Intro Onboarding Overlay */}
+      {introVisible && (
+        <IntroPage
+          onComplete={() => {
+            setIntroVisible(false);
+            // After tour, if they are logged in, send them home, else show welcome
+            if (user) {
+              navigate("/dashboard");
+            } else {
+              setShowWelcome(true);
+            }
+          }}
+        />
+      )}
+
+      {/* Main Content */}
+      <div
+        id="welcome"
+        className={`min-h-screen bg-cover bg-center flex flex-col items-center justify-center transition-opacity duration-1000 ${
+          showWelcome ? "opacity-100" : "opacity-0"
+        }`}
+        style={{ backgroundImage: `url(${regImage})` }}
+      >
+        <div className="absolute inset-0 bg-slate-900/75 backdrop-blur-[2px]" />
+
+        <div className="relative z-10 max-w-4xl mx-auto text-center px-6 text-white">
+          <img
+            src={bedIcon}
+            alt="Bed Icon"
+            className="mx-auto h-24 w-auto mb-8 drop-shadow-2xl animate-pulse"
+          />
+
+          <h1 className="text-5xl font-extrabold tracking-tight sm:text-7xl">
+            Hospital Bed <br />
+            <span className="text-indigo-400">Notification System</span>
+          </h1>
+
+          <p className="mt-6 text-xl text-slate-300 max-w-2xl mx-auto font-light">
+            A modern, lightweight system for real-time bed assignment and patient
+            admission notifications.
+          </p>
+
+          <div className="mt-10 flex flex-wrap justify-center gap-4">
+            <a
+              href="/login"
+              className="px-10 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition-all shadow-xl"
+            >
+              Log in
+            </a>
+            <a
+              href="/register"
+              className="px-10 py-4 border-2 border-indigo-400 hover:bg-indigo-400/20 text-white font-bold rounded-lg transition-all"
+            >
+              Sign Up
+            </a>
           </div>
         </div>
       </div>
-    )}
-  </>
+    </div>
   );
 };
 

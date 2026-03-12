@@ -1,15 +1,8 @@
 import React, { useState } from 'react';
-import { uploadProfileImage } from '../services/profileAPI'; // Adjust the import path as necessary
+import { uploadProfileImage } from '../services/profileAPI';
 import { requestRoleChange } from '../services/auth'; 
 import toast from 'react-hot-toast';
-
-// Icon for the upload overlay
-const CameraIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.218A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.218A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-    </svg>
-);
+import { Camera, User, Mail, ShieldCheck, X, Activity } from 'lucide-react';
 
 const Profile = ({ onClose, user }) => {
     const [image, setImage] = useState(user?.image || '');
@@ -21,8 +14,6 @@ const Profile = ({ onClose, user }) => {
     const [roleRequest, setRoleRequest] = useState('');
     const [sendingRole, setSendingRole] = useState(false);
 
-    const scrollableClass = "overflow-y-auto no-scrollbar max-h-[90vh]"; 
-
     const handleRoleChangeRequest = async () => {
         if (!roleRequest) {
             toast.error("Please select a role.");
@@ -31,7 +22,7 @@ const Profile = ({ onClose, user }) => {
         try {
             setSendingRole(true);
             const res = await requestRoleChange(roleRequest); 
-            toast.success(res.message || "Role change request sent!");
+            toast.success(res.message || "Request sent to Administration!");
             setRoleRequest('');
         } catch (err) {
             toast.error(err.response?.data?.message || err.message || "Failed to send request.");
@@ -44,9 +35,7 @@ const Profile = ({ onClose, user }) => {
         const selectedFile = e.target.files[0];
         if (selectedFile) {
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setImage(reader.result);
-            };
+            reader.onloadend = () => setImage(reader.result);
             setFile(selectedFile);
             reader.readAsDataURL(selectedFile);
         }
@@ -58,186 +47,151 @@ const Profile = ({ onClose, user }) => {
         setError('');
 
         const formData = new FormData();
-        if (file) {
-            formData.append('image', file);
-        }
+        if (file) formData.append('image', file);
         formData.append('name', name); 
         formData.append('email', email);
 
         try {
-            const uploadResponse = await uploadProfileImage(formData);
-            toast.success('Profile Updated Successfully.');
+            await uploadProfileImage(formData);
+            toast.success('Medical Profile Updated.');
             onClose();
         } catch (err) {
-            setError(err.message || 'An unknown error occurred.');
-            toast.error('Error Updating Profile.');
-            console.error('Upload failed:', err);
+            setError(err.message || 'Update failed.');
+            toast.error('Could not update profile.');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <>
-            <style>{`
-                .no-scrollbar::-webkit-scrollbar {
-                    display: none;
-                }
-                .no-scrollbar {
-                    -ms-overflow-style: none;
-                    scrollbar-width: none;
-                }
-            `}</style>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
+            {/* Main Card */}
+            <div className="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl border border-white overflow-hidden flex flex-col max-h-[90vh]">
+                
+                {/* Header */}
+                <div className="px-8 pt-8 pb-4 flex justify-between items-center bg-white sticky top-0 z-10">
+                    <div className="flex items-center gap-3">
+                        <div className="bg-blue-100 p-2 rounded-xl text-blue-600">
+                            <Activity size={20} />
+                        </div>
+                        <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">
+                            Provider Profile
+                        </h2>
+                    </div>
+                    <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400">
+                        <X size={24} />
+                    </button>
+                </div>
 
-            <div className="fixed inset-0 flex items-start justify-center p-4 backdrop-blur-sm z-50 overflow-y-auto pt-8 sm:pt-16">
-                <div 
-                    className={`bg-white w-full max-w-lg p-6 sm:p-8 rounded-xl shadow-2xl transition-all duration-300 mb-10 ${scrollableClass}`}
-                >
-                    <h2 className="text-2xl font-extrabold text-gray-900 text-center mb-6 border-b border-gray-100 pb-3 sticky top-0 bg-white z-10 shadow-sm">
-                        Update Profile
-                    </h2>
-
+                {/* Scrollable Body */}
+                <div className="flex-1 overflow-y-auto px-8 pb-8 no-scrollbar">
                     {error && (
-                        <div className="bg-red-100 border border-red-400 text-red-700 p-4 rounded-lg mb-4 text-sm" role="alert">
-                            <span className="font-medium">{error}</span>
+                        <div className="bg-rose-50 border border-rose-100 text-rose-600 p-4 rounded-2xl mb-6 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                            <ShieldCheck size={16} /> {error}
                         </div>
                     )}
-                    
-                    <form onSubmit={handleSubmit} className="flex flex-col items-center space-y-6">
+
+                    <form onSubmit={handleSubmit} className="space-y-8">
                         
-                        <div className="flex flex-col items-center mb-4">
-                            <input 
-                                type="file" 
-                                onChange={handleImageChange} 
-                                accept="image/*" 
-                                className="hidden"
-                                id="file-input"
-                            />
-                            <label 
-                                htmlFor="file-input" 
-                                className="relative w-36 h-36 rounded-full cursor-pointer overflow-hidden border-4 border-indigo-300 hover:border-indigo-500 transition-colors duration-300 group shadow-lg ring-2 ring-indigo-100"
-                            >
-                                {image ? (
-                                    <img 
-                                        src={image} 
-                                        alt="Profile Preview" 
-                                        className="w-full h-full object-cover transition duration-300 group-hover:opacity-75" 
-                                        onError={(e) => e.target.src = 'https://placehold.co/144x144/f0f0f0/808080?text=Error'} 
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-500">
-                                        <span className="text-sm text-center font-medium">No Photo</span>
+                        {/* Avatar Upload */}
+                        <div className="flex flex-col items-center">
+                            <div className="relative group">
+                                <input type="file" onChange={handleImageChange} accept="image/*" className="hidden" id="profile-upload" />
+                                <label htmlFor="profile-upload" className="block relative cursor-pointer">
+                                    <div className="w-32 h-32 rounded-[2.5rem] overflow-hidden border-4 border-slate-50 shadow-xl ring-1 ring-slate-200">
+                                        {image ? (
+                                            <img src={image} alt="Profile" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400">
+                                                <User size={40} />
+                                            </div>
+                                        )}
                                     </div>
-                                )}
-                                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                    <CameraIcon />
-                                </div>
-                            </label>
-                            <p className="text-sm text-gray-500 mt-2">Change Profile Photo</p>
+                                    <div className="absolute inset-0 bg-blue-600/60 flex items-center justify-center rounded-[2.5rem] opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                        <Camera className="text-white" size={28} />
+                                    </div>
+                                </label>
+                            </div>
+                            <span className="mt-3 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Clinical ID Photo</span>
                         </div>
 
-                        <div className="w-full space-y-4">
-                            <div>
-                                <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-1">Name</label>
-                                <input 
-                                    id="name"
-                                    type="text" 
-                                    value={name} 
-                                    onChange={(e) => setName(e.target.value)} 
-                                    placeholder="Your Full Name" 
-                                    className="w-full border border-gray-300 text-gray-900 p-3 rounded-lg shadow-sm focus:border-indigo-600 focus:ring-indigo-600 focus:ring-1 transition duration-150"
-                                    required
-                                />
+                        {/* Input Fields */}
+                        <div className="space-y-4">
+                            <div className="relative">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-1 block">Full Name</label>
+                                <div className="relative">
+                                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                    <input 
+                                        type="text" value={name} onChange={(e) => setName(e.target.value)} 
+                                        className="w-full bg-slate-50 border border-slate-100 pl-12 pr-4 py-4 rounded-2xl text-sm font-bold text-slate-700 focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition-all"
+                                        placeholder="Enter name" required
+                                    />
+                                </div>
                             </div>
-                            
-                            <div>
-                                <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
-                                <input 
-                                    id="email"
-                                    type="email" 
-                                    value={email} 
-                                    onChange={(e) => setEmail(e.target.value)} 
-                                    placeholder="name@example.com" 
-                                    className="w-full border border-gray-300 text-gray-900 p-3 rounded-lg shadow-sm focus:border-indigo-600 focus:ring-indigo-600 focus:ring-1 transition duration-150"
-                                    required
-                                />
+
+                            <div className="relative">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-1 block">Email Address</label>
+                                <div className="relative">
+                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                    <input 
+                                        type="email" value={email} onChange={(e) => setEmail(e.target.value)} 
+                                        className="w-full bg-slate-50 border border-slate-100 pl-12 pr-4 py-4 rounded-2xl text-sm font-bold text-slate-700 focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition-all"
+                                        placeholder="Enter email" required
+                                    />
+                                </div>
                             </div>
                         </div>
-                        
-                        <div className="w-full pt-6">
-                            <h3 className="text-xl font-bold text-gray-800 border-t border-gray-200 pt-4">Role & Access</h3>
-                        </div>
-                        
-                        <div className="w-full p-5 border border-purple-200 rounded-xl bg-purple-50 shadow-inner space-y-4">
-                            <h4 className="text-base font-bold text-purple-800 flex items-center">
-                                <svg className="h-5 w-5 mr-2 text-purple-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1.513l-.224-.131A7.001 7.001 0 003 10a7.001 7.001 0 0014 0 7.001 7.001 0 00-7.776-5.618l-.224.131V3a1 1 0 011-1zm3 10a1 1 0 10-2 0v3a1 1 0 102 0v-3z" clipRule="evenodd" />
-                                </svg>
-                                Request Access Level Change
-                            </h4>
+
+                        {/* Role Request Section */}
+                        <div className="bg-teal-50/50 rounded-3xl p-6 border border-teal-100">
+                            <div className="flex items-center gap-2 mb-4">
+                                <ShieldCheck className="text-teal-600" size={18} />
+                                <h3 className="text-xs font-black text-teal-800 uppercase tracking-widest">Medical Access Level</h3>
+                            </div>
                             
-                            <div className='flex flex-col sm:flex-row sm:space-x-3 space-y-3 sm:space-y-0'>
+                            <div className="flex gap-2">
                                 <select
                                     value={roleRequest}
                                     onChange={(e) => setRoleRequest(e.target.value)}
-                                    className="flex-grow border border-purple-300 p-3 rounded-lg focus:ring-purple-500 focus:border-purple-500 shadow-sm bg-white text-gray-800"
+                                    className="flex-1 bg-white border border-teal-200 px-4 py-3 rounded-xl text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-teal-200"
                                 >
-                                    <option value="">-- Select Requested Role --</option>
-                                    {/* <option value="admin">Admin (Full Control)</option>
-                                    <option value="supervisor">Supervisor (Management)</option> */}
-                                    <option value="c1">C1 (Clinical Year 1 Student)</option>
-                                    <option value="c2">C2 (Clinical Year 2 Student)</option>
-                                    <option value="intern">Intern</option>
+                                    <option value="">Select Target Role</option>
+                                    <option value="c1">C1 (Clinical Yr 1)</option>
+                                    <option value="c2">C2 (Clinical Yr 2)</option>
+                                    <option value="intern">Intern Resident</option>
                                 </select>
                                 <button
-                                    type="button"
-                                    onClick={handleRoleChangeRequest}
+                                    type="button" onClick={handleRoleChangeRequest}
                                     disabled={sendingRole || !roleRequest}
-                                    className={`flex-shrink-0 px-6 py-3 rounded-lg font-semibold text-sm text-white shadow-md transition duration-150 ${
-                                        sendingRole || !roleRequest
-                                            ? 'bg-green-400 cursor-not-allowed'
-                                            : 'bg-green-600 hover:bg-green-700 focus:ring-2 focus:ring-offset-2 focus:ring-green-500'
-                                    }`}
+                                    className="px-4 py-3 bg-teal-600 text-white rounded-xl text-xs font-black uppercase tracking-tighter hover:bg-teal-700 disabled:opacity-50 transition-all active:scale-95"
                                 >
-                                    {sendingRole ? "Sending..." : "Send Request"}
+                                    {sendingRole ? "..." : "Request"}
                                 </button>
                             </div>
-                            <p className="text-xs text-purple-700 mt-2">Your current role: **{user?.role || 'Guest'}**</p>
+                            <p className="mt-3 text-[10px] font-bold text-teal-600/70 italic text-center uppercase tracking-wider">
+                                Current Status: {user?.role || 'Unverified'}
+                            </p>
                         </div>
 
-                        <div className="w-full flex justify-end space-x-3 pt-6 border-t border-gray-100">
+                        {/* Footer Buttons */}
+                        <div className="flex gap-3 pt-4">
                             <button
-                                type="button"
-                                onClick={onClose}
-                                className="px-5 py-2 text-sm font-semibold rounded-lg text-gray-700 bg-gray-200 hover:bg-gray-300 transition duration-150 shadow-sm"
+                                type="button" onClick={onClose}
+                                className="flex-1 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest text-slate-500 bg-slate-100 hover:bg-slate-200 transition-all"
                             >
-                                Cancel
+                                Dismiss
                             </button>
                             <button
-                                type="submit"
-                                disabled={loading}
-                                className={`px-5 py-2 text-sm font-semibold rounded-lg text-white shadow-lg transition duration-150 transform hover:scale-[1.02] ${
-                                    loading
-                                        ? 'bg-indigo-400 cursor-not-allowed'
-                                        : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
-                                }`}
+                                type="submit" disabled={loading}
+                                className="flex-[2] px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest text-white bg-blue-600 shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all active:scale-[0.98]"
                             >
-                                {loading ? (
-                                    <span className="flex items-center">
-                                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        Saving...
-                                    </span>
-                                ) : 'Save Changes'}
+                                {loading ? "Updating Records..." : "Save Profile"}
                             </button>
                         </div>
-
                     </form>
                 </div>
             </div>
-        </>
+        </div>
     );
 };
 

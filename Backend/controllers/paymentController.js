@@ -143,12 +143,109 @@ export const verifyPayment = async (req, res) => {
         user.subscription.paidAt = new Date();
         await user.save();
       }
-      return res.json({ success: true, message: "Payment verified" });
+      return res.json({ success: true, message: "Payment verified"});
     }
 
     return res.json({ success: false, message: "Payment not verified" });
   } catch (err) {
     console.error("Payment verify error:", err.response?.data || err.message);
     res.status(500).json({ message: "Payment verification failed" });
+  }
+};
+
+
+// --- NEW AI PAYMENT FUNCTIONS ---
+
+export const uploadAIScreenshot = async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const uploadResponse = await imagekit.upload({
+      file: req.file.buffer,
+      fileName: `ai_payment_${user._id}_${Date.now()}`,
+      folder: "/ai_payment_screenshots",
+    });
+
+    // Update the NEW aiAccess object
+    user.aiAccess.paymentScreenshot = uploadResponse.url;
+    user.aiAccess.status = "pending"; 
+    await user.save();
+
+    await sendEmailToAdmins(
+      `AI Add-on Screenshot by ${user.name}`,
+      `User <strong>${user.name}</strong> uploaded a screenshot for <strong>AI Access</strong>.<br>
+       <a href="${uploadResponse.url}">View AI Screenshot</a>`
+    );
+
+    res.status(200).json({ message: "AI Screenshot uploaded. Pending Admin approval.", url: uploadResponse.url });
+  } catch (err) {
+    res.status(500).json({ message: "AI Screenshot upload failed", error: err.message });
+  }
+};
+
+export const initiateAIPayment = async (req, res) => {
+  const { email, plan } = req.body; // plan: "weekly", "monthly", "yearly"
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // AI Specific Pricing (Example ETB)
+    let amount = 0;
+    if (plan === "weekly") amount = 50;
+    if (plan === "monthly") amount = 150;
+    if (plan === "yearly") amount = 1200;
+
+    // Save intended plan to user temporarily so callback knows what to activate
+    user.aiAccess.plan = plan;
+    await user.save();
+
+    const response = await axios.post(
+      "https://api.chapa.co/v1/transaction/initialize",
+      {
+        amount,
+        currency: "ETB",
+        email: user.email,
+        tx_ref: `ai-tx-${Date.now()}`,
+        callback_url: `${process.env.BACKEND_URL1}/api/payment/ai-callback`,
+        return_url: `${process.env.FRONTEND_URL1}/payment/ai-success`,
+      },
+      {
+        headers: { Authorization: `Bearer ${process.env.CHAPA_SECRET_KEY}` }
+      }
+    );
+
+    res.json({ checkout_url: response.data.data.checkout_url });
+  } catch (err) {
+    res.status(500).json({ message: "AI Payment initiation failed" });
+  }
+};
+
+export const aiPaymentCallback = async (req, res) => {
+  const { status, tx_ref, email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (status === "success" && user) {
+      const now = new Date();
+      let expiry = new Date();
+
+      if (user.aiAccess.plan === "weekly") expiry.setDate(now.getDate() + 7);
+      else if (user.aiAccess.plan === "monthly") expiry.setMonth(now.getMonth() + 1);
+      else if (user.aiAccess.plan === "yearly") expiry.setFullYear(now.getFullYear() + 1);
+
+      user.aiAccess.isActive = true;
+      user.aiAccess.startDate = now;
+      user.aiAccess.expiryDate = expiry;
+      user.aiAccess.status = "approved";
+      
+      await user.save();
+    }
+    res.json({ message: "AI Payment processed" });
+  } catch (err) {
+    res.status(500).json({ message: "AI Callback failed" });
   }
 };

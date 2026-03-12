@@ -1,0 +1,205 @@
+import React, { useState, useEffect, useRef } from "react";
+import { Menu, X, Hospital, Bed, User, Building2, Timer, Info, Activity, ShieldCheck } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import { useBed } from "../context/BedContext";
+import toast from "react-hot-toast";
+import GoBack from '../components/GoBack';
+import SearchBar from '../components/SearchBar';
+import { Link } from "react-router-dom";
+
+const Beds = () => {
+const { user } = useAuth();
+  const { departments, loading, admit, discharge } = useBed();
+  const [selectedDepartment, setSelectedDepartment] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isExpand, setIsExpand] = useState(false);
+  
+  // Refs for auto-scroll containers
+  const scrollRefs = useRef([]);
+
+  // Auto-scroll Logic
+  useEffect(() => {
+    if (loading || !currentDepartment) return;
+
+    const interval = setInterval(() => {
+      scrollRefs.current.forEach((el) => {
+        if (el) {
+          const isAtEnd = el.scrollLeft + el.offsetWidth >= el.scrollWidth;
+          if (isAtEnd) {
+            el.scrollTo({ left: 0, behavior: 'smooth' });
+          } else {
+            el.scrollBy({ left: 320, behavior: 'smooth' }); // Scrolls exactly one card width
+          }
+        }
+      });
+    }, 5000); // 5-second delay
+
+    return () => clearInterval(interval);
+  }, [loading, departments, selectedDepartment]);
+
+  if (loading) {
+    return (
+      <div className='flex flex-col items-center justify-center p-10 bg-white rounded-xl shadow-xl border border-gray-200'>
+        <Timer size={64} className="text-gray-400 mb-4 animate-pulse" />
+        <div
+          className="w-16 h-16 rounded-full border-4 border-gray-300 border-t-indigo-500 animate-spin mt-4"
+          role="status"
+        >
+          <span className="sr-only">Loading...</span>
+        </div>
+        <p className='text-2xl font-semibold text-gray-700 mt-4'>Getting departments & wards...</p>
+      </div>
+    );
+  }
+
+  const filteredDepartments = departments.map(dept => {
+    const filteredWards = dept.wards.map(ward => {
+      const filteredBeds = ward.beds.filter(bed => {
+        return ward.name.toLowerCase().includes(searchTerm.toLowerCase());
+      });
+      return { ...ward, beds: filteredBeds };
+    }).filter(ward => ward.beds.length > 0);
+    return { ...dept, wards: filteredWards };
+  }).filter(dept => dept.wards.length > 0);
+
+  const departmentsToDisplay = searchTerm ? filteredDepartments : departments;
+  const currentDepartment = selectedDepartment || (departmentsToDisplay.length > 0 ? departmentsToDisplay[0] : null);
+
+  const handleSearch = () => {};
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar */}
+      <div className={`fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:relative lg:translate-x-0 lg:w-64 lg:border-r lg:border-gray-200`}>
+        <div className="flex justify-between items-center p-6 border-b border-gray-200">
+          <h2 className="text-2xl font-bold text-gray-800">Departments</h2>
+          <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden"><X size={24} /></button>
+        </div>
+        <nav className="p-4 space-y-2">
+          {departmentsToDisplay.map((dept) => (
+            <button
+              key={dept._id}
+              onClick={() => { setSelectedDepartment(dept); setIsSidebarOpen(false); }}
+              className={`w-full text-left p-3 rounded-lg transition-colors ${currentDepartment?._id === dept._id ? "bg-indigo-600 text-white shadow-md font-semibold" : "text-gray-700 hover:bg-gray-100"}`}
+            >
+              {dept.name}
+            </button>
+          ))}
+        </nav>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 overflow-y-auto p-4 md:p-8">
+        <div className="flex justify-between items-start mb-6">
+          <GoBack />
+          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="lg:hidden p-4 bg-indigo-600 text-white rounded-full fixed bottom-6 left-6 z-50">
+            <Menu size={24} />
+          </button>
+        </div>
+        
+        <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} placeholder={`Search by Ward Name`} />
+
+        {currentDepartment && (
+          <>
+            <div className="mb-8 text-center mt-8">
+              <h1 className="text-4xl font-extrabold text-gray-900 flex items-center justify-center space-x-3">
+                <Building2 className="h-10 w-10 text-indigo-600" />
+                <span>{currentDepartment.name}</span>
+              </h1>
+            </div>
+
+            <div className="space-y-12">
+              {currentDepartment.wards.map((ward, wardIndex) => (
+                <div key={wardIndex} className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
+                  <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-4">
+                    <div className="flex items-center space-x-2 text-indigo-600">
+                      <Hospital className="h-8 w-8" />
+                      <h3 className="text-2xl font-bold uppercase italic">{ward.name}</h3>
+                    </div>
+                  </div>
+
+                  {/* Auto-Scrolling Container */}
+                  <div 
+                    ref={el => scrollRefs.current[wardIndex] = el}
+                    className="flex overflow-x-auto gap-6 pb-4 pt-2 scroll-smooth no-scrollbar snap-x"
+                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                  >
+                    {ward.beds.map((bed) => (
+                      <div
+                        key={bed.id}
+                        className={`flex-shrink-0 w-80 snap-center p-5 rounded-[2rem] border-2 transition-all ${bed.status === "occupied" ? "bg-slate-50 border-slate-200" : "bg-white border-emerald-100 shadow-sm"}`}
+                      >
+                        {/* Bed Header */}
+                        <div className="flex justify-between items-center mb-4">
+                          <span className="font-black text-slate-900 uppercase italic text-sm">BED ID: {bed.id}</span>
+                          <div className={`text-[10px] font-black px-2 py-1 rounded border uppercase ${bed.status === "occupied" ? "text-rose-600 bg-rose-50 border-rose-100" : "text-emerald-600 bg-emerald-50 border-emerald-100"}`}>
+                            {bed.status}
+                          </div>
+                        </div>
+
+                        {/* Input Clinical Form */}
+                        <div className="space-y-3 bg-white p-4 rounded-2xl border border-slate-100 mb-4 shadow-inner">
+                          <div>
+                            <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest block">Patient Identity</label>
+                            <input id={`name-${bed.id}`} type="text" placeholder="NAME" defaultValue={bed.assignedUser?.name || ""} className="w-full bg-transparent border-none p-0 focus:ring-0 text-[11px] font-black uppercase mt-1" />
+                            <div className="flex gap-2 mt-2">
+                                <input id={`age-${bed.id}`} type="number" placeholder="AGE" defaultValue={bed.assignedUser?.age || ""} className="w-1/2 bg-slate-50 border-none rounded-lg p-1.5 text-[10px] font-bold" />
+                                <select id={`sex-${bed.id}`} defaultValue={bed.assignedUser?.sex || ""} className="w-1/2 bg-slate-50 border-none rounded-lg p-1.5 text-[10px] font-bold">
+                                    <option value="">SEX</option>
+                                    <option value="M">M</option>
+                                    <option value="F">F</option>
+                                </select>
+                            </div>
+                          </div>
+                          <div>
+                            <label className="text-[8px] font-black text-indigo-500 uppercase tracking-widest block">Chief Complaint</label>
+                            <textarea id={`complaint-${bed.id}`} placeholder="Describe symptoms..." defaultValue={bed.assignedUser?.chiefComplaint || ""} className="w-full bg-slate-50 border-none rounded-xl p-2 text-[10px] min-h-[50px] resize-none mt-1" />
+                          </div>
+                          <div>
+                            <label className="text-[8px] font-black text-rose-500 uppercase tracking-widest block">Predicted Disease</label>
+                            <input id={`disease-${bed.id}`} type="text" placeholder="DIAGNOSIS" defaultValue={bed.assignedUser?.predictedDisease || ""} className="w-full bg-slate-900 text-white border-none rounded-xl p-2 text-[9px] font-black uppercase mt-1" />
+                          </div>
+                        </div>
+
+                        {/* Buttons */}
+                        <div className="flex flex-col gap-2">
+                          <button
+                            onClick={() => {
+                              const data = {
+                                name: document.getElementById(`name-${bed.id}`).value,
+                                age: document.getElementById(`age-${bed.id}`).value,
+                                sex: document.getElementById(`sex-${bed.id}`).value,
+                                chiefComplaint: document.getElementById(`complaint-${bed.id}`).value,
+                                predictedDisease: document.getElementById(`disease-${bed.id}`).value
+                              };
+                              if (!data.name && bed.status === "available") return toast.error("No Assigned User");
+                              admit(currentDepartment._id, ward.name, bed.id, data);
+                            }}
+                            disabled={bed.status === "occupied"}
+                            className={`cp py-2 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${bed.status === 'occupied' ? 'bg-slate-200 text-slate-400' : 'bg-blue-600 text-white active:scale-95'}`}
+                          >
+                            {bed.status === "occupied" ? "In-Patient Active" : "Submit & Admit"}
+                          </button>
+                          <button
+                            onClick={() => {if (!data.name && bed.status === "available") return toast.error("No Assigned User"); discharge(currentDepartment._id, ward.name, bed.id)}}
+                            disabled={bed.status === "available"}
+                            className="cp py-2 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest bg-indigo-600 text-white disabled:bg-slate-100 disabled:text-slate-300"
+                          >
+                            Discharge
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Beds;

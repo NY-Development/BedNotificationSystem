@@ -2,8 +2,9 @@ import axios from 'axios';
 import { toast } from 'react-hot-toast';
 
 const API = axios.create({
-  baseURL: 'https://bnst-ao5j.vercel.app/api',
+  //baseURL: 'https://bnst-ao5j.vercel.app/api',
   // baseURL: 'http://localhost:5000/api',
+  baseURL: 'https://bns-q300.onrender.com/api',
   withCredentials: true,
 });
 

@@ -6,6 +6,7 @@ import {
 } from "../services/bed";
 import { toast } from "react-hot-toast";
 import { useAuth } from "./AuthContext";
+import { sendPatientInfo, updatePatientInfo } from "../services/department";
 
 const BedContext = createContext();
 
@@ -40,7 +41,7 @@ export const BedProvider = ({ children }) => {
     try {
       const res = await admitPatient({ deptId, wardName, bedId });
       // if backend returns a notification message
-      if (res.notifyUser) {
+      if (res) {
         toast.success(res.message); 
       } else {
         toast.success(res.message || "Admit handled");
@@ -49,6 +50,7 @@ export const BedProvider = ({ children }) => {
       loadDepartments();
       window.location.reload();
     } catch (err) {
+        toast.error("No user assigned to this bed.")
       handleError(err)
     }
   };
@@ -58,7 +60,7 @@ export const BedProvider = ({ children }) => {
     try {
       const res = await dischargePatient({ deptId, wardName, bedId });
 
-      if (res.notifyUser) {
+      if (res) {
         toast.success(res.message);
       } else {
         toast.success(res.message || "Discharge handled");
@@ -70,6 +72,36 @@ export const BedProvider = ({ children }) => {
     }
   };
 
+  const recordPatientInfo = async (info) => {
+    try {
+      const res = await sendPatientInfo(info);
+      if (res) {
+        toast.success(res.message);
+      } else {
+        toast.success(res.message || "Discharge handled");
+      }
+      loadDepartments();
+      window.location.reload();
+    } catch (err) {
+      handleError(err)
+    }
+  };
+
+  const updatePatientRecord = async (info) => {
+    try {
+      // Determine if we should update or record new
+      // If the bed already has a patient object, we use update
+      const res = await updatePatientInfo(info); 
+      
+      // Refresh departments to show updated data
+      await fetchDepartments(); 
+      toast.success("Patient record updated successfully");
+      return res;
+    } catch (err) {
+      console.error("Update failed", err);
+      toast.error(err.response?.data?.message || "Failed to update record");
+    }
+  };
 
   return (
     <BedContext.Provider
@@ -79,6 +111,8 @@ export const BedProvider = ({ children }) => {
         admit,
         discharge,
         loadDepartments,
+        recordPatientInfo,
+        updatePatientRecord,
       }}
     >
       {children}

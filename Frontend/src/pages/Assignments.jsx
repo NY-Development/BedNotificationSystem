@@ -4,7 +4,16 @@ import { getDepartments } from "../services/department";
 import { toast } from "react-hot-toast";
 import { useBed } from "../context/BedContext";
 import { useAuth } from "../context/AuthContext";
-import { useAssignment } from "../context/AssignmentContext"; 
+import { useAssignment } from "../context/AssignmentContext";
+import { 
+  ClipboardList, 
+  Stethoscope, 
+  Calendar, 
+  BedDouble, 
+  AlertCircle,
+  ChevronRight,
+  Activity
+} from "lucide-react";
 
 const Assignments = ({ closeModal, updateAssign = false, onFirstAssignmentComplete }) => {
   const { loadDepartments } = useBed();
@@ -22,12 +31,10 @@ const Assignments = ({ closeModal, updateAssign = false, onFirstAssignmentComple
   });
   const [loading, setLoading] = useState(false);
 
-  // Calculate tomorrow's date
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  const minDate = tomorrow.toISOString().split("T")[0]; // Format YYYY-MM-DD
+  const minDate = tomorrow.toISOString().split("T")[0];
 
-  // Fetch user assignments on mount
   useEffect(() => {
     const fetchAssignments = async () => {
       setLoading(true);
@@ -44,13 +51,12 @@ const Assignments = ({ closeModal, updateAssign = false, onFirstAssignmentComple
 
   useEffect(() => {
     if (updateAssign) {
-      setMsg('Warning ⚠️: Updating here overrides all previous assignments!');
+      setMsg('PROTOCOL OVERRIDE: Updating here will terminate all previous clinical assignments.');
     } else {
       setMsg('');
     }
   }, [updateAssign]);
 
-  // Load departments
   useEffect(() => {
     getDepartments().then(setDepartments).catch(console.error);
   }, [user]);
@@ -79,24 +85,22 @@ const Assignments = ({ closeModal, updateAssign = false, onFirstAssignmentComple
           throw new Error("Assignment ID not found for update.");
         }
         await updateAssignment(userAssign._id, form); 
-        toast.success("Assignment updated successfully!");
+        toast.success("Clinical assignment updated.");
         window.location.reload();
       } else {
         await createAssignment(form);
-        toast.success("Assignment saved!");
-        window.location.reload();        
-        // If it's their first login, trigger callback to unforce modal
+        toast.success("Clinical assignment synchronized.");
         if (typeof onFirstAssignmentComplete === "function") {
           onFirstAssignmentComplete();
         } else {
           window.location.reload();
-        }        
+        }         
       }
       loadDepartments();
       closeModal();
     } catch (err) {
       console.error(err);
-      toast.error(`Failed to save assignment: ${err.message}`);
+      toast.error(`Sync error: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -105,148 +109,176 @@ const Assignments = ({ closeModal, updateAssign = false, onFirstAssignmentComple
   const selectedDept = departments.find((d) => d._id === form.deptId);
   const selectedWard = selectedDept?.wards.find((w) => w.name === form.wardName);
 
-  // Beds filtering logic
   const bedsToDisplay = selectedWard
-    ? updateAssign
-      ? selectedWard.beds.filter(bed => 
-          !bed.assignedUser || bed.assignedUser.name === user.name
-        )
-      : selectedWard.beds.filter(bed => 
-          !bed.assignedUser || form.beds.includes(bed.id)
-        )
+    ? updateAssign ? selectedWard?.beds
+      : selectedWard.beds.filter(bed => !bed.assignedUser || form.beds.includes(bed.id))
     : [];
 
-  // Form validation
-  const isFormValid =
-    form.deptId &&
-    form.deptExpiry &&
-    form.wardName &&
-    form.wardExpiry &&
-    form.beds.length > 0;
+  const isFormValid = form.deptId && form.deptExpiry && form.wardName && form.wardExpiry && form.beds.length > 0;
 
   return (
-    <div className="max-h-[500px] overflow-auto p-4">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <h2 className="text-xl font-bold mb-2">
-          <p className={`${msg ? 'text-yellow-600 mb-2' : ''}`}>{msg}</p>
-          {updateAssign ? "Update your assignments" : "Insert your assigned beds"}
-        </h2>
-
-        {/* Department Selection */}
-        <div>
-          <label className="block font-semibold">Select Department:</label>
-          {!departments.length ? (
-            <div className="text-blue-500 italic animate-pulse">
-              Wait for fetching departments . . .
+    <div className="max-h-140 overflow-y-auto px-1">
+      <form onSubmit={handleSubmit} className="space-y-8 p-1">
+        
+        {/* Header Section */}
+        <div className="border-b border-slate-100 pb-6">
+          <h2 className="text-2xl font-black text-slate-900 tracking-tight italic">
+            {updateAssign ? "Clinical Update" : "Duty Entry"}
+          </h2>
+          {msg && (
+            <div className="mt-4 flex items-start gap-3 bg-amber-50 border border-amber-100 p-4 rounded-xl text-amber-800">
+              <AlertCircle size={18} className="mt-0.5 shrink-0" />
+              <p className="text-xs font-bold leading-relaxed uppercase tracking-tight">{msg}</p>
             </div>
-          ) :(
-            departments.map((dept) => (
-            <label key={dept._id} className="block">
-              <input
-                type="radio"
-                name="department"
-                value={dept._id}
-                checked={form.deptId === dept._id}
-                onChange={handleDeptChange}
-                required
-                className="border-1 border-indigo-500"
-              />{" "}
-              {dept.name}
-            </label>
-          )))}
+          )}
         </div>
 
-        {/* Department expiry */}
+        {/* Step 1: Department */}
+        <div className="space-y-4">
+          <label className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400">
+            <Stethoscope size={14} /> 01. Select Department
+          </label>
+          {!departments.length ? (
+            <div className="animate-pulse flex items-center gap-3 p-4 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-slate-400 italic text-sm">
+              <Activity size={16} className="animate-pulse text-indigo-400" />
+              Fetching department directory...
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-2">
+              {departments.map((dept) => (
+                <label 
+                  key={dept._id} 
+                  className={`cp flex items-center justify-between p-4 rounded-xl border-2 transition-all ${
+                    form.deptId === dept._id 
+                    ? "border-indigo-600 bg-indigo-50 text-indigo-900 shadow-sm" 
+                    : "border-slate-100 bg-white hover:border-slate-300 text-slate-600"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="radio"
+                      name="department"
+                      value={dept._id}
+                      checked={form.deptId === dept._id}
+                      onChange={handleDeptChange}
+                      required
+                      className="accent-indigo-600 h-4 w-4"
+                    />
+                    <span className="font-bold text-sm tracking-tight uppercase">{dept.name}</span>
+                  </div>
+                  {form.deptId === dept._id && <ChevronRight size={16} />}
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Step 2: Department Expiry */}
         {form.deptId && (
-          <div>
-            <label className="block font-semibold">Department Expiry:</label>
+          <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
+            <label className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400">
+              <Calendar size={14} /> 02. Rotation Expiry (Dept)
+            </label>
             <input
               type="date"
-              className="border p-2 w-full rounded-md"
+              className="cp w-full p-4 bg-white border-2 border-slate-100 rounded-xl font-bold text-slate-900 focus:border-indigo-600 outline-none transition-colors"
               value={form.deptExpiry}
               onChange={(e) => setForm({ ...form, deptExpiry: e.target.value })}
               required
-              min={minDate} // Set minimum date to tomorrow
+              min={minDate}
             />
           </div>
         )}
 
-        {/* Ward select */}
+        {/* Step 3: Ward Selection */}
         {selectedDept && (
-          <div>
-            <label className="block font-semibold">Select Ward:</label>
+          <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
+            <label className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400">
+              <Activity size={14} /> 03. Target Ward
+            </label>
             <select
-              className="border p-2 w-full rounded-md"
+              className="cp w-full p-4 bg-white border-2 border-slate-100 rounded-xl font-bold text-slate-900 focus:border-indigo-600 outline-none transition-colors appearance-none"
               value={form.wardName}
               onChange={handleWardChange}
               required
             >
-              <option value="">-- Select Ward --</option>
+              <option value="">-- Select Clinical Ward --</option>
               {selectedDept.wards.map((w, idx) => (
-                <option key={idx} value={w.name}>
-                  {w.name}
-                </option>
+                <option key={idx} value={w.name}>{w.name}</option>
               ))}
             </select>
           </div>
         )}
 
-        {/* Ward expiry */}
+        {/* Step 4: Ward Expiry */}
         {form.wardName && (
-          <div>
-            <label className="block font-semibold">Ward Expiry:</label>
+          <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
+            <label className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400">
+              <Calendar size={14} /> 04. Duty Expiry (Ward)
+            </label>
             <input
               type="date"
-              className="border p-2 w-full rounded-md"
+              className="cp w-full p-4 bg-white border-2 border-slate-100 rounded-xl font-bold text-slate-900 focus:border-indigo-600 outline-none transition-colors"
               value={form.wardExpiry}
               onChange={(e) => setForm({ ...form, wardExpiry: e.target.value })}
               required
-              min={minDate} // Set minimum date to tomorrow
+              min={minDate}
             />
           </div>
         )}
 
-        {/* Beds checkboxes */}
+        {/* Step 5: Bed Selection */}
         {selectedWard && (
-          <div>
-            <label className="block font-semibold">Select Beds:</label>
+          <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
+            <label className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400">
+              <BedDouble size={14} /> 05. Assigned Units (Beds)
+            </label>
             {bedsToDisplay.length === 0 && !updateAssign && (
-              <p className="text-sm text-red-500 mt-1">No free beds available in this ward.</p>
+              <div className="flex items-center gap-2 p-4 bg-red-50 text-red-700 rounded-xl border border-red-100 text-xs font-bold uppercase italic">
+                <AlertCircle size={14} /> Critical: No available units in this ward.
+              </div>
             )}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-3">
               {bedsToDisplay.map((bed) => (
-                <label key={bed.id} className="flex items-center space-x-2">
+                <label 
+                  key={bed.id} 
+                  className={`cp flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${
+                    form.beds.includes(bed.id)
+                    ? "border-indigo-600 bg-indigo-50"
+                    : "border-slate-50 bg-slate-50/50 opacity-80"
+                  }`}
+                >
                   <input
                     type="checkbox"
                     value={bed.id}
                     checked={form.beds.includes(bed.id)}
                     onChange={() => handleBedToggle(bed.id)}
+                    className="accent-indigo-600 h-4 w-4"
                   />
-                  <span>
-                    Bed {bed.id} ({bed.status})
-                  </span>
+                  <div className="flex flex-col">
+                    <span className="font-black text-xs text-slate-900 uppercase">Bed {bed.id}</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{bed.status}</span>
+                  </div>
                 </label>
               ))}
             </div>
           </div>
         )}
 
-        {/* Save button */}
-        <button
-          type="submit"
-          disabled={!isFormValid || loading}
-          className={`px-4 py-2 rounded w-full ${
-            isFormValid
-              ? "bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
-              : "bg-gray-300 text-gray-600 cursor-not-allowed"
-          }`}
-        >
-          {loading
-            ? "Saving..."
-            : updateAssign
-            ? "Update Assignment"
-            : "Save Assignment"}
-        </button>
+        {/* Submit Section */}
+        <div className="pt-8 border-t border-slate-100 sticky bottom-0 bg-white pb-4">
+          <button
+            type="submit"
+            disabled={!isFormValid || loading}
+            className={`cp w-full py-5 rounded-[1.5rem] font-black uppercase tracking-[0.2em] transition-all shadow-lg text-xs ${
+              isFormValid && !loading
+                ? "bg-indigo-600 text-white hover:bg-indigo-800 hover:-translate-y-0.5"
+                : "bg-slate-100 text-slate-400 cursor-not-allowed shadow-none"
+            }`}
+          >
+            {loading ? "Synchronizing Data..." : updateAssign ? "Update Clinical Station" : "Initialize Assignment"}
+          </button>
+        </div>
       </form>
     </div>
   );

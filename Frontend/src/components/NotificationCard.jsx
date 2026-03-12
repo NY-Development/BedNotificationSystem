@@ -1,116 +1,120 @@
 import React, { useState } from "react";
-import { ChevronDown, ChevronUp, CheckCircle } from "lucide-react";
+import { ChevronDown, ChevronUp, CheckCircle, Clock, MapPin, User } from "lucide-react";
 import { markNotificationAsRead } from "../services/notification";
 
 const NotificationCard = ({ notification, onMarkAsRead }) => {
   const [showDetails, setShowDetails] = useState(false);
   const { _id, message, type, bedId, wardName, departmentName, createdAt, from, read } = notification;
 
-  const handleMarkAsReadClick = async () => {
+  const handleMarkAsReadClick = async (e) => {
+    e.stopPropagation(); // Prevent toggling details when clicking read
     try {
       await markNotificationAsRead(_id);
-      onMarkAsRead(); // Call the parent handler to re-fetch notifications
+      onMarkAsRead(); 
     } catch (err) {
       console.error("Failed to mark notification as read:", err);
     }
   };
 
-  // Logic to hide the card after 3 days of being read
   const isOldAndRead = read && (new Date() - new Date(new Date(createdAt).getTime() + 3 * 24 * 60 * 60 * 1000) > 0);
-  if (isOldAndRead) {
-    return null; // Don't render the component if it's old and read
-  }
-
-  const cardClasses = `bg-white shadow-md rounded-lg p-4 border border-gray-200 relative transition-opacity duration-500 ${read ? 'opacity-50' : ''}`;
+  if (isOldAndRead) return null;
 
   return (
-    <div className={cardClasses}>
-      <div className="flex flex-col items-center justify-between mb-2">
-        {/* Message */}
-        <p className={`font-semibold ${read ? 'text-gray-500' : 'text-gray-800'}`}>{message}</p>
-        
-        {/* Mark as Read button/status */}
-        {read ? (
-          <div className="text-xs text-green-600 font-medium flex items-center p-1 rounded-full">
-            <CheckCircle size={16} className="mr-1" />
-            Read
+    <div 
+      className={`group relative bg-white rounded-[1.5rem] border-2 transition-all duration-300 ${
+        read 
+          ? 'border-slate-100 opacity-60 grayscale-[0.5]' 
+          : 'border-white shadow-sm hover:shadow-md hover:border-indigo-100'
+      }`}
+    >
+      <div className="p-5">
+        <div className="flex justify-between items-start gap-4">
+          <div className="flex-1">
+            {/* Header: Sender Info */}
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-6 w-6 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden border border-slate-200">
+                {from?.image ? (
+                  <img src={from.image} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <User size={12} className="text-slate-400" />
+                )}
+              </div>
+              <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600">
+                {from?.name || "System Auth"}
+              </span>
+              <span className="text-slate-300 text-[10px]">•</span>
+              <div className="flex items-center gap-1 text-slate-400">
+                <Clock size={10} />
+                <span className="text-[9px] font-bold uppercase tracking-tighter">
+                  {new Date(createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              </div>
+            </div>
+
+            {/* Main Message */}
+            <p className={`text-sm font-bold leading-snug tracking-tight mb-3 ${read ? 'text-slate-500' : 'text-slate-900'}`}>
+              {message}
+            </p>
           </div>
-        ) : (
-          <button
-            onClick={handleMarkAsReadClick}
-            className="text-xs text-green-600 font-medium flex items-center p-1 rounded-full transition-colors hover:bg-green-100"
-            aria-label="Mark as read"
-          >
-            <CheckCircle size={16} className="mr-1" />
-            Mark as Read
-          </button>
-        )}
-      </div>
 
-      {/* From with image */}
-      <div className="flex flex-col items-center mt-1">
-        {from?.image && (
-          <img
-            src={from.image}
-            alt="Sender"
-            className="w-8 h-8 rounded-full mr-2" // Adjust size and margin as needed
-          />
-        )}
-        <p className={`text-sm ${read ? 'text-gray-400' : 'text-gray-600'}`}>
-          From:{" "}
-          <span className={`font-medium ${read ? 'text-indigo-400' : 'text-indigo-600'}`}>
-            {from?.name || "Unknown"}
-          </span>
-        </p>
-      </div>
-
-      {/* Timestamp */}
-      <p className={`text-xs ${read ? 'text-gray-300' : 'text-gray-400'} mt-1`}>
-        {new Date(createdAt).toLocaleString()}
-      </p>
-
-      {/* Toggle button */}
-      <button
-        onClick={() => setShowDetails((prev) => !prev)}
-        className="absolute bottom-2 right-3 text-xs text-indigo-600 font-medium flex items-center cursor-pointer hover:underline"
-      >
-        {showDetails ? (
-          <>
-            Hide <ChevronUp size={14} className="ml-1" />
-          </>
-        ) : (
-          <>
-            More <ChevronDown size={14} className="ml-1" />
-          </>
-        )}
-      </button>
-
-      {/* Details */}
-      {showDetails && (
-        <div className="mt-4 p-3 bg-gray-50 rounded-lg text-sm border border-gray-100">
-          <p>
-            <span className="font-semibold">Type:</span>{" "}
-            <span
-              className={`px-2 py-0.5 rounded-full text-xs ${
-                type === "admit"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-yellow-100 text-yellow-700"
-              }`}
-            >
-              {type}
-            </span>
-          </p>
-          <p>
-            <span className="font-semibold">Bed:</span> {bedId}
-          </p>
-          <p>
-            <span className="font-semibold">Ward:</span> {wardName}
-          </p>
-          <p>
-            <span className="font-semibold">Department:</span> {departmentName}
-          </p>
+          {/* Action Button */}
+          <div className="flex-shrink-0">
+            {read ? (
+              <div className="p-2 bg-emerald-50 text-emerald-500 rounded-lg" title="Acknowledged">
+                <CheckCircle size={18} />
+              </div>
+            ) : (
+              <button
+                onClick={handleMarkAsReadClick}
+                className="p-2 bg-white border border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-200 rounded-lg transition-all shadow-sm"
+                aria-label="Mark as read"
+              >
+                <CheckCircle size={18} />
+              </button>
+            )}
+          </div>
         </div>
-      )}
+
+        {/* Quick Context Bar */}
+        <div className="flex items-center gap-4 pt-3 border-t border-slate-50">
+          <div className="flex items-center gap-1.5 text-slate-400">
+            <MapPin size={12} />
+            <span className="text-[10px] font-black uppercase tracking-tight">{wardName}</span>
+          </div>
+          
+          <button
+            onClick={() => setShowDetails((prev) => !prev)}
+            className="ml-auto flex items-center gap-1 text-[9px] font-black uppercase tracking-[0.2em] text-indigo-600 hover:text-slate-900 transition-colors"
+          >
+            {showDetails ? 'Minimize' : 'Inspect'} 
+            {showDetails ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+          </button>
+        </div>
+
+        {/* Expanded Telemetry Details */}
+        {showDetails && (
+          <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Protocol Type</p>
+                <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest ${
+                  type === "admit" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
+                }`}>
+                  {type}
+                </span>
+              </div>
+              <div className="space-y-1">
+                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Unit ID</p>
+                <p className="text-[10px] font-bold text-slate-700 uppercase">BED: {bedId}</p>
+              </div>
+              <div className="col-span-2 space-y-1">
+                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Department Assignment</p>
+                <p className="text-[10px] font-bold text-slate-700 uppercase">{departmentName}</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

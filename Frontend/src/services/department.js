@@ -21,3 +21,23 @@ export const getDepartment = async (deptId) => {
     throw err;
   }
 };
+
+export const sendPatientInfo = async (info) => {
+  try {
+    const res = await API.post(`/departments/patient`, info);
+    return res.data;
+  } catch (err) {
+    console.error("Failed to send patient datat", err);
+    throw err;
+  }
+}
+
+export const updatePatientInfo = async (info) => {
+  try {
+    const res = await API.put(`/departments/update-patient`, info);
+    return res.data;
+  } catch (err) {
+    console.error("Failed to update patient data", err);
+    throw err;
+  }
+}

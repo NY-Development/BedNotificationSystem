@@ -51,3 +51,33 @@ export const uploadPaymentScreenshot = async (file) => {
     throw new Error(err.response?.data?.message || "Screenshot upload failed");
   }
 };
+
+
+// 🤖 AI Payment: Initiate
+export const initiateAIPayment = async (email, plan) => {
+  try {
+    const res = await API.post("/payment/ai/initiate", { email, plan });
+    return res.data; 
+  } catch (err) {
+    throw new Error(err.response?.data?.message || "AI Payment failed");
+  }
+};
+
+// 📸 AI Payment: Upload Screenshot
+export const uploadAIScreenshot = async (file) => {
+  try {
+    // Create FormData object
+    const formData = new FormData();
+    
+    // IMPORTANT: The key MUST be 'screenshot' to match your backend (req.file)
+    formData.append("screenshot", file);
+
+    const res = await API.post("/payment/ai/upload-screenshot", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    
+    return res.data;
+  } catch (err) {
+    throw new Error(err.response?.data?.message || "AI Screenshot upload failed");
+  }
+};

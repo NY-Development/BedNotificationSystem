@@ -12,6 +12,11 @@ import Assignment from "../models/Assignment.js";
  * - Save Department and create Assignment doc
  */
 
+const areSameBeds = (a = [], b = []) => {
+  if (a.length !== b.length) return false;
+  return a.map(String).sort().join(",") === b.map(String).sort().join(",");
+};
+
 export const createAssignment = async (req, res) => {
   try {
     const {
@@ -23,7 +28,7 @@ export const createAssignment = async (req, res) => {
       note,
     } = req.body;
 
-    const userFromToken = req.user; // from JWT (may be plain object with id/_id)
+    const userFromToken = req.user;
     const userId = userFromToken?._id || userFromToken?.id;
 
     // Basic validations
@@ -32,31 +37,51 @@ export const createAssignment = async (req, res) => {
     }
 
     const department = await Department.findById(deptId);
-    if (!department) return res.status(404).json({ message: "Department not found" });
+    if (!department) {
+      return res.status(404).json({ message: "Department not found" });
+    }
 
     const ward = department.wards.find(w => w.name === wardName);
-    if (!ward) return res.status(404).json({ message: "Ward not found" });
+    if (!ward) {
+      return res.status(404).json({ message: "Ward not found" });
+    }
 
-    // Validate that each bedId exists in the ward (BUT do NOT reject occupied beds)
+    // Validate beds exist in ward
     for (const bedId of bedIds) {
       const bed = ward.beds.find(b => String(b.id) === String(bedId));
       if (!bed) {
-        return res.status(404).json({ message: `Bed ${bedId} not found in ward ${wardName}` });
+        return res
+          .status(404)
+          .json({ message: `Bed ${bedId} not found in ward ${wardName}` });
       }
-      // Note: we intentionally do NOT check bed.status === "occupied" here,
-      // because doctors/users should be able to be assigned regardless.
     }
 
-    // Assign beds to this user (set assignedUser). We intentionally do NOT change bed.status.
+    // 🔒 DUPLICATE ASSIGNMENT CHECK
+    const existingAssignments = await Assignment.find({
+      user: userId,
+      department: deptId,
+      ward: wardName,
+      isActive: true,
+    });
+
+    for (const a of existingAssignments) {
+      if (areSameBeds(a.beds, bedIds)) {
+        return res.status(409).json({
+          message: "Assignment already exists for this user with the same ward and beds",
+          assignmentId: a._id,
+        });
+      }
+    }
+
+    // Assign beds (only assignedUser)
     for (const bedId of bedIds) {
       const bed = ward.beds.find(b => String(b.id) === String(bedId));
       bed.assignedUser = userId;
     }
 
-    // Save the updated department (with assignedUser changes)
     await department.save();
 
-    // Create Assignment doc
+    // Create assignment
     const assignment = new Assignment({
       user: userId,
       department: department._id,
@@ -70,16 +95,20 @@ export const createAssignment = async (req, res) => {
 
     await assignment.save();
 
-    // Mark firstLoginDone on the real user document (only if not already true)
+    // Mark firstLoginDone
     const userDoc = await User.findById(userId);
     if (userDoc && !userDoc.firstLoginDone) {
       userDoc.firstLoginDone = true;
       await userDoc.save();
     }
 
-    // Return assignment and updated user to frontend (so frontend can refresh context)
     const updatedUser = await User.findById(userId).select("-password");
-    return res.json({ message: "Assignment created", assignment, user: updatedUser });
+
+    return res.json({
+      message: "Assignment created",
+      assignment,
+      user: updatedUser,
+    });
   } catch (err) {
     console.error("createAssignment error:", err);
     return res.status(500).json({ message: err.message || "Server error" });
