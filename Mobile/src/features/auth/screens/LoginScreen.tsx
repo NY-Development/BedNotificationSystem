@@ -36,7 +36,11 @@ export default function LoginScreen() {
 
   const onSubmit = (data: LoginFormData) => {
     loginMutation.mutate(data, {
-      onSuccess: () => router.replace('/(staff)/dashboard'),
+      onSuccess: (res) => {
+        res?.role.toLowerCase() === 'admin'
+          ? router.replace('/(admin)/dashboard')
+          : router.replace('/(staff)/dashboard');
+      },
       onError: () => {},
     });
   };
@@ -47,28 +51,42 @@ export default function LoginScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1">
         {/* Header Section */}
-        <View className="overflow-hidden rounded-b-[2.5rem] bg-primary px-6 pb-12 pt-14">
-          <View className="absolute right-8 top-8 z-10">
-            <Pressable
-              onPress={() => router.push('/(auth)/university-choice')}
-              className="flex-row items-center gap-2 rounded-full bg-white/20 px-3 py-2 active:bg-white/30">
-              <Icon as={Building2} className="text-white" size={16} />
-              <Text className="text-xs font-bold text-white">
-                {selectedUniversity || 'Select University'}
-              </Text>
-            </Pressable>
-            <ThemeToggle variant="ghost" size={20} />
+        <View className="rounded-b-[2.5rem] bg-[#135bec] px-6 pb-10 pt-14 shadow-xl">
+          {/* Top Row: Branding and Controls */}
+          <View className="mb-8 flex-row flex-wrap items-start justify-between">
+            {/* Left: Branding */}
+            <View className="flex-row items-center gap-3">
+              <View className="rounded-xl bg-white/20 p-2">
+                <Icon as={Hospital} className="text-white" size={24} />
+              </View>
+              <Text className="text-xl font-bold tracking-tight text-white">BNS Portal</Text>
+            </View>
+
+            {/* Right: Controls (University + Theme) */}
+            <View className="flex-row items-center gap-2">
+              <Pressable
+                onPress={() => router.push('/(auth)/university-choice')}
+                className="flex-row items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 active:bg-white/30">
+                <Icon as={Building2} className="text-white/80" size={14} />
+                <Text
+                  className="max-w-[80px] text-[10px] font-black uppercase tracking-wider text-white"
+                  numberOfLines={1}>
+                  {selectedUniversity || 'Select'}
+                </Text>
+              </Pressable>
+
+              <View className="rounded-full bg-white/10">
+                <ThemeToggle variant="ghost" size={18} />
+              </View>
+            </View>
           </View>
-          <View className="items-center gap-4">
-            <View className="rounded-2xl bg-white/20 p-3">
-              <Icon as={Hospital} className="text-white" size={36} />
-            </View>
-            <View className="items-center">
-              <Text className="text-3xl font-bold tracking-tight text-white">BNS</Text>
-              <Text className="mt-1 text-sm font-medium uppercase tracking-wide text-blue-100">
-                Bed Navigation System
-              </Text>
-            </View>
+
+          {/* Hero Content */}
+          <View>
+            <Text className="text-4xl font-black tracking-tighter text-white">Login</Text>
+            <Text className="mt-1 text-base font-medium text-white/70">
+              Sign in to access your account
+            </Text>
           </View>
         </View>
 
@@ -80,7 +98,7 @@ export default function LoginScreen() {
           {/* Login Card */}
           <View className="w-full gap-6 rounded-2xl border border-border bg-card p-6 shadow-xl">
             <View className="items-center pb-2">
-              <Text className="text-xl font-bold text-foreground">Welcome Back</Text>
+              <Text className="font-bold text-foreground">Welcome Back</Text>
               <Text className="mt-1 text-sm text-muted-foreground">
                 Please sign in to access staff tools.
               </Text>
@@ -183,7 +201,7 @@ export default function LoginScreen() {
           </View>
 
           {/* Help Link */}
-          <View className="mt-8 items-center">
+          <View className="m-8 items-center">
             <Pressable onPress={() => router.push('/(system)/contact')}>
               <Text className="text-sm text-muted-foreground">
                 Having trouble? <Text className="font-medium text-primary">Contact IT Support</Text>
@@ -191,11 +209,6 @@ export default function LoginScreen() {
             </Pressable>
           </View>
         </ScrollView>
-
-        {/* Footer */}
-        <View className="items-center py-6">
-          <Text className="text-xs text-muted-foreground">v1.0.4 | Secure 256-bit Encryption</Text>
-        </View>
       </KeyboardAvoidingView>
 
       {/* Quick Help Support */}

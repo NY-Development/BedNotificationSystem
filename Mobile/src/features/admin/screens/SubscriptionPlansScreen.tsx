@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { Header } from '@/src/components/layout/Header';
 import { CheckCircle, Lock } from 'lucide-react-native';
 import { Icon } from '@/components/ui/icon';
@@ -51,6 +52,7 @@ const PLANS: Plan[] = [
 ];
 
 export default function SubscriptionPlansScreen() {
+  const router = useRouter();
   const [period, setPeriod] = useState<PlanPeriod>('monthly');
 
   return (
@@ -83,8 +85,8 @@ export default function SubscriptionPlansScreen() {
               }`}>
               Yearly
             </Text>
-            <View className="absolute -right-2 -top-3 rounded-full bg-green-500 px-1.5 py-0.5">
-              <Text className="text-[10px] font-bold text-white">-20%</Text>
+            <View className="absolute -right-2 -top-3 rounded-full bg-success px-1.5 py-0.5">
+              <Text className="text-[10px] font-bold text-primary-foreground">-20%</Text>
             </View>
           </Pressable>
         </View>
@@ -101,7 +103,7 @@ export default function SubscriptionPlansScreen() {
               } relative`}>
               {plan.badge && (
                 <View className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1">
-                  <Text className="text-xs font-bold text-white">{plan.badge}</Text>
+                  <Text className="text-xs font-bold text-primary-foreground">{plan.badge}</Text>
                 </View>
               )}
 
@@ -145,12 +147,13 @@ export default function SubscriptionPlansScreen() {
               </View>
 
               <Pressable
+                onPress={() => router.push('/(system)/payment')}
                 className={`h-12 items-center justify-center rounded-xl ${
                   plan.ctaStyle === 'primary' ? 'bg-primary shadow-lg' : 'border border-border'
                 } active:opacity-90`}>
                 <Text
                   className={`text-sm font-bold ${
-                    plan.ctaStyle === 'primary' ? 'text-white' : 'text-foreground'
+                    plan.ctaStyle === 'primary' ? 'text-primary-foreground' : 'text-foreground'
                   }`}>
                   {plan.cta}
                 </Text>

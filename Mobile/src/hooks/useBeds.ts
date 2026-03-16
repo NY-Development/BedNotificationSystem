@@ -3,17 +3,25 @@ import { useBedStore } from '@/src/store/bedStore';
 import apiClient from '@/src/lib/apiClient';
 import type { Department } from '@/src/types';
 
-export function useDepartments() {
-  const { setDepartments } = useBedStore();
+export const DEPARTMENTS_QUERY_KEY = ['departments'] as const;
 
-  return useQuery({
-    queryKey: ['departments'],
-    queryFn: async () => {
-      const { data } = await apiClient.get<Department[]>('/departments');
-      setDepartments(data);
-      return data;
-    },
-  });
+export const departmentsQueryOptions = {
+  queryKey: DEPARTMENTS_QUERY_KEY,
+  queryFn: async () => {
+    const { setDepartments } = useBedStore.getState();
+    const { data } = await apiClient.get<Department[]>('/departments');
+    setDepartments(data);
+    return data;
+  },
+  staleTime: 1000 * 60 * 5,
+  gcTime: 1000 * 60 * 30,
+  refetchInterval: 1000 * 60 * 5,
+  refetchOnWindowFocus: true,
+  refetchOnReconnect: true,
+} as const;
+
+export function useDepartments() {
+  return useQuery(departmentsQueryOptions);
 }
 
 export function useAdmitPatient() {
@@ -25,7 +33,7 @@ export function useAdmitPatient() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['departments'] });
+      queryClient.invalidateQueries({ queryKey: DEPARTMENTS_QUERY_KEY });
     },
   });
 }
@@ -39,7 +47,7 @@ export function useDischargePatient() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['departments'] });
+      queryClient.invalidateQueries({ queryKey: DEPARTMENTS_QUERY_KEY });
     },
   });
 }

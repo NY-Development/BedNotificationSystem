@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Pressable, Text, Platform } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { View, Pressable, Text, Platform, ActivityIndicator } from 'react-native';
 import { cn } from '@/lib/utils';
 import { usePathname, useRouter } from 'expo-router';
 import type { LucideIcon } from 'lucide-react-native';
@@ -14,6 +14,7 @@ import {
   Headset,
   UserCircle,
 } from 'lucide-react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface TabItem {
   label: string;
@@ -45,46 +46,87 @@ export function BottomNav({ variant = 'staff' }: BottomNavProps) {
   const pathname = usePathname();
   const router = useRouter();
   const tabs = variant === 'admin' ? adminTabs : staffTabs;
+  const [isBedsNavigating, setIsBedsNavigating] = useState(false);
+
+  const isOnBedsRoute = useMemo(() => pathname.includes('/beds'), [pathname]);
+
+  useEffect(() => {
+    if (isBedsNavigating && isOnBedsRoute) {
+      setIsBedsNavigating(false);
+    }
+  }, [isBedsNavigating, isOnBedsRoute]);
+
+  useEffect(() => {
+    if (!isBedsNavigating) return;
+
+    const timeout = setTimeout(() => {
+      setIsBedsNavigating(false);
+    }, 30000);
+
+    return () => clearTimeout(timeout);
+  }, [isBedsNavigating]);
+
+  const handleTabPress = (tab: TabItem) => {
+    if (tab.path.includes('/beds')) {
+      setIsBedsNavigating(true);
+    }
+
+    router.push(tab.path as never);
+  };
 
   return (
-    <View
-      className="absolute bottom-0 left-0 right-0 border-t border-border bg-card"
-      style={Platform.OS === 'ios' ? { paddingBottom: 20 } : { paddingBottom: 8 }}>
-      <View className="flex-row items-end justify-around px-2 pt-2">
-        {tabs.map((tab) => {
-          const isActive =
-            pathname === tab.path.replace(/\(.*?\)/, '').replace('//', '/') ||
-            pathname.startsWith(tab.path.split(')')[1] || '___');
-          const segment = tab.path.split('/').pop() ?? '';
-          const active = pathname.includes(segment);
+    <>
+      {isBedsNavigating && (
+        <View className="absolute inset-0 z-50 items-center justify-center bg-background/80">
+          <View className="items-center gap-3 rounded-2xl border border-border bg-card px-6 py-5">
+            <ActivityIndicator size="large" color="hsl(221, 83%, 53%)" />
+            <Text className="text-sm font-semibold text-foreground">Opening Bed Management...</Text>
+            <Text className="text-xs text-muted-foreground">
+              Preparing cached and latest ward data
+            </Text>
+          </View>
+        </View>
+      )}
 
-          return (
-            <Pressable
-              key={tab.path}
-              onPress={() => router.push(tab.path as never)}
-              className="flex-1 items-center pb-1 pt-1.5">
-              <View
-                className={cn(
-                  'mb-1 items-center justify-center rounded-2xl px-5 py-1.5 transition-colors',
-                  active ? 'bg-primary/10' : 'bg-transparent'
-                )}>
-                <Icon
-                  as={tab.icon}
-                  className={cn(active ? 'text-primary' : 'text-muted-foreground')}
-                  size={22}
-                />
-              </View>
-              <Text
-                className={cn(
-                  'text-[10px]',
-                  active ? 'font-bold text-primary' : 'font-medium text-muted-foreground'
-                )}>
-                {tab.label}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
-    </View>
+      <SafeAreaView
+        className="absolute bottom-0 left-0 right-0 border-t border-border bg-card"
+        style={Platform.OS === 'ios' ? { paddingBottom: 20 } : { paddingBottom: 6 }}>
+        <View className="flex-row items-end justify-around px-2">
+          {tabs.map((tab) => {
+            const isActive =
+              pathname === tab.path.replace(/\(.*?\)/, '').replace('//', '/') ||
+              pathname.startsWith(tab.path.split(')')[1] || '___');
+            const segment = tab.path.split('/').pop() ?? '';
+            const active = pathname.includes(segment);
+
+            return (
+              <Pressable
+                key={tab.path}
+                onPress={() => handleTabPress(tab)}
+                className="flex-1 items-center pb-1">
+                <View
+                  className={cn(
+                    'mb-1 items-center justify-center rounded-2xl px-5 transition-colors',
+                    active ? 'bg-primary/10' : 'bg-transparent'
+                  )}>
+                  <Icon
+                    as={tab.icon}
+                    className={cn(active ? 'text-primary' : 'text-muted-foreground')}
+                    size={22}
+                  />
+                </View>
+                <Text
+                  className={cn(
+                    'text-[10px]',
+                    active ? 'font-bold text-primary' : 'font-medium text-muted-foreground'
+                  )}>
+                  {tab.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </SafeAreaView>
+    </>
   );
 }

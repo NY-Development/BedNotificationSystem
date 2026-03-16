@@ -73,8 +73,8 @@ export default function ContactScreen() {
     {
       icon: Mail,
       label: 'Email Support',
-      value: 'support@nydev.et',
-      action: () => Linking.openURL('mailto:support@nydev.et'),
+      value: 'nydevofficial@gmail.com',
+      action: () => Linking.openURL('mailto:nydevofficial@gmail.com'),
     },
     {
       icon: Phone,
@@ -157,7 +157,7 @@ export default function ContactScreen() {
             </Text>
           </View>
         </View>
-        <View className="w-10" /> {/* Spacer for centering */}
+        <View className="w-10" />
       </View>
 
       <ScrollView className="flex-1 p-6">
@@ -337,7 +337,7 @@ export default function ContactScreen() {
         {/* Developer Info */}
         <View
           className={cn(
-            'items-center rounded-2xl p-4',
+            'mb-4 items-center rounded-2xl p-4',
             isDark ? 'bg-slate-800/50' : 'bg-slate-50'
           )}>
           <View className="mb-2 flex-row items-center gap-2">

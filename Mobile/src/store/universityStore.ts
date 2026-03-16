@@ -24,21 +24,21 @@ export const useUniversityStore = create<UniversityStore>((set, get) => ({
       name: 'Addis Ababa University',
       description:
         'Leading medical education institution in Ethiopia with comprehensive clinical training facilities.',
-      image: 'https://via.placeholder.com/400x200/3B82F6/ffffff?text=AAU',
+      image: '../../assets/universities/AA.png',
     },
     {
       id: '2',
       name: 'Jimma University',
       description:
         'Renowned for its medical school and healthcare research programs across Ethiopia.',
-      image: 'https://via.placeholder.com/400x200/10B981/ffffff?text=JU',
+      image: '../../assets/universities/JU.png',
     },
     {
       id: '3',
       name: 'Gondar University',
       description:
         'Specialized medical training with focus on rural healthcare delivery and community medicine.',
-      image: 'https://via.placeholder.com/400x200/F59E0B/ffffff?text=GU',
+      image: '../../assets/universities/Gonder.png',
     },
   ],
 

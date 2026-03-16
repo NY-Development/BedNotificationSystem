@@ -315,7 +315,7 @@ export function FloatingHelpButton({ onPress, className }: FloatingHelpButtonPro
     <Pressable
       onPress={onPress}
       className={cn(
-        'absolute bottom-16 right-6 z-50 h-14 w-14 items-center justify-center rounded-full shadow-lg',
+        'absolute bottom-[125px] right-3 z-50 h-14 w-14 items-center justify-center rounded-full shadow-lg',
         isDark ? 'bg-indigo-600' : 'bg-indigo-600',
         className
       )}

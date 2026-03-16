@@ -21,7 +21,7 @@ export default function StaffLayout() {
       <BottomNav variant="staff" />
       <FloatingHelpButton
         onPress={() => setIsHelpVisible(true)}
-        className="bottom-20" // Adjust for bottom nav
+        // className="bottom-[110px]" // Adjust for bottom nav
       />
       <QuickHelpModal isVisible={isHelpVisible} onClose={() => setIsHelpVisible(false)} />
     </View>

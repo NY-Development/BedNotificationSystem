@@ -27,6 +27,7 @@ export function useLogin() {
     },
     onSuccess: (data) => {
       login(data, data.token);
+      console.log(data);
     },
   });
 }
@@ -36,7 +37,7 @@ export function useRegister() {
     mutationFn: async (payload: RegisterPayload) => {
       const { data } = await apiClient.post('/auth/register', payload);
       return data;
-    },
+    }
   });
 }
 

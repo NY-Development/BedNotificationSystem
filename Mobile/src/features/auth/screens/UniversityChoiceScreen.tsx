@@ -1,25 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, Pressable } from 'react-native';
+import React, { useEffect, useState, useMemo } from 'react';
+import { View, Text, ScrollView, Pressable, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, GraduationCap, MapPin } from 'lucide-react-native';
+import { ArrowLeft, Search } from 'lucide-react-native';
 import { Icon } from '@/components/ui/icon';
 import { ChoiceCard } from '@/src/components/ui/ChoiceCard';
 import { useUniversityStore } from '@/src/store/universityStore';
 import { useThemeStore } from '@/src/store/themeStore';
 import { cn } from '@/lib/utils';
 
-interface University {
-  id: string;
-  name: string;
-  description: string;
-  image: string;
-}
-
 export default function UniversityChoiceScreen() {
   const router = useRouter();
   const { colorScheme } = useThemeStore();
   const { universities, setSelectedUniversity, loadSelectedUniversity } = useUniversityStore();
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const isDark = colorScheme === 'dark';
@@ -28,133 +24,111 @@ export default function UniversityChoiceScreen() {
     loadSelectedUniversity();
   }, []);
 
-  const handleUniversitySelect = async (university: University) => {
+  const filteredUniversities = useMemo(() => {
+    return universities.filter((u) => u.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  }, [searchQuery, universities]);
+
+  const handleContinue = async () => {
+    const selected = universities.find((u) => u.id === selectedId);
+    if (!selected) return;
+
     setIsLoading(true);
     try {
-      await setSelectedUniversity(university.name);
-      // Navigate back to previous screen
+      await setSelectedUniversity(selected.name);
       router.back();
     } catch (error) {
-      console.error('Error selecting university:', error);
+      console.error('Error:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <SafeAreaView className={cn('flex-1', isDark ? 'bg-slate-900' : 'bg-white')}>
-      {/* Header */}
-      <View
-        className={cn(
-          'flex-row items-center justify-between border-b p-6',
-          isDark ? 'border-slate-700' : 'border-slate-200'
-        )}>
-        <Pressable
-          onPress={() => router.back()}
-          className={cn('rounded-full p-2', isDark ? 'bg-slate-800' : 'bg-slate-100')}>
-          <Icon as={ArrowLeft} className={isDark ? 'text-slate-300' : 'text-slate-600'} size={20} />
+    <SafeAreaView className={cn('flex-1', isDark ? 'bg-[#101622]' : 'bg-[#f6f6f8]')}>
+      {/* Top Navigation */}
+      <View className="flex-row items-center p-4">
+        <Pressable onPress={() => router.back()} className="p-2">
+          <Icon as={ArrowLeft} className={isDark ? 'text-white' : 'text-slate-900'} size={24} />
         </Pressable>
-        <View className="flex-row items-center gap-3">
-          <View
-            className={cn('rounded-xl p-2', isDark ? 'bg-emerald-500/20' : 'bg-emerald-500/10')}>
-            <Icon
-              as={GraduationCap}
-              className={isDark ? 'text-emerald-400' : 'text-emerald-600'}
-              size={24}
-            />
-          </View>
-          <View>
-            <Text className={cn('text-xl font-bold', isDark ? 'text-white' : 'text-slate-900')}>
-              Choose University
-            </Text>
-            <Text
-              className={cn(
-                'text-xs font-bold uppercase tracking-wider',
-                isDark ? 'text-slate-500' : 'text-slate-400'
-              )}>
-              Medical Institution
-            </Text>
-          </View>
-        </View>
-        <View className="w-10" /> {/* Spacer for centering */}
+        <Text
+          className={cn('ml-2 flex-1 text-lg font-bold', isDark ? 'text-white' : 'text-slate-900')}>
+          Medical App
+        </Text>
       </View>
 
-      {/* Content */}
-      <ScrollView className="flex-1">
-        {/* Header Message */}
-        <View className="p-6">
-          <View
-            className={cn(
-              'mb-6 rounded-2xl p-4',
-              isDark
-                ? 'border border-emerald-500/20 bg-emerald-500/10'
-                : 'border border-emerald-100 bg-emerald-50'
-            )}>
-            <View className="mb-2 flex-row items-center gap-2">
-              <Icon
-                as={MapPin}
-                className={isDark ? 'text-emerald-400' : 'text-emerald-600'}
-                size={18}
-              />
-              <Text className={cn('font-bold', isDark ? 'text-emerald-300' : 'text-emerald-700')}>
-                Ethiopian Medical Institutions
-              </Text>
-            </View>
-            <Text
-              className={cn(
-                'text-sm leading-relaxed',
-                isDark ? 'text-emerald-300/80' : 'text-emerald-700/80'
-              )}>
-              Select your medical university or hospital to access the appropriate bed management
-              system and clinical rotation tracking.
-            </Text>
-          </View>
-
-          {/* University Cards */}
-          <View>
-            <Text
-              className={cn('mb-4 text-lg font-bold', isDark ? 'text-white' : 'text-slate-900')}>
-              Available Institutions
-            </Text>
-
-            {universities.map((university) => (
-              <ChoiceCard
-                key={university.id}
-                university={university}
-                onSelect={handleUniversitySelect}
-              />
-            ))}
-          </View>
-
-          {/* Instructions */}
-          <View className={cn('mt-4 rounded-xl p-4', isDark ? 'bg-slate-800/50' : 'bg-slate-50')}>
-            <Text
-              className={cn('mb-2 text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>
-              Note:
-            </Text>
-            <Text
-              className={cn(
-                'text-sm leading-relaxed',
-                isDark ? 'text-slate-400' : 'text-slate-600'
-              )}>
-              Your selected institution will be used to configure the correct hospital database
-              connections and rotation schedules. You can change this selection later in settings.
-            </Text>
-          </View>
+      {/* Progress Indicator */}
+      <View className="px-4 py-2">
+        <View className="mb-2 flex-row justify-between">
+          <Text className={isDark ? 'text-white' : 'text-slate-900'}>Onboarding Progress</Text>
+          <Text className={isDark ? 'text-slate-400' : 'text-slate-500'}>Step 1 of 2</Text>
         </View>
+        <View className="h-2 w-full overflow-hidden rounded-full bg-primary/20">
+          <View className="h-full bg-[#135bec]" style={{ width: '50%' }} />
+        </View>
+      </View>
+
+      {/* Header Section */}
+      <View className="px-4 pb-2 pt-6">
+        <Text
+          className={cn(
+            'text-3xl font-bold tracking-tight',
+            isDark ? 'text-white' : 'text-slate-900'
+          )}>
+          Affiliate Your Account
+        </Text>
+        <Text className={cn('mt-2 text-base', isDark ? 'text-slate-400' : 'text-slate-600')}>
+          Select your medical university to continue setup
+        </Text>
+      </View>
+
+      {/* Search Bar */}
+      <View className="px-4 py-4">
+        <View
+          className={cn(
+            'h-14 flex-row items-center rounded-xl px-4 shadow-sm',
+            isDark ? 'bg-slate-800' : 'bg-white'
+          )}>
+          <Icon as={Search} size={20} className="text-slate-500" />
+          <TextInput
+            placeholder="Search universities..."
+            placeholderTextColor="#94a3b8"
+            className={cn('ml-3 flex-1 text-base', isDark ? 'text-white' : 'text-slate-900')}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
+      </View>
+
+      {/* Scrollable List */}
+      <ScrollView className="flex-1 px-4" contentContainerStyle={{ paddingBottom: 20 }}>
+        {filteredUniversities.map((university) => (
+          <ChoiceCard
+            key={university.id}
+            university={university}
+            isSelected={selectedId === university.id}
+            onSelect={() => setSelectedId(university.id)}
+          />
+        ))}
       </ScrollView>
 
-      {/* Loading Overlay */}
-      {isLoading && (
-        <View className="absolute inset-0 items-center justify-center bg-black/50">
-          <View
-            className={cn('items-center rounded-2xl p-6', isDark ? 'bg-slate-800' : 'bg-white')}>
-            <Text className={cn('font-bold', isDark ? 'text-white' : 'text-slate-900')}>
-              Selecting University...
-            </Text>
-          </View>
-        </View>
-      )}
+      {/* Sticky Footer Action */}
+      <View
+        className={cn(
+          'border-t p-4',
+          isDark ? 'border-slate-800 bg-slate-900/80' : 'border-slate-100 bg-white/80'
+        )}>
+        <Pressable
+          onPress={handleContinue}
+          disabled={!selectedId || isLoading}
+          className={cn(
+            'w-full items-center rounded-xl py-4 shadow-lg',
+            !selectedId ? 'bg-slate-300 dark:bg-slate-700' : 'bg-[#135bec]'
+          )}>
+          <Text className={cn('text-lg font-bold', !selectedId ? 'text-slate-500' : 'text-white')}>
+            {isLoading ? 'Processing...' : 'Continue'}
+          </Text>
+        </Pressable>
+      </View>
     </SafeAreaView>
   );
 }

@@ -7,10 +7,13 @@ import {
   Lock,
   CreditCard,
   Headset,
+  ChevronLeft,
+  LayoutDashboard,
   BedDouble,
   ClipboardList,
   Bell,
   BarChart3,
+  Layers3,
 } from 'lucide-react-native';
 import { Icon } from '@/components/ui/icon';
 import { ThemeToggle } from '@/src/components/ui/ThemeToggle';
@@ -27,9 +30,18 @@ export default function ExpiredSubscriptionScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
+      <View className="absolute left-4 top-14 z-10">
+        <Pressable
+          onPress={() => router.back()}
+          className="h-10 w-10 items-center justify-center rounded-full border border-border bg-card active:opacity-80">
+          <Icon as={ChevronLeft} className="text-foreground" size={22} />
+        </Pressable>
+      </View>
+
       <View className="absolute right-4 top-14 z-10">
         <ThemeToggle variant="ghost" />
       </View>
+
       <ScrollView contentContainerClassName="flex-grow items-center justify-center px-6 py-10">
         {/* Icon */}
         <View className="mb-8 rounded-full bg-warning/10 p-6">
@@ -68,10 +80,17 @@ export default function ExpiredSubscriptionScreen() {
         {/* Actions */}
         <View className="w-full gap-3">
           <Pressable
-            onPress={() => router.push('/(system)/subscription-plans')}
+            onPress={() => router.push('/(system)/payment')}
             className="h-14 w-full flex-row items-center justify-center gap-2 rounded-xl bg-primary shadow-lg active:opacity-90">
-            <Icon as={CreditCard} className="text-white" size={20} />
-            <Text className="text-base font-bold text-white">Renew Subscription</Text>
+            <Icon as={CreditCard} className="text-primary-foreground" size={20} />
+            <Text className="text-base font-bold text-primary-foreground">Renew Subscription</Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => router.push('/(system)/subscription-plans')}
+            className="h-14 w-full flex-row items-center justify-center gap-2 rounded-xl border-2 border-border active:opacity-90">
+            <Icon as={Layers3} className="text-foreground" size={20} />
+            <Text className="text-base font-bold text-foreground">Manage Billing Plans</Text>
           </Pressable>
 
           <Pressable
@@ -79,6 +98,13 @@ export default function ExpiredSubscriptionScreen() {
             className="h-14 w-full flex-row items-center justify-center gap-2 rounded-xl border-2 border-border active:opacity-90">
             <Icon as={Headset} className="text-foreground" size={20} />
             <Text className="text-base font-bold text-foreground">Contact Support</Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => router.push('/(staff)/dashboard')}
+            className="h-14 w-full flex-row items-center justify-center gap-2 rounded-xl border-2 border-border active:opacity-90">
+            <Icon as={LayoutDashboard} className="text-foreground" size={20} />
+            <Text className="text-base font-bold text-foreground">Go to Dashboard</Text>
           </Pressable>
         </View>
       </ScrollView>

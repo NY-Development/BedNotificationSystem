@@ -90,31 +90,58 @@ export default function RegisterScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1">
         {/* Header Section */}
-        <View className="rounded-b-xl bg-primary px-6 pb-8 pt-12">
-          <View className="absolute right-8 top-8 z-10">
-            <Pressable
-              onPress={() => router.push('/(auth)/university-choice')}
-              className="flex-row items-center gap-2 rounded-full bg-white/20 px-3 py-2 active:bg-white/30">
-              <Icon as={Building2} className="text-white" size={16} />
-              <Text className="text-xs font-bold text-white">
-                {selectedUniversity || 'Select University'}
-              </Text>
-            </Pressable>
-            <ThemeToggle variant="ghost" size={20} />
-          </View>
-          <View className="mb-4 flex-row items-center gap-3">
-            <Icon as={Hospital} className="text-white" size={28} />
-            <Text className="text-2xl font-bold tracking-tight text-white">BNS Portal</Text>
-          </View>
-          <Text className="text-3xl font-bold leading-tight text-white/90">Create Account</Text>
-          <Text className="mt-2 text-sm text-white/70">Register for the Bed Management System</Text>
-        </View>
+        <View className="rounded-b-[2.5rem] bg-[#135bec] px-6 pb-10 pt-14 shadow-xl">
+          {/* Top Row: Branding and Controls */}
+          <View className="mb-8 flex-row items-start justify-between">
+            {/* Left: Branding */}
+            <View className="flex-row items-center gap-3">
+              <View className="rounded-xl bg-white/20 p-2">
+                <Icon as={Hospital} className="text-white" size={24} />
+              </View>
+              <Text className="text-xl font-bold tracking-tight text-white">BNS Portal</Text>
+            </View>
 
+            {/* Right: Controls (University + Theme) */}
+            <View className="flex-row items-center gap-2">
+              <Pressable
+                onPress={() => router.push('/(auth)/university-choice')}
+                className="flex-row items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 active:bg-white/30">
+                <Icon as={Building2} className="text-white/80" size={14} />
+                <Text
+                  className="max-w-[80px] text-[10px] font-black uppercase tracking-wider text-white"
+                  numberOfLines={1}>
+                  {selectedUniversity || 'Select'}
+                </Text>
+              </Pressable>
+
+              <View className="rounded-full bg-white/10">
+                <ThemeToggle variant="ghost" size={18} />
+              </View>
+            </View>
+          </View>
+
+          {/* Hero Content */}
+          <View>
+            <Text className="text-4xl font-black tracking-tighter text-white">Create Account</Text>
+            <Text className="mt-1 text-base font-medium text-white/70">
+              Register for the Bed Management System
+            </Text>
+          </View>
+        </View>
         {/* Form */}
         <ScrollView
-          className="flex-1 px-6 py-8"
+          className="flex-1 px-6 py-4"
           contentContainerClassName="gap-6 pb-8"
           keyboardShouldPersistTaps="handled">
+          {/* Login Link */}
+          <View className="mt-4 items-center">
+            <Text className="text-sm text-muted-foreground">
+              Already have an account?{' '}
+              <Text onPress={() => router.push('/(auth)/login')} className="font-bold text-primary">
+                Login
+              </Text>
+            </Text>
+          </View>
           <Controller
             control={control}
             name="name"
@@ -291,7 +318,7 @@ export default function RegisterScreen() {
           <Pressable
             onPress={handleSubmit(onSubmit)}
             disabled={!!registerMutation.isPending}
-            className="mt-4 h-14 w-full flex-row items-center justify-center gap-2 rounded-lg bg-primary shadow-lg active:opacity-90">
+            className="mb-4 mt-4 h-14 w-full flex-row items-center justify-center gap-2 rounded-lg bg-primary shadow-lg active:opacity-90">
             <Text className="text-lg font-bold text-white">
               {registerMutation.isPending ? 'Registering...' : 'Register Account'}
             </Text>
@@ -300,15 +327,16 @@ export default function RegisterScreen() {
             )}
           </Pressable>
 
-          {/* Login Link */}
-          <View className="mb-8 mt-4 items-center">
-            <Text className="text-sm text-muted-foreground">
-              Already have an account?{' '}
-              <Text onPress={() => router.push('/(auth)/login')} className="font-bold text-primary">
-                Login
+          {/* Error Message */}
+          {!!registerMutation.error && (
+            <View className="mt-4 rounded-lg bg-destructive/10 px-4 py-3">
+              <Text className="text-sm font-medium text-destructive">
+                {registerMutation.error instanceof Error
+                  ? registerMutation.error.message
+                  : 'An unexpected error occurred. Please try again.'}
               </Text>
-            </Text>
-          </View>
+            </View>
+          )}
         </ScrollView>
       </KeyboardAvoidingView>
 
