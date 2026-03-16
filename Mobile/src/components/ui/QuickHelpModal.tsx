@@ -43,8 +43,8 @@ export function QuickHelpModal({ isVisible, onClose }: QuickHelpModalProps) {
         'Product tour has been reset. You will see the onboarding tour on next app start.'
       );
       onClose();
-    } catch (error) {
-      console.error('Error clearing tour flag:', error);
+    } catch (err) {
+      console.error('Error clearing tour flag:', err);
       error('Error', 'Failed to reset tour. Please try again.');
     }
   };
@@ -52,7 +52,8 @@ export function QuickHelpModal({ isVisible, onClose }: QuickHelpModalProps) {
   const handleTelegramSupport = async () => {
     try {
       await Linking.openURL('https://t.me/NYDev_Chat');
-    } catch (error) {
+    } catch (err) {
+      console.error('Error opening Telegram:', err);
       error('Error', 'Could not open Telegram link');
     }
   };

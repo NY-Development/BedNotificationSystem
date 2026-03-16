@@ -54,7 +54,7 @@ export default function RegisterScreen() {
       password: '',
       phone: '',
       role: undefined,
-      plan: 'month',
+      subscriptionPlan: 'monthly',
       agreeToTerms: undefined,
     },
   });
@@ -67,7 +67,7 @@ export default function RegisterScreen() {
     // Add subscription plan to payload (for non-intern roles)
     const finalPayload = {
       ...payload,
-      subscriptionPlan: selectedRole !== 'intern' ? subscriptionPlan : undefined,
+      plan: selectedRole !== 'intern' ? subscriptionPlan : 'monthly',
     };
 
     registerMutation.mutate(finalPayload, {
